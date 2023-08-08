@@ -1,0 +1,17 @@
+.vs/
+bin/
+bin-int/
+
+*.ini
+*.lib
+*.ilk
+*.pdb
+*.user
+*.vcxproj
+*.csproj
+*.filters
+*.sln
+*.log
+*.cache
+
+scripts/__pycache__

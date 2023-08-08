@@ -1,0 +1,6 @@
+[submodule "Sofia/vendor/spdlog"]
+	path = Sofia/vendor/spdlog
+	url = https://github.com/gabime/spdlog
+[submodule "Sofia/vendor/glm"]
+	path = Sofia/vendor/glm
+	url = https://github.com/g-truc/glm
