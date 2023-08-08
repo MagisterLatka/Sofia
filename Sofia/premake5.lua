@@ -32,7 +32,9 @@ project "Sofia"
 
 	links
 	{
-		
+		"d3d11.lib",
+		"D3DCompiler.lib",
+		"dxguid.lib"
 	}
 	
 	buildoptions

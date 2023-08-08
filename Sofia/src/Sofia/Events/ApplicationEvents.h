@@ -30,7 +30,7 @@ namespace Sofia {
 	class WindowCloseEvent : public Event
 	{
 	public:
-		WindowCloseEvent() noexcept = default;
+		WindowCloseEvent() = default;
 
 		std::string ToString() const noexcept override
 		{
@@ -44,7 +44,7 @@ namespace Sofia {
 	class WindowFocusEvent : public Event
 	{
 	public:
-		WindowFocusEvent() noexcept = default;
+		WindowFocusEvent() = default;
 
 		std::string ToString() const noexcept override
 		{
@@ -58,7 +58,7 @@ namespace Sofia {
 	class WindowLostFocusEvent : public Event
 	{
 	public:
-		WindowLostFocusEvent() noexcept = default;
+		WindowLostFocusEvent() = default;
 
 		std::string ToString() const noexcept override
 		{
@@ -115,7 +115,7 @@ namespace Sofia {
 	class AppUpdateEvent : public Event
 	{
 	public:
-		AppUpdateEvent() noexcept = default;
+		AppUpdateEvent() = default;
 
 		std::string ToString() const noexcept override
 		{
@@ -129,7 +129,7 @@ namespace Sofia {
 	class AppRenderEvent : public Event
 	{
 	public:
-		AppRenderEvent() noexcept = default;
+		AppRenderEvent() = default;
 
 		std::string ToString() const noexcept override
 		{

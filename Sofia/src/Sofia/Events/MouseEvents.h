@@ -98,4 +98,32 @@ namespace Sofia {
 
 		EVENT_TYPE(MouseButtonReleased)
 	};
+
+	class MouseEnteredEvent : public Event
+	{
+	public:
+		MouseEnteredEvent() = default;
+
+		std::string ToString() const noexcept override
+		{
+			return "MouseEnteredEvent";
+		}
+
+		EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
+		EVENT_TYPE(MouseEntered)
+	};
+
+	class MouseLeftEvent : public Event
+	{
+	public:
+		MouseLeftEvent() = default;
+
+		std::string ToString() const noexcept override
+		{
+			return "MouseLeftEvent";
+		}
+
+		EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
+		EVENT_TYPE(MouseLeft)
+	};
 }

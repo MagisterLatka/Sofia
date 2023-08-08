@@ -11,4 +11,8 @@ public:
 	virtual void OnUpdate(Sofia::Timestep ts) override;
 	virtual void OnImGuiRender() override;
 	virtual void OnEvent(Sofia::Event& e) override;
+private:
+	bool OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e);
+private:
+	std::string m_Title;
 };

@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "Sofia/Application.h"
 
+#include "Renderer/RendererAPI.h"
+
 namespace Sofia {
 
 	Application* Application::s_Application = nullptr;
@@ -10,6 +12,10 @@ namespace Sofia {
 	{
 		SOF_CORE_ASSERT(!s_Application, "Application already exist!");
 		s_Application = this;
+
+		ChooseGraphicsContext();
+		m_Window = Window::Create(WindowProps{ title, 1600u, 900u });
+		m_Window->SetEventCallback(SOF_BIND_EVENT_FN(Application::OnEvent));
 
 		m_LayerStack = CreateScope<LayerStack>();
 	}
@@ -22,7 +28,9 @@ namespace Sofia {
 	{}
 	void Application::Shutdown() noexcept
 	{
+		m_Window.Reset();
 		m_LayerStack.reset();
+		m_GraphicsContext.Reset();
 	}
 	void Application::Close() noexcept
 	{
@@ -48,11 +56,61 @@ namespace Sofia {
 			}
 			{ auto e = AppUpdateEvent(); OnEvent(e); }
 
+			m_Window->OnUpdate();
 			{ auto e = AppRenderEvent(); OnEvent(e); }
+			if (auto a = Window::ProcessEvents())
+			{
+				returnVal = *a;
+				m_Running = false;
+			}
 		}
 
 		Shutdown();
 		return returnVal;
+	}
+
+	RendererAPI::API RendererAPI::s_API;
+	void Application::ChooseGraphicsContext()
+	{
+		bool foundAPI = false;
+		for (int i = 0; i < m_CommandLineArgs.Count; ++i)
+		{
+			std::string arg = m_CommandLineArgs[i];
+			if (auto a = arg.find("API="); a != std::string::npos)
+			{
+				std::string api = arg.substr(a);
+				if (api.find("DirectX11") || api.find("DX11"))
+				{
+					RendererAPI::s_API = RendererAPI::API::DX11;
+					foundAPI = true;
+					break;
+				}
+				else if (api.find("DirectX12") || api.find("DX12"))
+				{
+					SOF_CORE_THROW_INFO("DX12 is not supported yet");
+					RendererAPI::s_API = RendererAPI::API::DX12;
+					foundAPI = true;
+					break;
+				}
+				else if (api.find("OpenGL"))
+				{
+					SOF_CORE_THROW_INFO("Opengl is not supported yet");
+					RendererAPI::s_API = RendererAPI::API::OpenGL;
+					foundAPI = true;
+					break;
+				}
+				else if (api.find("Vulkan"))
+				{
+					SOF_CORE_THROW_INFO("Vulkan is not supported yet");
+					RendererAPI::s_API = RendererAPI::API::Vulkan;
+					foundAPI = true;
+					break;
+				}
+			}
+		}
+		if (!foundAPI) RendererAPI::s_API = RendererAPI::API::DX11;
+		m_GraphicsContext = GraphicsContext::Create();
+		m_GraphicsContext->Init();
 	}
 
 	void Application::OnEvent(Event& e)

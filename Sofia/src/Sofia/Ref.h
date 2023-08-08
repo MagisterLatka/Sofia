@@ -1,5 +1,7 @@
 #pragma once
 
+#include <wrl.h>
+
 namespace Sofia {
 
 	class RefCounted
@@ -108,7 +110,7 @@ namespace Sofia {
 		}
 
 		template<typename T2>
-		Ref<T2> As() noexcept { static_assert(std::is_base_of<RefCounted, T2>::value && std::is_convertible<T, T2>::value); return Ref<T2>(*this); }
+		Ref<T2> As() noexcept { static_assert(std::is_base_of<RefCounted, T2>::value); return Ref<T2>(*this); }
 
 		template<typename ...Args>
 		static Ref<T> Create(Args&& ...args) noexcept
@@ -140,3 +142,6 @@ namespace Sofia {
 
 template<typename T>
 using Ref = Sofia::Ref<T>;
+
+template<typename T>
+using ComPtr = Microsoft::WRL::ComPtr<T>;

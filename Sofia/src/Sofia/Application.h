@@ -3,6 +3,8 @@
 #include "Sofia/Core.h"
 #include "Sofia/Events/ApplicationEvents.h"
 #include "Sofia/LayerStack.h"
+#include "Sofia/Window.h"
+#include "Sofia/Renderer/GraphicsContext.h"
 
 int main(int argc, char** argv, char** envp);
 
@@ -33,13 +35,16 @@ namespace Sofia {
 		void Close() noexcept;
 
 		void PushLayer(Layer* layer) noexcept { m_LayerStack->PushLayer(layer); }
-		void PushOverlay(Layer* overlay) noexcept { m_LayerStack->PushOverlay(overlay); }
+
+		Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
+		Ref<Window> GetWindow() const noexcept { return m_Window; }
 
 		ApplicationCommandLineArgs GetCommandLineArgs() const noexcept { return m_CommandLineArgs; }
 
 		static Application& Get() noexcept { return *s_Application; }
 	private:
 		int Run();
+		void ChooseGraphicsContext();
 
 		void OnEvent(Event& e);
 		bool OnWindowClose(WindowCloseEvent& e);
@@ -54,6 +59,9 @@ namespace Sofia {
 
 		Timer m_Timer;
 		Timestep m_Timestep;
+
+		Ref<GraphicsContext> m_GraphicsContext;
+		Ref<Window> m_Window;
 
 		static Application* s_Application;
 	};

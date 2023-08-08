@@ -10,7 +10,7 @@ namespace Sofia {
 		WindowResized, WindowClosed, WindowFocused, WindowLostFocus, WindowMoved,
 		AppTick, AppUpdate, AppRender,
 		KeyPressed, KeyReleased, KeyTyped,
-		MouseMoved, MouseScrolled, MouseButtonPressed, MouseButtonReleased
+		MouseMoved, MouseScrolled, MouseButtonPressed, MouseButtonReleased, MouseEntered, MouseLeft
 	};
 
 	enum EventCategory
