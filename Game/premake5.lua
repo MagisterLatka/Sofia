@@ -16,7 +16,8 @@ project "Game"
 	files
 	{
 		"src/**.cpp",
-		"src/**.h"
+		"src/**.h",
+		"assets/shaders/**.hlsl"
 	}
 	
 	defines
@@ -58,3 +59,11 @@ project "Game"
 		optimize "Full"
 		runtime "Release"
 		inlining "Auto"
+	
+	filter "files:**.vert.hlsl"
+		shadertype ("Vertex")
+		shaderobjectfileoutput ("%{prj.location}/assets/shaders/%{file.basename}.cso")
+		
+	filter "files:**.frag.hlsl"
+		shadertype ("Pixel")
+		shaderobjectfileoutput ("%{prj.location}/assets/shaders/%{file.basename}.cso")

@@ -18,7 +18,7 @@ namespace Sofia {
 		uint32_t Size = 0;
 
 		Buffer() = default;
-		Buffer(void* data, uint32_t size, bool takeControl = false, Allocator allocator = Allocator::New) noexcept
+		Buffer(void* data, uint32_t size, bool takeControl = false, Allocator allocator = Allocator::New)
 			: Data(data), Size(size), m_Delete(takeControl), m_Allocator(allocator)
 		{
 			SOF_CORE_ASSERT(!takeControl || allocator != Allocator::None, "Sofia::Buffer expect to specify allocator");
@@ -115,7 +115,7 @@ namespace Sofia {
 			return *this;
 		}
 
-		static Buffer Copy(void* data, uint32_t size) noexcept
+		static Buffer Copy(const void* data, uint32_t size) noexcept
 		{
 			Buffer buffer;
 			buffer.Allocate(size);

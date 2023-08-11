@@ -84,7 +84,7 @@ namespace Sofia {
 			std::string title;
 			uint32_t width, height;
 			glm::ivec2 pos;
-			bool vSync;
+			bool vSync = true;
 
 			EventCallbackFn eventCallback;
 		};

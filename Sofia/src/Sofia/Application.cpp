@@ -1,7 +1,8 @@
 #include <pch.h>
 #include "Sofia/Application.h"
 
-#include "Renderer/RendererAPI.h"
+#include "Sofia/Renderer/RendererAPI.h"
+#include "Sofia/Renderer/Renderer.h"
 
 namespace Sofia {
 
@@ -17,6 +18,8 @@ namespace Sofia {
 		m_Window = Window::Create(WindowProps{ title, 1600u, 900u });
 		m_Window->SetEventCallback(SOF_BIND_EVENT_FN(Application::OnEvent));
 
+		Renderer::Init();
+
 		m_LayerStack = CreateScope<LayerStack>();
 	}
 	Application::~Application()
@@ -30,6 +33,7 @@ namespace Sofia {
 	{
 		m_Window.Reset();
 		m_LayerStack.reset();
+		Renderer::Shutdown();
 		m_GraphicsContext.Reset();
 	}
 	void Application::Close() noexcept

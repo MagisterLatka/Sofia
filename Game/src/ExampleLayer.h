@@ -1,5 +1,7 @@
 #pragma once
 
+#include <d3d11.h>
+
 class ExampleLayer : public Sofia::Layer
 {
 public:
@@ -14,5 +16,6 @@ public:
 private:
 	bool OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e);
 private:
-	std::string m_Title;
+	Ref<Sofia::Shader> m_Shader;
+	Ref<Sofia::InputLayout> m_InputLayout;
 };
