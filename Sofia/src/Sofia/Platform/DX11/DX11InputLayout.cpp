@@ -36,11 +36,6 @@ namespace Sofia {
 	}
 	DX11InputLayout::~DX11InputLayout()
 	{
-		ComPtr<ID3D11InputLayout> instance = m_InputLayout;
-		Renderer::Submit([instance]() mutable
-		{
-			instance.Reset();
-		});
 		delete[] m_Buffers;
 		delete[] m_Strides;
 	}

@@ -25,6 +25,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dep"
 	include "vendor/premake"
+	include "Sofia/vendor/ImGui"
 group ""
 
 group "Core"

@@ -5,6 +5,7 @@
 #include "Sofia/LayerStack.h"
 #include "Sofia/Window.h"
 #include "Sofia/Renderer/GraphicsContext.h"
+#include "Sofia/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv, char** envp);
 
@@ -35,9 +36,11 @@ namespace Sofia {
 		void Close() noexcept;
 
 		void PushLayer(Layer* layer) noexcept { m_LayerStack->PushLayer(layer); }
+		void PushOverlay(Layer* overlay) noexcept { m_LayerStack->PushOverlay(overlay); }
 
 		Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
 		Ref<Window> GetWindow() const noexcept { return m_Window; }
+		ImGuiLayer* GetImGuiLayer() noexcept { return m_ImGuiLayer; }
 
 		ApplicationCommandLineArgs GetCommandLineArgs() const noexcept { return m_CommandLineArgs; }
 
@@ -56,6 +59,7 @@ namespace Sofia {
 		bool m_Minimized = false;
 
 		Scope<LayerStack> m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
 
 		Timer m_Timer;
 		Timestep m_Timestep;

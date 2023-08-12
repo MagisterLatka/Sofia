@@ -30,7 +30,8 @@ project "Game"
 		"%{wks.location}/Sofia/src",
 		"%{wks.location}/Sofia/vendor",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.glm}"
+		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.imgui}"
 	}
 
 	links

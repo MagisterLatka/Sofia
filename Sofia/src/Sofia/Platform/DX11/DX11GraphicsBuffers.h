@@ -12,7 +12,7 @@ namespace Sofia {
 		DX11VertexBuffer(const BufferLayout& layout, void* data, uint32_t size, BufferUsage usage);
 		DX11VertexBuffer(const BufferLayout& layout, const Buffer& buffer, BufferUsage usage);
 		DX11VertexBuffer(const BufferLayout& layout, Buffer&& buffer, BufferUsage usage);
-		virtual ~DX11VertexBuffer();
+		virtual ~DX11VertexBuffer() = default;
 
 		virtual void SetData(void* data, uint32_t size, uint32_t offset = 0u) override;
 		virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
@@ -40,7 +40,7 @@ namespace Sofia {
 		DX11IndexBuffer(uint32_t* data, uint32_t size, BufferUsage usage);
 		DX11IndexBuffer(const Buffer& buffer, BufferUsage usage);
 		DX11IndexBuffer(Buffer&& buffer, BufferUsage usage);
-		virtual ~DX11IndexBuffer();
+		virtual ~DX11IndexBuffer() = default;
 
 		virtual void SetData(uint32_t* data, uint32_t size, uint32_t offset) override;
 		virtual void SetData(const Buffer& buffer, uint32_t offset) override;
@@ -65,7 +65,7 @@ namespace Sofia {
 		DX11ConstantBuffer(BufferShaderBinding binding, const Buffer& buffer);
 		DX11ConstantBuffer(BufferShaderBinding binding, Buffer&& buffer);
 		DX11ConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer);
-		virtual ~DX11ConstantBuffer();
+		virtual ~DX11ConstantBuffer() = default;
 
 		virtual void SetData(void* data, uint32_t size) override;
 		virtual void SetData(const Buffer& buffer) override;

@@ -22,18 +22,6 @@ namespace Sofia {
 	{
 		Reload();
 	}
-	DX11Shader::~DX11Shader()
-	{
-		ComPtr<ID3D11VertexShader> vertexShader;
-		ComPtr<ID3D11PixelShader> fragmentShader;
-		ComPtr<ID3DBlob> vertexSource;
-		Renderer::Submit([vertexShader, fragmentShader, vertexSource]() mutable
-		{
-			vertexShader.Reset();
-			fragmentShader.Reset();
-			vertexSource.Reset();
-		});
-	}
 
 	void DX11Shader::Reload()
 	{

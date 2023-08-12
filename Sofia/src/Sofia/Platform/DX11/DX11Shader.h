@@ -9,7 +9,7 @@ namespace Sofia {
 	{
 	public:
 		DX11Shader(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
-		~DX11Shader();
+		virtual ~DX11Shader() = default;
 
 		virtual void Reload() override;
 

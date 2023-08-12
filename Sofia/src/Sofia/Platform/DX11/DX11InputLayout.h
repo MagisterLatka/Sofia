@@ -11,7 +11,7 @@ namespace Sofia {
 	{
 	public:
 		DX11InputLayout(const std::initializer_list<Ref<VertexBuffer>>& vertexBuffers, const Ref<Shader>& shader, const Ref<IndexBuffer>& indexBuffer);
-		~DX11InputLayout();
+		virtual ~DX11InputLayout();
 
 		virtual Ref<VertexBuffer> GetVertexBuffer(uint32_t index) const noexcept override { return m_VertexBuffers[index]; }
 		virtual Ref<IndexBuffer> GetIndexBuffer() const noexcept override { return m_IndexBuffer; }

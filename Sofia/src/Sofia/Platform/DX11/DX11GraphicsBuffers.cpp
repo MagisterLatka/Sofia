@@ -36,14 +36,6 @@ namespace Sofia {
 	{
 		Create();
 	}
-	DX11VertexBuffer::~DX11VertexBuffer()
-	{
-		ComPtr<ID3D11Buffer> instance = m_Buffer;
-		Renderer::Submit([instance]() mutable
-		{
-			instance.Reset();
-		});
-	}
 	void DX11VertexBuffer::Create()
 	{
 		Ref<DX11VertexBuffer> instance = this;
@@ -132,14 +124,6 @@ namespace Sofia {
 		: m_Size(buffer.Size), m_Data(buffer), m_Usage(usage)
 	{
 		Create();
-	}
-	DX11IndexBuffer::~DX11IndexBuffer()
-	{
-		ComPtr<ID3D11Buffer> instance = m_Buffer;
-		Renderer::Submit([instance]() mutable
-		{
-			instance.Reset();
-		});
 	}
 	void DX11IndexBuffer::Create()
 	{
@@ -233,14 +217,6 @@ namespace Sofia {
 		: m_Size(buffer.GetBufferSize()), m_Data(std::move(Buffer::Copy(buffer.GetBuffer(), buffer.GetBufferSize()))), m_Binding(binding)
 	{
 		Create();
-	}
-	DX11ConstantBuffer::~DX11ConstantBuffer()
-	{
-		ComPtr<ID3D11Buffer> instance = m_Buffer;
-		Renderer::Submit([instance]() mutable
-		{
-			instance.Reset();
-		});
 	}
 	void DX11ConstantBuffer::Create()
 	{

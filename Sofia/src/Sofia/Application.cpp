@@ -21,6 +21,8 @@ namespace Sofia {
 		Renderer::Init();
 
 		m_LayerStack = CreateScope<LayerStack>();
+		m_ImGuiLayer = new ImGuiLayer;
+		m_LayerStack->PushOverlay(m_ImGuiLayer);
 	}
 	Application::~Application()
 	{
@@ -59,6 +61,11 @@ namespace Sofia {
 					layer->OnUpdate(m_Timestep);
 			}
 			{ auto e = AppUpdateEvent(); OnEvent(e); }
+
+			m_ImGuiLayer->Begin();
+			for (auto layer : *m_LayerStack)
+				layer->OnImGuiRender();
+			m_ImGuiLayer->End();
 
 			m_Window->OnUpdate();
 			{ auto e = AppRenderEvent(); OnEvent(e); }

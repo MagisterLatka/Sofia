@@ -9,7 +9,7 @@ namespace Sofia {
 	struct RendererData
 	{
 		RenderCommandQueue* commandQueue;
-		ShaderLibrary shaderLibrary;
+		ShaderLibrary* shaderLibrary;
 	};
 	static RendererData s_Data;
 
@@ -18,9 +18,11 @@ namespace Sofia {
 		s_Data.commandQueue = new RenderCommandQueue;
 		RenderCommand::Init();
 		s_Data.commandQueue->Execute();
+		s_Data.shaderLibrary = new ShaderLibrary;
 	}
 	void Renderer::Shutdown()
 	{
+		delete s_Data.shaderLibrary;
 		s_Data.commandQueue->Execute();
 		delete s_Data.commandQueue;
 	}
@@ -31,7 +33,7 @@ namespace Sofia {
 	}
 	ShaderLibrary& Renderer::GetShaderLibrary() noexcept
 	{
-		return s_Data.shaderLibrary;
+		return *s_Data.shaderLibrary;
 	}
 	RenderCommandQueue& Renderer::GetRenderCommandQueue() noexcept
 	{

@@ -10,6 +10,8 @@
 #include "Sofia/Application.h"
 
 #include <dxgi1_3.h>
+#include <imgui.h>
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace Sofia {
 
@@ -151,6 +153,12 @@ namespace Sofia {
 	}
 	LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
+		if (m_HandleInputForImgui)
+		{
+			if (ImGui_ImplWin32_WndProcHandler(windowHandle, msg, wParam, lParam))
+				return true;
+		}
+
 		switch (msg)
 		{
 			case WM_CLOSE:

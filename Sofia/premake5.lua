@@ -27,11 +27,13 @@ project "Sofia"
 		"src",
 		"vendor",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.glm}"
+		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.imgui}"
 	}
 
 	links
 	{
+		"ImGui",
 		"d3d11.lib",
 		"D3DCompiler.lib",
 		"dxguid.lib"

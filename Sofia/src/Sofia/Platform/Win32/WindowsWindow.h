@@ -62,6 +62,10 @@ namespace Sofia {
 
 		virtual Keyboard& GetKeyboard() noexcept { return m_Keyboard; };
 		virtual Mouse& GetMouse() noexcept { return m_Mouse; }
+
+		HWND GetNativeWindow() const noexcept { return m_Window; }
+
+		void HandleInputForImgui(bool handle = true) noexcept { m_HandleInputForImgui = handle; }
 	private:
 		void Init(const WindowProps& props);
 		void Shutdown();
@@ -78,6 +82,8 @@ namespace Sofia {
 
 		Keyboard m_Keyboard;
 		Mouse m_Mouse;
+
+		bool m_HandleInputForImgui = false;
 
 		struct WindowData
 		{
