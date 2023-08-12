@@ -5,6 +5,14 @@
 
 namespace Sofia {
 
+	DX11Context::~DX11Context()
+	{
+#if defined(SOF_DEBUG)
+		ComPtr<ID3D11Debug> debug;
+		m_Device->QueryInterface(IID_PPV_ARGS(&debug));
+		debug->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY | D3D11_RLDO_IGNORE_INTERNAL);
+#endif
+	}
 	void DX11Context::Init()
 	{
 #if defined(SOF_DEBUG)

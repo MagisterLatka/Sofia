@@ -30,7 +30,7 @@ namespace Sofia {
 		};
 	public:
 		DX11Context() = default;
-		virtual ~DX11Context() = default;
+		virtual ~DX11Context();
 
 		virtual void Init() override;
 

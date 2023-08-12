@@ -8,6 +8,8 @@ namespace Sofia {
 	class InputLayout : public RefCounted
 	{
 	public:
+		virtual ~InputLayout() = default;
+
 		virtual Ref<VertexBuffer> GetVertexBuffer(uint32_t index = 0) const noexcept = 0;
 		virtual Ref<IndexBuffer> GetIndexBuffer() const noexcept = 0;
 
