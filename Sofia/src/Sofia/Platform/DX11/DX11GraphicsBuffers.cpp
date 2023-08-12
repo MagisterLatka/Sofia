@@ -67,21 +67,24 @@ namespace Sofia {
 	void DX11VertexBuffer::SetData(void* data, uint32_t size, uint32_t offset)
 	{
 		SOF_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
-		SOF_CORE_ASSERT(size + offset < m_Size, "Vertex buffer overflow");
+		if (m_Usage == BufferUsage::Dynamic) SOF_CORE_ASSERT(size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
+		SOF_CORE_ASSERT(size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = std::move(Buffer::Copy(data, size));
 		Update(offset);
 	}
 	void DX11VertexBuffer::SetData(const Buffer & buffer, uint32_t offset)
 	{
 		SOF_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
-		SOF_CORE_ASSERT(buffer.Size + offset < m_Size, "Vertex buffer overflow");
+		if (m_Usage == BufferUsage::Dynamic) SOF_CORE_ASSERT(buffer.Size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
+		SOF_CORE_ASSERT(buffer.Size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = buffer;
 		Update(offset);
 	}
 	void DX11VertexBuffer::SetData(Buffer&& buffer, uint32_t offset)
 	{
 		SOF_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
-		SOF_CORE_ASSERT(buffer.Size + offset < m_Size, "Vertex buffer overflow");
+		if (m_Usage == BufferUsage::Dynamic) SOF_CORE_ASSERT(buffer.Size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
+		SOF_CORE_ASSERT(buffer.Size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = buffer;
 		Update(offset);
 	}
@@ -94,8 +97,9 @@ namespace Sofia {
 			if (instance->m_Usage == BufferUsage::Dynamic)
 			{
 				D3D11_MAPPED_SUBRESOURCE map;
-				context->Map(instance->m_Buffer.Get(), 0u, D3D11_MAP_WRITE, 0u, &map);
-				memcpy((uint8_t*)map.pData + offset, instance->m_Data.Data, instance->m_Data.Size);
+				HRESULT hr;
+				SOF_DX_GRAPHICS_CALL_INFO(context->Map(instance->m_Buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &map));
+				memcpy(map.pData, instance->m_Data.Data, instance->m_Data.Size);
 				context->Unmap(instance->m_Buffer.Get(), 0u);
 			}
 			else
@@ -103,6 +107,8 @@ namespace Sofia {
 				D3D11_BOX box = { 0 };
 				box.left = offset;
 				box.right = offset + instance->m_Data.Size;
+				box.bottom = 1u;
+				box.back = 1u;
 				SOF_DX_GRAPHICS_CALL_INFO_ONLY(context->UpdateSubresource(instance->m_Buffer.Get(), 0u, &box, instance->m_Data.Data, 0u, 0u));
 			}
 		});
@@ -158,21 +164,24 @@ namespace Sofia {
 	void DX11IndexBuffer::SetData(uint32_t* data, uint32_t size, uint32_t offset)
 	{
 		SOF_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
-		SOF_CORE_ASSERT(size + offset < m_Size, "Vertex buffer overflow");
+		if (m_Usage == BufferUsage::Dynamic) SOF_CORE_ASSERT(size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
+		SOF_CORE_ASSERT(size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = std::move(Buffer::Copy(data, size));
 		Update(offset);
 	}
 	void DX11IndexBuffer::SetData(const Buffer & buffer, uint32_t offset)
 	{
 		SOF_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
-		SOF_CORE_ASSERT(buffer.Size + offset < m_Size, "Vertex buffer overflow");
+		if (m_Usage == BufferUsage::Dynamic) SOF_CORE_ASSERT(buffer.Size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
+		SOF_CORE_ASSERT(buffer.Size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = buffer;
 		Update(offset);
 	}
 	void DX11IndexBuffer::SetData(Buffer&& buffer, uint32_t offset)
 	{
 		SOF_CORE_ASSERT(m_Usage != BufferUsage::Immutable, "Cannot modify immutable buffer");
-		SOF_CORE_ASSERT(buffer.Size + offset < m_Size, "Vertex buffer overflow");
+		if (m_Usage == BufferUsage::Dynamic) SOF_CORE_ASSERT(buffer.Size == m_Size && offset == 0u, "Dynamic buffer cannot be updated partially");
+		SOF_CORE_ASSERT(buffer.Size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = buffer;
 		Update(offset);
 	}
@@ -185,8 +194,9 @@ namespace Sofia {
 			if (instance->m_Usage == BufferUsage::Dynamic)
 			{
 				D3D11_MAPPED_SUBRESOURCE map;
-				context->Map(instance->m_Buffer.Get(), 0u, D3D11_MAP_WRITE, 0u, &map);
-				memcpy((uint8_t*)map.pData + offset, instance->m_Data.Data, instance->m_Data.Size);
+				HRESULT hr;
+				SOF_DX_GRAPHICS_CALL_INFO(context->Map(instance->m_Buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &map));
+				memcpy(map.pData, instance->m_Data.Data, instance->m_Data.Size);
 				context->Unmap(instance->m_Buffer.Get(), 0u);
 			}
 			else
@@ -252,7 +262,7 @@ namespace Sofia {
 		});
 	}
 
-	void DX11ConstantBuffer::SetData(uint32_t* data, uint32_t size)
+	void DX11ConstantBuffer::SetData(void* data, uint32_t size)
 	{
 		SOF_CORE_ASSERT(size == m_Size, "Only updating whole constant buffer is possible");
 		m_Data = std::move(Buffer::Copy(data, size));

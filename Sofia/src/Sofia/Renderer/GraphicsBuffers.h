@@ -65,16 +65,16 @@ namespace Sofia {
 	{
 	public:
 		BufferLayout() = default;
-		BufferLayout(const std::initializer_list<BufferLayoutElement>& elements)
+		BufferLayout(const std::initializer_list<BufferLayoutElement>& elements) noexcept
 			: m_Elements(elements)
 		{
 			Calculate();
 		}
 
-		uint32_t GetStride() const { return m_Stride; }
-		const std::vector<BufferLayoutElement>& GetElements() const { return m_Elements; }
+		uint32_t GetStride() const noexcept { return m_Stride; }
+		const std::vector<BufferLayoutElement>& GetElements() const noexcept { return m_Elements; }
 
-		void AddElement(const BufferLayoutElement& element)
+		void AddElement(const BufferLayoutElement& element) noexcept
 		{
 			m_Elements.push_back(element);
 			auto& e = m_Elements.back();
@@ -82,10 +82,10 @@ namespace Sofia {
 			m_Stride += e.Size;
 		}
 
-		std::vector<BufferLayoutElement>::iterator		 begin()		{ return m_Elements.begin(); }
-		std::vector<BufferLayoutElement>::iterator		 end()			{ return m_Elements.end(); }
-		std::vector<BufferLayoutElement>::const_iterator begin() const	{ return m_Elements.begin(); }
-		std::vector<BufferLayoutElement>::const_iterator end() const	{ return m_Elements.end(); }
+		std::vector<BufferLayoutElement>::iterator		 begin() noexcept		{ return m_Elements.begin(); }
+		std::vector<BufferLayoutElement>::iterator		 end() noexcept			{ return m_Elements.end(); }
+		std::vector<BufferLayoutElement>::const_iterator begin() const noexcept { return m_Elements.begin(); }
+		std::vector<BufferLayoutElement>::const_iterator end() const noexcept	{ return m_Elements.end(); }
 	private:
 		void Calculate()
 		{
@@ -168,10 +168,10 @@ namespace Sofia {
 		uint32_t Offset = 0;
 		uint32_t index = 0;
 
-		virtual const uint8_t* GetBuffer() const override { return Buffer; }
+		virtual const uint8_t* GetBuffer() const noexcept override { return Buffer; }
 		virtual uint32_t GetBufferSize() const noexcept override { return N; };
-		virtual const UniformDecl* GetUniforms() const override { return Uniforms; }
-		virtual uint32_t GetUniformCount() const override { return U; }
+		virtual const UniformDecl* GetUniforms() const noexcept override { return Uniforms; }
+		virtual uint32_t GetUniformCount() const noexcept override { return U; }
 
 		template<typename T>
 		void Push(const std::string& name, const T& data) noexcept {}
@@ -264,7 +264,7 @@ namespace Sofia {
 	public:
 		virtual ~ConstantBuffer() = default;
 
-		virtual void SetData(uint32_t* data, uint32_t size) = 0;
+		virtual void SetData(void* data, uint32_t size) = 0;
 		virtual void SetData(const Buffer& buffer) = 0;
 		virtual void SetData(Buffer&& buffer) = 0;
 		virtual void SetData(const UniformBufferBase& buffer) = 0;

@@ -13,7 +13,7 @@ namespace Sofia {
 		std::string name;
 		uint64_t found = path.find_last_of("/\\");
 		name = found != std::string::npos ? path.substr(found + 1) : path;
-		found = name.find_last_of(".vert.cso");
+		found = name.find(".vert.cso");
 		name = found != std::string::npos ? name.substr(0, found) : name;
 		return name;
 	}

@@ -18,4 +18,5 @@ private:
 private:
 	Ref<Sofia::Shader> m_Shader;
 	Ref<Sofia::InputLayout> m_InputLayout;
+	Ref<Sofia::ConstantBuffer> m_ConstantBuffer;
 };

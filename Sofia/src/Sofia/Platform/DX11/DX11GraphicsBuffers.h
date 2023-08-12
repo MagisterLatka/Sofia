@@ -67,7 +67,7 @@ namespace Sofia {
 		DX11ConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer);
 		virtual ~DX11ConstantBuffer();
 
-		virtual void SetData(uint32_t* data, uint32_t size) override;
+		virtual void SetData(void* data, uint32_t size) override;
 		virtual void SetData(const Buffer& buffer) override;
 		virtual void SetData(Buffer&& buffer) override;
 		virtual void SetData(const UniformBufferBase& buffer) override;

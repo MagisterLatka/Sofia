@@ -1,4 +1,9 @@
-float4 main() : SV_TARGET
+cbuffer ConstBuff
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	float4 tint;
+};
+
+float4 main(float4 color : Color) : SV_Target
+{
+	return color * tint;
 }

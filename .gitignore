@@ -13,5 +13,6 @@ bin-int/
 *.sln
 *.log
 *.cache
+*.cso
 
 scripts/__pycache__
