@@ -6,6 +6,8 @@ namespace Sofia {
 	{
 	public:
 		SofiaException(int line, const char* file, bool core = false) noexcept : m_Line(line), m_File(file), m_Core(core) {}
+		SofiaException(const SofiaException& other)
+			: m_WhatBuffer(other.m_WhatBuffer), m_Line(other.m_Line), m_File(other.m_File), m_Core(other.m_Core) {}
 		virtual const char* what() const noexcept override
 		{
 			std::ostringstream oss;

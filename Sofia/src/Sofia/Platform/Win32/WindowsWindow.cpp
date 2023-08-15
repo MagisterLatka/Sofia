@@ -13,6 +13,8 @@
 #include <imgui.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#include <stb_image.h>
+
 namespace Sofia {
 
 	WindowsWindow::WindowsWindow(const WindowProps& props) noexcept
@@ -68,6 +70,81 @@ namespace Sofia {
 		m_Data.title = title;
 	}
 
+	void WindowsWindow::SetIcon(const std::filesystem::path& iconPath)
+	{
+		std::string path = iconPath.string();
+		if (std::filesystem::exists(iconPath))
+		{
+			int x, y, channels;
+			uint8_t* pixels = stbi_load(path.c_str(), &x, &y, &channels, 4);
+
+			HICON bigIcon, smallIcon;
+			bigIcon = CreateIcon(pixels, x, y);
+			smallIcon = CreateIcon(pixels, x, y);
+
+			SendMessageA(m_Window, WM_SETICON, ICON_BIG, (LPARAM)bigIcon);
+			SendMessageA(m_Window, WM_SETICON, ICON_SMALL, (LPARAM)smallIcon);
+
+			if (m_SmallIcon) DestroyIcon(m_SmallIcon);
+			m_SmallIcon = smallIcon;
+			if (m_BigIcon) DestroyIcon(m_BigIcon);
+			m_BigIcon = bigIcon;
+
+			stbi_image_free(pixels);
+		}
+		else SOF_CORE_WARN("Path {0} does not exist", path);
+	}
+	HICON WindowsWindow::CreateIcon(const uint8_t* pixels, int x, int y)
+	{
+		BITMAPV5HEADER bi = { 0 };
+		bi.bV5Size = sizeof(bi);
+		bi.bV5Width = x;
+		bi.bV5Height = -y;
+		bi.bV5Planes = 1;
+		bi.bV5BitCount = 32;
+		bi.bV5Compression = BI_BITFIELDS;
+		bi.bV5RedMask = 0x00ff0000;
+		bi.bV5GreenMask = 0x0000ff00;
+		bi.bV5BlueMask = 0x000000ff;
+		bi.bV5AlphaMask = 0xff000000;
+
+		HDC deviceContext = GetDC(nullptr);
+		uint8_t* target = nullptr;
+		HBITMAP color = CreateDIBSection(deviceContext, (BITMAPINFO*)&bi, DIB_RGB_COLORS, (void**)&target, nullptr, (DWORD)0);
+		ReleaseDC(nullptr, deviceContext);
+		if (!color)
+			throw SOF_WINDOWS_WINDOW_LAST_EXCEPTION();
+
+		HBITMAP mask = CreateBitmap(x, y, 1, 1, nullptr);
+		if (!mask)
+		{
+			DeleteObject(color);
+			SOF_CORE_THROW("Failed to create mask bitmap");
+		}
+
+		uint8_t* source = (uint8_t*)pixels;
+		for (int i = 0; i < x * y; ++i)
+		{
+			target[0] = source[2];
+			target[1] = source[1];
+			target[2] = source[0];
+			target[3] = source[3];
+			target += 4;
+			source += 4;
+		}
+
+		ICONINFO iconInfo = { 0 };
+		iconInfo.fIcon = TRUE;
+		iconInfo.hbmColor = color;
+		iconInfo.hbmMask = mask;
+
+		HICON handle = CreateIconIndirect(&iconInfo);
+		DeleteObject(color);
+		DeleteObject(mask);
+		SOF_CORE_ASSERT(handle, "Failed to create icon");
+		return handle;
+	}
+
 	void WindowsWindow::Init(const WindowProps& props)
 	{
 		m_Data.title = props.Title;
@@ -77,20 +154,56 @@ namespace Sofia {
 
 		SOF_CORE_INFO("Creating window {0}, ({1}, {2})", m_Data.title, m_Data.width, m_Data.height);
 
+		////////////////////////////////////////////////////////////////////////////////////////////////
+
+		DWORD windowStyle = WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION;
+		if (props.Resizable) windowStyle |= WS_MAXIMIZEBOX | WS_THICKFRAME;
+		DWORD windowExStyle = WS_EX_ACCEPTFILES | WS_EX_APPWINDOW;
+
 		RECT windowArea;
 		windowArea.left = 0;
 		windowArea.right = m_Data.width + windowArea.left;
 		windowArea.top = 0;
 		windowArea.bottom = m_Data.height + windowArea.top;
-		if (AdjustWindowRect(&windowArea, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU, FALSE) == 0)
+		if (AdjustWindowRectEx(&windowArea, windowStyle, FALSE, windowExStyle) == 0)
 			throw SOF_WINDOWS_WINDOW_LAST_EXCEPTION();
 
-		if (m_Window = CreateWindowExA(0u, WindowClass::GetName(), m_Data.title.c_str(), WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,
+		if (m_Window = CreateWindowExA(windowExStyle, WindowClass::GetName(), m_Data.title.c_str(), windowStyle,
 									 CW_USEDEFAULT, CW_USEDEFAULT, windowArea.right - windowArea.left, windowArea.bottom - windowArea.top, nullptr, nullptr,
 									 WindowClass::GetInstance(), this); m_Window == nullptr)
 			throw SOF_WINDOWS_WINDOW_LAST_EXCEPTION();
 
-		ShowWindow(m_Window, SW_SHOW);
+		////////////////////////////////////////////////////////////////////////////////////////////////
+
+		ChangeWindowMessageFilterEx(m_Window, WM_DROPFILES, MSGFLT_ALLOW, nullptr);
+		ChangeWindowMessageFilterEx(m_Window, WM_COPYDATA, MSGFLT_ALLOW, nullptr);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		windowArea.left = 0;
+		windowArea.right = m_Data.width + windowArea.left;
+		windowArea.top = 0;
+		windowArea.bottom = m_Data.height + windowArea.top;
+
+		ClientToScreen(m_Window, (POINT*)&windowArea.left);
+		ClientToScreen(m_Window, (POINT*)&windowArea.right);
+
+		AdjustWindowRectEx(&windowArea, windowStyle, FALSE, windowExStyle);
+
+		WINDOWPLACEMENT windowPlacement;
+		windowPlacement.length = sizeof(WINDOWPLACEMENT);
+
+		GetWindowPlacement(m_Window, &windowPlacement);
+		windowPlacement.rcNormalPosition = windowArea;
+		SetWindowPlacement(m_Window, &windowPlacement);
+
+		GetClientRect(m_Window, &windowArea);
+		m_Data.width = windowArea.right;
+		m_Data.height = windowArea.bottom;
+
+		////////////////////////////////////////////////////////////////////////////////////////////////
+
+		ShowWindow(m_Window, SW_SHOWNA);
 
 		DXGI_SWAP_CHAIN_DESC swapChain = {};
 		swapChain.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -326,17 +439,12 @@ namespace Sofia {
 	{
 		WNDCLASSEXA windowClass = { 0 };
 		windowClass.cbSize = sizeof(WNDCLASSEXA);
-		windowClass.style = CS_OWNDC;
+		windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 		windowClass.lpfnWndProc = WindowsWindow::HandleMsgSetup;
-		windowClass.cbClsExtra = 0;
-		windowClass.cbWndExtra = 0;
 		windowClass.hInstance = m_Instance;
-		windowClass.hIcon = nullptr;
-		windowClass.hCursor = nullptr;
-		windowClass.hbrBackground = nullptr;
-		windowClass.lpszMenuName = nullptr;
+		windowClass.hCursor = LoadCursorA(nullptr, IDC_ARROW);
 		windowClass.lpszClassName = GetName();
-		windowClass.hIconSm = nullptr;
+		windowClass.hIcon = reinterpret_cast<HICON>(LoadImageA(nullptr, IDI_APPLICATION, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED));
 
 		RegisterClassExA(&windowClass);
 	}

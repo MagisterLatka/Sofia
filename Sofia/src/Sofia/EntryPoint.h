@@ -1,6 +1,6 @@
 #pragma once
 
-extern Sofia::Application* Sofia::CreateApplication(ApplicationCommandLineArgs args);
+extern Sofia::Application* Sofia::CreateApplication();
 
 int main(int argc, char** argv, char** envp)
 {
@@ -9,7 +9,7 @@ int main(int argc, char** argv, char** envp)
 	Sofia::Application* app = nullptr;
 	int returnVal = 0;
 	try {
-		app = Sofia::CreateApplication({ argc, argv, envp });
+		app = Sofia::CreateApplication();
 		SOF_CORE_ASSERT(app, "Could not initialize app!");
 		returnVal = app->Run();
 	}

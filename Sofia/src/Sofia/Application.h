@@ -6,29 +6,27 @@
 #include "Sofia/Window.h"
 #include "Sofia/Renderer/GraphicsContext.h"
 #include "Sofia/ImGui/ImGuiLayer.h"
+#include "Sofia/Renderer/RendererAPI.h"
 
 int main(int argc, char** argv, char** envp);
 
 namespace Sofia {
 
-	struct ApplicationCommandLineArgs
+	struct ApplicationSpecifications
 	{
-		int Count = 0;
-		char** Args = nullptr;
-		char** Env = nullptr;
+		std::string Name = "Sofia Engine";
+		uint32_t Width = 1600u, Height = 900;
+		std::filesystem::path IconPath;
+		bool ResizableWindow = true;
 
-		const char* operator[](int index) const
-		{
-			SOF_CORE_ASSERT(index < Count);
-			return Args[index];
-		}
+		RendererAPI::API GraphicsAPI = RendererAPI::API::DX11;
 	};
 
 	class Application
 	{
 		friend int ::main(int argc, char** argv, char** envp);
 	public:
-		Application(const std::string& title = "Sofia Engine", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
+		Application(ApplicationSpecifications applicationSpecifications = ApplicationSpecifications());
 		virtual ~Application();
 
 		void Init() noexcept;
@@ -42,18 +40,17 @@ namespace Sofia {
 		Ref<Window> GetWindow() const noexcept { return m_Window; }
 		ImGuiLayer* GetImGuiLayer() noexcept { return m_ImGuiLayer; }
 
-		ApplicationCommandLineArgs GetCommandLineArgs() const noexcept { return m_CommandLineArgs; }
+		const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
 		static Application& Get() noexcept { return *s_Application; }
 	private:
 		int Run();
-		void ChooseGraphicsContext();
 
 		void OnEvent(Event& e);
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 	private:
-		ApplicationCommandLineArgs m_CommandLineArgs;
+		ApplicationSpecifications m_Specs;
 
 		bool m_Running = true;
 		bool m_Minimized = false;
@@ -70,5 +67,5 @@ namespace Sofia {
 		static Application* s_Application;
 	};
 
-	Application* CreateApplication(ApplicationCommandLineArgs args);
+	Application* CreateApplication();
 }

@@ -36,8 +36,8 @@ namespace Sofia {
 	}
 	DX11InputLayout::~DX11InputLayout()
 	{
-		delete[] m_Buffers;
-		delete[] m_Strides;
+		if (m_Buffers) delete[] m_Buffers;
+		if (m_Strides) delete[] m_Strides;
 	}
 	void DX11InputLayout::Create()
 	{

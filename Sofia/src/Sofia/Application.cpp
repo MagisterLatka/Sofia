@@ -1,22 +1,31 @@
 #include <pch.h>
 #include "Sofia/Application.h"
 
-#include "Sofia/Renderer/RendererAPI.h"
 #include "Sofia/Renderer/Renderer.h"
 
 namespace Sofia {
 
 	Application* Application::s_Application = nullptr;
+	RendererAPI::API RendererAPI::s_API;
 
-	Application::Application(const std::string& title, ApplicationCommandLineArgs args)
-		: m_CommandLineArgs(args)
+	Application::Application(ApplicationSpecifications applicationSpecifications)
+		: m_Specs(applicationSpecifications)
 	{
 		SOF_CORE_ASSERT(!s_Application, "Application already exist!");
 		s_Application = this;
 
-		ChooseGraphicsContext();
-		m_Window = Window::Create(WindowProps{ title, 1600u, 900u });
+		RendererAPI::s_API = m_Specs.GraphicsAPI;
+		m_GraphicsContext = GraphicsContext::Create();
+		m_GraphicsContext->Init();
+
+		WindowProps windowProps;
+		windowProps.Width = m_Specs.Width;
+		windowProps.Height = m_Specs.Height;
+		windowProps.Title = m_Specs.Name;
+		windowProps.Resizable = m_Specs.ResizableWindow;
+		m_Window = Window::Create(windowProps);
 		m_Window->SetEventCallback(SOF_BIND_EVENT_FN(Application::OnEvent));
+		if (!m_Specs.IconPath.empty()) m_Window->SetIcon(m_Specs.IconPath);
 
 		Renderer::Init();
 
@@ -64,7 +73,7 @@ namespace Sofia {
 
 			m_ImGuiLayer->Begin();
 			for (auto layer : *m_LayerStack)
-				layer->OnImGuiRender();
+				layer->OnUIRender();
 			m_ImGuiLayer->End();
 
 			m_Window->OnUpdate();
@@ -80,61 +89,20 @@ namespace Sofia {
 		return returnVal;
 	}
 
-	RendererAPI::API RendererAPI::s_API;
-	void Application::ChooseGraphicsContext()
-	{
-		bool foundAPI = false;
-		for (int i = 0; i < m_CommandLineArgs.Count; ++i)
-		{
-			std::string arg = m_CommandLineArgs[i];
-			if (auto a = arg.find("API="); a != std::string::npos)
-			{
-				std::string api = arg.substr(a);
-				if (api.find("DirectX11") || api.find("DX11"))
-				{
-					RendererAPI::s_API = RendererAPI::API::DX11;
-					foundAPI = true;
-					break;
-				}
-				else if (api.find("DirectX12") || api.find("DX12"))
-				{
-					SOF_CORE_THROW_INFO("DX12 is not supported yet");
-					RendererAPI::s_API = RendererAPI::API::DX12;
-					foundAPI = true;
-					break;
-				}
-				else if (api.find("OpenGL"))
-				{
-					SOF_CORE_THROW_INFO("Opengl is not supported yet");
-					RendererAPI::s_API = RendererAPI::API::OpenGL;
-					foundAPI = true;
-					break;
-				}
-				else if (api.find("Vulkan"))
-				{
-					SOF_CORE_THROW_INFO("Vulkan is not supported yet");
-					RendererAPI::s_API = RendererAPI::API::Vulkan;
-					foundAPI = true;
-					break;
-				}
-			}
-		}
-		if (!foundAPI) RendererAPI::s_API = RendererAPI::API::DX11;
-		m_GraphicsContext = GraphicsContext::Create();
-		m_GraphicsContext->Init();
-	}
-
 	void Application::OnEvent(Event& e)
 	{
 		Dispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(SOF_BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(SOF_BIND_EVENT_FN(Application::OnWindowResize));
 
-		for (auto it = m_LayerStack->rbegin(); it != m_LayerStack->rend(); ++it)
+		if (m_LayerStack)
 		{
-			(*it)->OnEvent(e);
-			if (e.p_Handled)
-				break;
+			for (auto it = m_LayerStack->rbegin(); it != m_LayerStack->rend(); ++it)
+			{
+				(*it)->OnEvent(e);
+				if (e.p_Handled)
+					break;
+			}
 		}
 	}
 	bool Application::OnWindowClose(WindowCloseEvent& e)

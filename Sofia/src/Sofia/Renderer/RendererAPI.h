@@ -20,6 +20,8 @@ namespace Sofia {
 	public:
 		static API GetAPI() { return s_API; }
 	public:
+		virtual ~RendererAPI() = default;
+
 		virtual void Init() = 0;
 
 		virtual void Draw(Topology topology, uint32_t verticesCount) = 0;

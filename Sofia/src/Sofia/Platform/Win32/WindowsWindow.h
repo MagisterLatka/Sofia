@@ -57,6 +57,8 @@ namespace Sofia {
 		virtual void SetVSync(bool vsync) noexcept override { m_Data.vSync = vsync; }
 		virtual bool IsVSyncEnabled() const noexcept override { return m_Data.vSync; }
 
+		virtual void SetIcon(const std::filesystem::path& iconPath) override;
+
 		virtual uint32_t GetWidth() const noexcept override { return m_Data.width; }
 		virtual uint32_t GetHeight() const noexcept override { return m_Data.height; }
 
@@ -69,6 +71,8 @@ namespace Sofia {
 	private:
 		void Init(const WindowProps& props);
 		void Shutdown();
+
+		static HICON CreateIcon(const uint8_t* pixels, int x, int y);
 
 		static LRESULT CALLBACK HandleMsgSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 		static LRESULT CALLBACK HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -95,6 +99,8 @@ namespace Sofia {
 			EventCallbackFn eventCallback;
 		};
 		WindowData m_Data;
+
+		HICON m_SmallIcon = nullptr, m_BigIcon = nullptr;
 	};
 
 }

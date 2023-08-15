@@ -45,7 +45,7 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	Sofia::RenderCommand::DrawIndexed(Sofia::RendererAPI::Topology::Triangles, 6u);
 	Sofia::Renderer::Render();
 }
-void ExampleLayer::OnImGuiRender()
+void ExampleLayer::OnUIRender()
 {
 	ImGuiIO& io = ImGui::GetIO();
 

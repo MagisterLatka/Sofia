@@ -12,12 +12,13 @@ namespace Sofia {
 		std::string Title;
 		unsigned int Width;
 		unsigned int Height;
+		bool Resizable;
 
 		WindowProps(const std::string& title = "Sofia Engine",
 					unsigned int width = 1280,
-					unsigned int height = 720)
-			: Title(title), Width(width), Height(height)
-		{}
+					unsigned int height = 720,
+					bool resizable = true)
+			: Title(title), Width(width), Height(height), Resizable(resizable) {}
 	};
 
 	class Window : public RefCounted
@@ -38,6 +39,8 @@ namespace Sofia {
 		virtual void SetEventCallback(const EventCallbackFn& callback) noexcept = 0;
 		virtual void SetVSync(bool vsync) noexcept = 0;
 		virtual bool IsVSyncEnabled() const noexcept = 0;
+
+		virtual void SetIcon(const std::filesystem::path& iconPath) = 0;
 
 		virtual unsigned int GetWidth() const noexcept = 0;
 		virtual unsigned int GetHeight() const noexcept = 0;

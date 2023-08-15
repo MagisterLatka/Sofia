@@ -4,19 +4,11 @@
 
 #include "ExampleLayer.h"
 
-class Game : public Sofia::Application
+Sofia::Application* Sofia::CreateApplication()
 {
-public:
-	Game(Sofia::ApplicationCommandLineArgs args)
-		: Sofia::Application("Game", args)
-	{
-		PushLayer(new ExampleLayer);
-	}
-
-	~Game() {}
-};
-
-Sofia::Application* Sofia::CreateApplication(ApplicationCommandLineArgs args)
-{
-	return new Game(args);
+	ApplicationSpecifications spec;
+	spec.IconPath = L"assets/Icon.png";
+	Application* app = new Application(spec);
+	app->PushLayer(new ExampleLayer);
+	return app;
 }
