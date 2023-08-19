@@ -9,22 +9,29 @@ namespace Sofia {
 
 	struct WindowProps
 	{
-		std::string Title;
-		unsigned int Width;
-		unsigned int Height;
-		bool Resizable;
+		std::string Title = "Sofia Engine";
+		unsigned int Width = 1280;
+		unsigned int Height = 720;
+		bool Resizable = true;
+		bool Maximized = false;
+		bool HasTitleBar = true;
 
-		WindowProps(const std::string& title = "Sofia Engine",
-					unsigned int width = 1280,
-					unsigned int height = 720,
-					bool resizable = true)
-			: Title(title), Width(width), Height(height), Resizable(resizable) {}
+		WindowProps() = default;
+		WindowProps(const std::string& title,
+					unsigned int width,
+					unsigned int height,
+					bool resizable = true,
+					bool maximized = false,
+					bool hasTitleBar = true)
+			: Title(title), Width(width), Height(height), Resizable(resizable), Maximized(maximized), HasTitleBar(hasTitleBar) {}
 	};
 
 	class Window : public RefCounted
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
+		using TitleBarHitTestCallbackFn = std::function<void(const int xMousePos, const int yMousePos, int& hitTest)>;
+		using InputDropCallbackFn = std::function<void(const int count, wchar_t** const paths)>;
 
 		virtual ~Window() = default;
 
@@ -37,8 +44,17 @@ namespace Sofia {
 		virtual const std::string& GetTille() const noexcept = 0;
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) noexcept = 0;
+		virtual void SetTitleBarHitTestCallback(const TitleBarHitTestCallbackFn& callback) noexcept = 0;
+		virtual void SetInputDropCallback(const InputDropCallbackFn& callback) noexcept = 0;
+
 		virtual void SetVSync(bool vsync) noexcept = 0;
 		virtual bool IsVSyncEnabled() const noexcept = 0;
+
+		virtual void Minimize() noexcept = 0;
+		virtual bool IsMinimized() const noexcept = 0;
+		virtual void Maximize() noexcept = 0;
+		virtual void Restore() noexcept = 0;
+		virtual bool IsMaximized() const noexcept = 0;
 
 		virtual void SetIcon(const std::filesystem::path& iconPath) = 0;
 

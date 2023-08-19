@@ -41,7 +41,7 @@ namespace Sofia {
 	public:
 		WindowsWindow(const WindowProps& props) noexcept;
 		WindowsWindow(const WindowsWindow&) = delete;
-		~WindowsWindow();
+		virtual ~WindowsWindow();
 
 		WindowsWindow& operator=(const WindowsWindow&) = delete;
 
@@ -54,8 +54,16 @@ namespace Sofia {
 		virtual const std::string& GetTille() const noexcept override { return m_Data.title; }
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) noexcept override { m_Data.eventCallback = callback; }
+		virtual void SetTitleBarHitTestCallback(const TitleBarHitTestCallbackFn& callback) noexcept override { m_Data.titlebarHitTest = callback; }
+		virtual void SetInputDropCallback(const InputDropCallbackFn& callback) noexcept override { m_Data.inputDropCallback = callback; };
 		virtual void SetVSync(bool vsync) noexcept override { m_Data.vSync = vsync; }
 		virtual bool IsVSyncEnabled() const noexcept override { return m_Data.vSync; }
+	
+		virtual void Minimize() noexcept override;
+		virtual bool IsMinimized() const noexcept override { return m_Data.minimized; }
+		virtual void Maximize() noexcept override;
+		virtual void Restore() noexcept override;
+		virtual bool IsMaximized() const noexcept override { return m_Data.maximized; }
 
 		virtual void SetIcon(const std::filesystem::path& iconPath) override;
 
@@ -75,8 +83,8 @@ namespace Sofia {
 		static HICON CreateIcon(const uint8_t* pixels, int x, int y);
 
 		static LRESULT CALLBACK HandleMsgSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-		static LRESULT CALLBACK HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-		LRESULT HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+		static LRESULT CALLBACK HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
+		LRESULT HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
 
 		void DefaultEventCallback(Event& e) {}
 	private:
@@ -95,8 +103,13 @@ namespace Sofia {
 			uint32_t width, height;
 			glm::ivec2 pos;
 			bool vSync = true;
+			bool maximized = false;
+			bool minimized = false;
+			bool titlebar = true;
 
 			EventCallbackFn eventCallback;
+			TitleBarHitTestCallbackFn titlebarHitTest;
+			InputDropCallbackFn inputDropCallback;
 		};
 		WindowData m_Data;
 

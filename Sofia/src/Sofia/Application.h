@@ -7,6 +7,7 @@
 #include "Sofia/Renderer/GraphicsContext.h"
 #include "Sofia/ImGui/ImGuiLayer.h"
 #include "Sofia/Renderer/RendererAPI.h"
+#include "Sofia/Renderer/Texture.h"
 
 int main(int argc, char** argv, char** envp);
 
@@ -16,8 +17,10 @@ namespace Sofia {
 	{
 		std::string Name = "Sofia Engine";
 		uint32_t Width = 1600u, Height = 900;
-		std::filesystem::path IconPath;
+		std::filesystem::path WindowIconPath;
+		Buffer TitlebarIconData;
 		bool ResizableWindow = true;
+		bool CustomTitleBar = false;
 
 		RendererAPI::API GraphicsAPI = RendererAPI::API::DX11;
 	};
@@ -26,6 +29,8 @@ namespace Sofia {
 	{
 		friend int ::main(int argc, char** argv, char** envp);
 	public:
+		using MenuBarCallbackFunc = std::function<void()>;
+
 		Application(ApplicationSpecifications applicationSpecifications = ApplicationSpecifications());
 		virtual ~Application();
 
@@ -39,6 +44,7 @@ namespace Sofia {
 		Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
 		Ref<Window> GetWindow() const noexcept { return m_Window; }
 		ImGuiLayer* GetImGuiLayer() noexcept { return m_ImGuiLayer; }
+		void SetMenuBarCallbackFunc(const MenuBarCallbackFunc& callback) noexcept { m_MenuBarCallback = callback; }
 
 		const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
@@ -49,6 +55,10 @@ namespace Sofia {
 		void OnEvent(Event& e);
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
+
+		void ImGuiRender();
+		void DrawTitleBar(float& titlebarHeight);
+		void DrawMenuBarUI();
 	private:
 		ApplicationSpecifications m_Specs;
 
@@ -57,6 +67,13 @@ namespace Sofia {
 
 		Scope<LayerStack> m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
+		MenuBarCallbackFunc m_MenuBarCallback;
+		bool m_TitleBarHovered = false;
+		Ref<Texture2D> m_TitlebarIcon;
+		Ref<Texture2D> m_CloseIcon;
+		Ref<Texture2D> m_MinimizeIcon;
+		Ref<Texture2D> m_MaximizeIcon;
+		Ref<Texture2D> m_RestoreIcon;
 
 		Timer m_Timer;
 		Timestep m_Timestep;

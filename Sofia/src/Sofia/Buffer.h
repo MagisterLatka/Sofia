@@ -23,13 +23,15 @@ namespace Sofia {
 		{
 			SOF_CORE_ASSERT(!takeControl || allocator != Allocator::None, "Sofia::Buffer expect to specify allocator");
 		}
-		Buffer(const Buffer& other) noexcept
-			: Size(other.Size), m_Delete(true), m_Allocator(other.m_Allocator)
+		Buffer(const Buffer& other) 
+			: m_Delete(true), m_Allocator(other.m_Allocator), Size(other.Size)
 		{
 			if (m_Allocator == Allocator::New)
 				Data = new uint8_t[Size];
 			else if (m_Allocator == Allocator::Malloc)
-				Data = (uint8_t*)malloc(Size);
+				Data = malloc(Size);
+			else return;
+
 			memcpy(Data, other.Data, Size);
 		}
 		Buffer(Buffer&& other) noexcept
@@ -47,9 +49,7 @@ namespace Sofia {
 				switch (m_Allocator)
 				{
 					case Allocator::New:
-						if (Size > 1)
-							delete Data;
-						else delete[] Data;
+						delete[] Data;
 						break;
 					case Allocator::Malloc:
 						free(Data);
@@ -68,9 +68,7 @@ namespace Sofia {
 					default:
 						SOF_CORE_THROW_INFO("Invalid allocator");
 					case Allocator::New:
-						if (Size > 1)
-							delete Data;
-						else delete[] Data;
+						delete[] Data;
 						break;
 					case Allocator::Malloc:
 						free(Data);
@@ -78,26 +76,38 @@ namespace Sofia {
 				}
 			}
 			m_Delete = true;
-			m_Allocator = Allocator::New;
+			m_Allocator = other.m_Allocator;
 
 			Size = other.Size;
-			Data = new uint8_t[Size];
+			
+			switch (m_Allocator)
+			{
+				case Sofia::Buffer::Allocator::None:
+					SOF_CORE_THROW_INFO("Invalid allocator");
+					m_Allocator = Allocator::New;
+					Data = new uint8_t[Size];
+					break;
+				case Sofia::Buffer::Allocator::New:
+					Data = new uint8_t[Size];
+					break;
+				case Sofia::Buffer::Allocator::Malloc:
+					Data = malloc(Size);
+					break;
+			}
+
 			memcpy(Data, other.Data, Size);
 			return *this;
 		}
-		Buffer& operator=(Buffer&& other)
+		Buffer& operator=(Buffer&& other) noexcept
 		{
 			if (m_Delete && Data)
 			{
 				switch (m_Allocator)
 				{
 					case Allocator::None:
-					default:
-						SOF_CORE_THROW_INFO("Invalid allocator");
+						break;
 					case Allocator::New:
-						if (Size > 1)
-							delete Data;
-						else delete[] Data;
+						delete[] Data;
 						break;
 					case Allocator::Malloc:
 						free(Data);
@@ -109,25 +119,50 @@ namespace Sofia {
 			m_Allocator = other.m_Allocator;
 			Size = other.Size;
 			Data = other.Data;
-			other.Data = nullptr;
-			other.Size = 0;
+			other.m_Delete = false;
 			other.m_Allocator = Allocator::None;
+			other.Size = 0;
+			other.Data = nullptr;
 			return *this;
 		}
 
-		static Buffer Copy(const void* data, uint32_t size) noexcept
+		static Buffer Copy(const void* data, uint32_t size, Allocator allocator = Allocator::New)
 		{
 			Buffer buffer;
-			buffer.Allocate(size);
+			buffer.Allocate(size, allocator);
 			memcpy(buffer.Data, data, size);
 			return buffer;
 		}
 
-		void Allocate(uint32_t size)
+		void Allocate(uint32_t size, Allocator newAllocator = Allocator::None)
 		{
 			if (size > Size)
 			{
-				if (m_Delete && Data)
+				void* oldData = Data;
+				switch (newAllocator)
+				{
+					case Sofia::Buffer::Allocator::None:
+					{
+						if (m_Allocator == Allocator::New)
+							Data = new uint8_t[size];
+						else if (m_Allocator == Allocator::Malloc)
+							Data = malloc(size);
+						else Data = new uint8_t[size];
+						break;
+					}
+					case Sofia::Buffer::Allocator::New:
+						Data = new uint8_t[size];
+						break;
+					case Sofia::Buffer::Allocator::Malloc:
+						Data = malloc(size);
+						break;
+				}
+
+				if (oldData) memcpy(Data, oldData, Size);
+				Size = size;
+				m_Delete = true;
+
+				if (m_Delete && oldData)
 				{
 					switch (m_Allocator)
 					{
@@ -135,10 +170,9 @@ namespace Sofia {
 						default:
 							SOF_CORE_THROW_INFO("Invalid allocator");
 							delete[] Data;
+							break;
 						case Allocator::New:
-							if (Size > 1)
-								delete Data;
-							else delete[] Data;
+							delete[] Data;
 							break;
 						case Allocator::Malloc:
 							free(Data);
@@ -146,10 +180,8 @@ namespace Sofia {
 					}
 				}
 
-				m_Allocator = Allocator::New;
-				m_Delete = true;
-				Data = new uint8_t[size];
-				Size = size;
+				if (newAllocator != Allocator::None)
+				m_Allocator = newAllocator;
 			}
 		}
 
@@ -161,14 +193,14 @@ namespace Sofia {
 		template<typename T>
 		T& Read(uint32_t offset = 0)
 		{
-			SOF_CORE_ASSERT(offset < Size, "Accesing data out of buffer");
+			SOF_CORE_ASSERT(offset + sizeof(T) <= Size, "Accesing data out of buffer");
 			return *(T*)(Data + offset);
 		}
 
 		void Write(void* data, uint32_t size, uint32_t offset = 0)
 		{
 			SOF_CORE_ASSERT(Data, "Buffer has no memory allocated");
-			SOF_CORE_ASSERT(size + offset < Size, "Accesing data out of buffer");
+			SOF_CORE_ASSERT(size + offset <= Size, "Accesing data out of buffer");
 			memcpy((uint8_t*)Data + offset, data, size);
 		}
 

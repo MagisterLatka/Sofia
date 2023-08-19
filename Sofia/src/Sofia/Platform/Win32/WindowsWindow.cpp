@@ -9,6 +9,7 @@
 
 #include "Sofia/Application.h"
 
+#include <shellapi.h>
 #include <dxgi1_3.h>
 #include <imgui.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -68,6 +69,22 @@ namespace Sofia {
 		if (SetWindowTextA(m_Window, title.c_str()) == 0)
 			throw SOF_WINDOWS_WINDOW_LAST_EXCEPTION();
 		m_Data.title = title;
+	}
+
+	void WindowsWindow::Minimize() noexcept
+	{
+		m_Data.minimized = true;
+		ShowWindow(m_Window, SW_MINIMIZE);
+	}
+	void WindowsWindow::Maximize() noexcept
+	{
+		m_Data.maximized = true;
+		ShowWindow(m_Window, SW_MAXIMIZE);
+	}
+	void WindowsWindow::Restore() noexcept
+	{
+		m_Data.maximized = false;
+		ShowWindow(m_Window, SW_RESTORE);
 	}
 
 	void WindowsWindow::SetIcon(const std::filesystem::path& iconPath)
@@ -150,6 +167,7 @@ namespace Sofia {
 		m_Data.title = props.Title;
 		m_Data.width = props.Width;
 		m_Data.height = props.Height;
+		m_Data.titlebar = props.HasTitleBar;
 		m_Data.eventCallback = SOF_BIND_EVENT_FN(WindowsWindow::DefaultEventCallback);
 
 		SOF_CORE_INFO("Creating window {0}, ({1}, {2})", m_Data.title, m_Data.width, m_Data.height);
@@ -158,6 +176,11 @@ namespace Sofia {
 
 		DWORD windowStyle = WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION;
 		if (props.Resizable) windowStyle |= WS_MAXIMIZEBOX | WS_THICKFRAME;
+		if (props.Maximized)
+		{
+			windowStyle |= WS_MAXIMIZE;
+			m_Data.maximized = true;
+		}
 		DWORD windowExStyle = WS_EX_ACCEPTFILES | WS_EX_APPWINDOW;
 
 		RECT windowArea;
@@ -195,7 +218,10 @@ namespace Sofia {
 
 		GetWindowPlacement(m_Window, &windowPlacement);
 		windowPlacement.rcNormalPosition = windowArea;
+		windowPlacement.showCmd = SW_HIDE;
 		SetWindowPlacement(m_Window, &windowPlacement);
+
+		DragAcceptFiles(m_Window, TRUE);
 
 		GetClientRect(m_Window, &windowArea);
 		m_Data.width = windowArea.right;
@@ -233,7 +259,7 @@ namespace Sofia {
 			SOF_DX_GRAPHICS_CALL_INFO(factory->CreateSwapChain(DX11Context::GetContextFromApplication()->GetDevice().Get(), &swapChain, &m_SwapChain));
 		}
 
-		ComPtr<ID3D11Resource> backBuffer;
+		ComPtr<ID3D11Texture2D> backBuffer;
 		SOF_DX_GRAPHICS_CALL_INFO(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer));
 		SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_TargetView));
 	}
@@ -259,12 +285,12 @@ namespace Sofia {
 
 		return DefWindowProc(windowHandle, msg, wParam, lParam);
 	}
-	LRESULT WindowsWindow::HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+	LRESULT WindowsWindow::HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		WindowsWindow* const window = reinterpret_cast<WindowsWindow*>(GetWindowLongPtrA(windowHandle, GWLP_USERDATA));
 		return window->HandleMsg(windowHandle, msg, wParam, lParam);
 	}
-	LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+	LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		if (m_HandleInputForImgui)
 		{
@@ -272,8 +298,21 @@ namespace Sofia {
 				return true;
 		}
 
+		BOOL hasThickFrame = GetWindowLongPtrA(m_Window, GWL_STYLE) & WS_THICKFRAME;
+
 		switch (msg)
 		{
+			case WM_CREATE:
+			{
+				if (!m_Data.titlebar && hasThickFrame)
+				{
+					RECT rect;
+					GetWindowRect(m_Window, &rect);
+					SetWindowPos(m_Window, nullptr, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
+				}
+				break;
+			}
+
 			case WM_CLOSE:
 			{
 				WindowCloseEvent e;
@@ -294,23 +333,6 @@ namespace Sofia {
 				WindowFocusEvent e;
 				m_Data.eventCallback(e);
 				break;
-			}
-			case WM_SIZE:
-			{
-				int width = LOWORD(lParam);
-				int height = HIWORD(lParam);
-				m_Data.width = width;
-				m_Data.height = height;
-				WindowResizeEvent e(width, height);
-				m_Data.eventCallback(e);
-				break;
-			}
-			case WM_MOVE:
-			{
-				int xpos = LOWORD(lParam);
-				int ypos = HIWORD(lParam);
-				m_Data.pos = { xpos, ypos };
-				WindowMovedEvent e(xpos, ypos);
 			}
 
 			case WM_KEYDOWN:
@@ -426,6 +448,139 @@ namespace Sofia {
 				MouseScrolledEvent e(0, (float)delta);
 				m_Data.eventCallback(e);
 				break;
+			}
+
+			case WM_DROPFILES:
+			{
+				HDROP drop = (HDROP)wParam;
+				const int count = DragQueryFileW(drop, 0xffffffffu, nullptr, 0u);
+				wchar_t** paths = new wchar_t* [count];
+
+				POINT pt;
+				DragQueryPoint(drop, &pt);
+
+				for (int i = 0; i < count; ++i)
+				{
+					const uint32_t lenght = DragQueryFileW(drop, i, nullptr, 0u);
+					paths[i] = new wchar_t[lenght + 1];
+					DragQueryFileW(drop, i, paths[i], lenght + 1);
+				}
+				if (m_Data.inputDropCallback) m_Data.inputDropCallback(count, paths);
+				for (int i = 0; i < count; ++i)
+					delete paths[i];
+				delete[] paths;
+
+				DragFinish(drop);
+			}
+
+			case WM_NCCALCSIZE:
+			{
+				if (!m_Data.titlebar && hasThickFrame && wParam)
+				{
+					const int resizeBorderX = GetSystemMetrics(SM_CXFRAME);
+					const int resizeBorderY = GetSystemMetrics(SM_CYFRAME);
+
+					NCCALCSIZE_PARAMS* params = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+					RECT* clientRect = params->rgrc;
+
+					clientRect->right -= resizeBorderX;
+					clientRect->left += resizeBorderX;
+					clientRect->bottom -= resizeBorderY;
+					clientRect->top += 0; //1
+					
+					return WVR_ALIGNLEFT | WVR_ALIGNTOP;
+				}
+				break;
+			}
+			case WM_SIZE:
+			{
+				const int width = LOWORD(lParam);
+				const int height = HIWORD(lParam);
+				m_Data.minimized = wParam == SIZE_MINIMIZED;
+				m_Data.maximized = wParam == SIZE_MAXIMIZED || (wParam != SIZE_RESTORED && m_Data.maximized);
+				if (m_Data.width != width || m_Data.height != height)
+				{
+					m_Data.width = width;
+					m_Data.height = height;
+
+					if (m_SwapChain)
+					{
+						auto context = DX11Context::GetContextFromApplication()->GetContext();
+
+						context->OMSetRenderTargets(0u, nullptr, nullptr);
+						m_TargetView.Reset();
+						HRESULT hr;
+						SOF_DX_GRAPHICS_CALL_INFO(m_SwapChain->ResizeBuffers(0u, 0u, 0u, DXGI_FORMAT_UNKNOWN, 0u));
+
+						ComPtr<ID3D11Texture2D> backBuffer;
+						SOF_DX_GRAPHICS_CALL_INFO(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer));
+						SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_TargetView));
+					}
+
+					WindowResizeEvent e(width, height);
+					m_Data.eventCallback(e);
+				}
+
+				RECT rect;
+				GetWindowRect(m_Window, &rect);
+				SetWindowPos(m_Window, nullptr, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
+				return 0;
+			}
+			case WM_MOVE:
+			{
+				int xpos = LOWORD(lParam);
+				int ypos = HIWORD(lParam);
+				m_Data.pos = { xpos, ypos };
+				WindowMovedEvent e(xpos, ypos);
+				return 0;
+			}
+
+			case WM_ACTIVATE:
+			{
+				if (!m_Data.titlebar)
+				{
+					RECT titlebarRect = {0};
+					InvalidateRect(m_Window, &titlebarRect, FALSE);
+				}
+			}
+			case WM_NCHITTEST:
+			{
+				if (!m_Data.titlebar && hasThickFrame)
+				{
+					POINT pt = { LOWORD(lParam), HIWORD(lParam) };
+					ScreenToClient(m_Window, &pt);
+
+					if (!m_Data.maximized)
+					{
+						RECT rect;
+						GetClientRect(m_Window, &rect);
+
+						const int verticalBorderSize = GetSystemMetrics(SM_CYFRAME);
+
+						static RECT borderThickness = { 4, 4, 4, 4 };
+						enum { left = 0x1, top = 0x2, right = 0x4, bottom = 0x8 };
+						int hit = 0;
+						if (pt.x <= borderThickness.left) hit |= left;
+						if (pt.x >= rect.right - borderThickness.right) hit |= right;
+						if (pt.y <= borderThickness.top || pt.y < verticalBorderSize) hit |= top;
+						if (pt.y >= rect.bottom - borderThickness.bottom) hit |= bottom;
+
+						if (hit & top && hit & left)		return HTTOPLEFT;
+						if (hit & top && hit & right)		return HTTOPRIGHT;
+						if (hit & bottom && hit & left)		return HTBOTTOMLEFT;
+						if (hit & bottom && hit & right)	return HTBOTTOMRIGHT;
+						if (hit & left)						return HTLEFT;
+						if (hit & top)						return HTTOP;
+						if (hit & right)					return HTRIGHT;
+						if (hit & bottom)					return HTBOTTOM;
+					}
+
+					int titlebarHitTest = 0;
+					if (m_Data.titlebarHitTest) m_Data.titlebarHitTest(pt.x, pt.y, titlebarHitTest);
+					if (titlebarHitTest) return HTCAPTION;
+
+					return HTCLIENT;
+				}
 			}
 		}
 		return DefWindowProcA(windowHandle, msg, wParam, lParam);

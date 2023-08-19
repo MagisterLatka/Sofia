@@ -7,7 +7,8 @@
 Sofia::Application* Sofia::CreateApplication()
 {
 	ApplicationSpecifications spec;
-	spec.IconPath = L"assets/Icon.png";
+	spec.WindowIconPath = L"assets/Icon.png";
+	spec.CustomTitleBar = true;
 	Application* app = new Application(spec);
 	app->PushLayer(new ExampleLayer);
 	return app;

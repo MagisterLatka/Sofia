@@ -59,6 +59,17 @@ namespace Sofia {
 		ImGui::StyleColorsDark();
 
 		ImGuiStyle& style = ImGui::GetStyle();
+		style.FrameRounding = 2.5f;
+		style.FrameBorderSize = 1.0f;
+		style.IndentSpacing = 11.0f;
+		style.WindowPadding = ImVec2(10.0f, 10.0f);
+		style.FramePadding = ImVec2(8.0f, 6.0f);
+		style.ItemSpacing = ImVec2(6.0f, 6.0f);
+		style.ChildRounding = 6.0f;
+		style.PopupRounding = 6.0f;
+		style.FrameRounding = 6.0f;
+		style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			style.WindowRounding = 0.0f;

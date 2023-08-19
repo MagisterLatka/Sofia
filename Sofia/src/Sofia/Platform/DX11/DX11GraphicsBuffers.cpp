@@ -22,7 +22,7 @@ namespace Sofia {
 	}
 
 	DX11VertexBuffer::DX11VertexBuffer(const BufferLayout& layout, void* data, uint32_t size, BufferUsage usage)
-		: m_Size(size), m_Data(std::move(Buffer::Copy(data, size))), m_Usage(usage), m_Layout(layout)
+		: m_Size(size), m_Data(Buffer::Copy(data, size)), m_Usage(usage), m_Layout(layout)
 	{
 		Create();
 	}
@@ -111,7 +111,7 @@ namespace Sofia {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	DX11IndexBuffer::DX11IndexBuffer(uint32_t* data, uint32_t size, BufferUsage usage)
-		: m_Size(size), m_Data(std::move(Buffer::Copy(data, size))), m_Usage(usage)
+		: m_Size(size), m_Data(Buffer::Copy(data, size)), m_Usage(usage)
 	{
 		Create();
 	}
@@ -199,7 +199,7 @@ namespace Sofia {
 
 
 	DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, void* data, uint32_t size)
-		: m_Size(size), m_Data(std::move(Buffer::Copy(data, size))), m_Binding(binding)
+		: m_Size(size), m_Data(Buffer::Copy(data, size)), m_Binding(binding)
 	{
 		Create();
 	}
@@ -214,7 +214,7 @@ namespace Sofia {
 		Create();
 	}
 	DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer)
-		: m_Size(buffer.GetBufferSize()), m_Data(std::move(Buffer::Copy(buffer.GetBuffer(), buffer.GetBufferSize()))), m_Binding(binding)
+		: m_Size(buffer.GetBufferSize()), m_Data(Buffer::Copy(buffer.GetBuffer(), buffer.GetBufferSize())), m_Binding(binding)
 	{
 		Create();
 	}
