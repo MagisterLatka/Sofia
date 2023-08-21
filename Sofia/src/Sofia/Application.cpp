@@ -324,6 +324,28 @@ namespace Sofia {
 	}
 	void Application::DrawMenuBarUI()
 	{
+		if (!m_MenuBarCallback)
+			return;
 
+		if (m_Specs.CustomTitleBar)
+		{
+			const ImRect menuBarRect = { ImGui::GetCursorPos(), { ImGui::GetContentRegionAvail().x + ImGui::GetCursorScreenPos().x, ImGui::GetFrameHeightWithSpacing() } };
+
+			ImGui::BeginGroup();
+			if (UI::BeginMenuBar(menuBarRect))
+			{
+				m_MenuBarCallback();
+				UI::EndMenuBar();
+			}
+			ImGui::EndGroup();
+		}
+		else
+		{
+			if (ImGui::BeginMenuBar())
+			{
+				m_MenuBarCallback();
+				ImGui::EndMenuBar();
+			}
+		}
 	}
 }

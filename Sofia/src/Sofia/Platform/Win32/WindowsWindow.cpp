@@ -503,7 +503,7 @@ namespace Sofia {
 					m_Data.width = width;
 					m_Data.height = height;
 
-					if (m_SwapChain)
+					if (m_SwapChain && width != 0 && height != 0)
 					{
 						auto context = DX11Context::GetContextFromApplication()->GetContext();
 

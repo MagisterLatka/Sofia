@@ -36,6 +36,70 @@ namespace Sofia::UI {
 		return result;
 	}
 
+	bool BeginMenuBar(const ImRect& menuBarRect)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems) return false;
+
+		SOF_CORE_ASSERT(!window->DC.MenuBarAppending);
+		ImGui::BeginGroup();
+		ImGui::PushID("##menubar");
+
+		const ImVec2 padding = window->WindowPadding;
+		ImRect barRect = RectMove(menuBarRect, 0.0f, padding.y);
+		ImRect clipRect(IM_ROUND(ImMax(window->Pos.x, barRect.Min.x + window->WindowBorderSize + window->Pos.x - 10.0f)),
+			IM_ROUND(barRect.Min.y + window->WindowBorderSize + window->Pos.y),
+			IM_ROUND(ImMax(barRect.Min.x + window->Pos.x, barRect.Max.x - ImMax(window->WindowRounding, window->WindowBorderSize))),
+			IM_ROUND(barRect.Max.y + window->Pos.y));
+
+		//debug menu bar bounds
+		//ImGui::GetForegroundDrawList()->AddRect(clipRect.Min, clipRect.Max, IM_COL32(0xffu, 0x20u, 0x20u, 0xffu));
+
+		clipRect.ClipWith(window->OuterRectClipped);
+		ImGui::PushClipRect(clipRect.Min, clipRect.Max, false);
+
+		window->DC.CursorPos = window->DC.CursorMaxPos = ImVec2(barRect.Min.x + window->Pos.x, barRect.Min.y + window->Pos.y);
+		window->DC.LayoutType = ImGuiLayoutType_Horizontal;
+		window->DC.NavLayerCurrent = ImGuiNavLayer_Menu;
+		window->DC.MenuBarAppending = true;
+		ImGui::AlignTextToFramePadding();
+		return true;
+	}
+	void EndMenuBar()
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems) return;
+		ImGuiContext& g = *GImGui;
+
+		if (ImGui::NavMoveRequestButNoResultYet() && (g.NavMoveDir == ImGuiDir_Left || g.NavMoveDir == ImGuiDir_Right) && (g.NavWindow->Flags & ImGuiWindowFlags_ChildMenu))
+		{
+			ImGuiWindow* navEarliestChild = g.NavWindow;
+			while (navEarliestChild->ParentWindow && (navEarliestChild->Flags & ImGuiWindowFlags_ChildMenu))
+				navEarliestChild = navEarliestChild->ParentWindow;
+
+			if (navEarliestChild->ParentWindow == window && navEarliestChild->DC.ParentLayoutType == ImGuiLayoutType_Horizontal && (g.NavMoveFlags & ImGuiNavMoveFlags_Forwarded) == 0)
+			{
+				const ImGuiNavLayer layer = ImGuiNavLayer_Menu;
+				SOF_CORE_ASSERT(window->DC.NavLayersActiveMaskNext & (1 << layer));
+				ImGui::FocusWindow(window);
+				ImGui::SetNavID(window->NavLastIds[layer], layer, 0, window->NavRectRel[layer]);
+				g.NavDisableHighlight = true;
+				g.NavDisableMouseHover = g.NavMousePosDirty = true;
+				ImGui::NavMoveRequestForward(g.NavMoveDir, g.NavMoveClipDir, g.NavMoveFlags, g.NavMoveScrollFlags);
+			}
+		}
+
+		SOF_CORE_ASSERT(window->DC.MenuBarAppending);
+		ImGui::PopClipRect();
+		ImGui::PopID();
+		window->DC.MenuBarOffset.x = window->DC.CursorPos.x - window->Pos.x;
+		g.GroupStack.back().EmitItem = false;
+		ImGui::EndGroup();
+		window->DC.LayoutType = ImGuiLayoutType_Vertical;
+		window->DC.NavLayerCurrent = ImGuiNavLayer_Main;
+		window->DC.MenuBarAppending = false;
+	}
+
 	void DrawButtonImage(Ref<Texture2D>& image, ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed, ImVec2 rectMin, ImVec2 rectMax) noexcept
 	{
 		auto* drawList = ImGui::GetForegroundDrawList();
