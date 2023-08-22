@@ -282,7 +282,7 @@ namespace Sofia {
 			const uint32_t iconWidth = m_MinimizeIcon->GetWidth();
 			const uint32_t iconHeight = m_MinimizeIcon->GetHeight();
 			const float pad = (buttonHeight - (float)iconHeight) / 2.0f;
-			if (ImGui::InvisibleButton("Minimize", ImVec2((float)iconWidth, (float)iconHeight)))
+			if (ImGui::InvisibleButton("Minimize", ImVec2(buttonWidth, buttonHeight)))
 				m_Window->Minimize();
 
 			UI::DrawButtonImage(m_MinimizeIcon, buttonNormalColor, buttonHoveredColor, buttonPressedColor, UI::RectExpand(UI::GetItemRect(), 0.0f, -pad));
@@ -295,7 +295,7 @@ namespace Sofia {
 			const uint32_t iconHeight = m_MaximizeIcon->GetHeight();
 			const bool maximized = m_Window->IsMaximized();
 
-			if (ImGui::InvisibleButton("Maximize", ImVec2((float)iconWidth, (float)iconHeight)))
+			if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight)))
 			{
 				if (maximized)
 					m_Window->Restore();
@@ -312,7 +312,7 @@ namespace Sofia {
 			const uint32_t iconWidth = m_CloseIcon->GetWidth();
 			const uint32_t iconHeight = m_CloseIcon->GetHeight();
 
-			if (ImGui::InvisibleButton("Close", ImVec2((float)iconWidth, (float)iconHeight)))
+			if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
 				m_Running = false;
 
 			UI::DrawButtonImage(m_MinimizeIcon, buttonNormalColor, buttonHoveredColor, buttonPressedColor, UI::GetItemRect());
