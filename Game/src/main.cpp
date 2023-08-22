@@ -21,14 +21,6 @@ Sofia::Application* Sofia::CreateApplication()
 
 			ImGui::EndMenu();
 		}
-
-		if (ImGui::BeginMenu("Test"))
-		{
-			if (ImGui::MenuItem("Test2"))
-				SOF_TRACE("Test");
-
-			ImGui::EndMenu();
-		}
 	});
 	return app;
 }

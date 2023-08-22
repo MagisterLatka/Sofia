@@ -238,6 +238,7 @@ namespace Sofia {
 		//debug drag bounds
 		//foregroundDrawList->AddRect(ImGui::GetCursorScreenPos(), ImVec2(ImGui::GetCursorScreenPos().x + width - buttonsAreaWidth,
 		//			ImGui::GetCursorScreenPos().y + titlebarHeight), debugColor);
+		ImGui::SetNextItemAllowOverlap();
 		ImGui::InvisibleButton("##titleBarDragZone", ImVec2(width - buttonsAreaWidth, titlebarHeight));
 
 		m_TitleBarHovered = ImGui::IsItemHovered();
@@ -253,7 +254,6 @@ namespace Sofia {
 		{
 			ImGui::SuspendLayout();
 			
-			ImGui::SetItemAllowOverlap();
 			const float iconHorizontalOffset = 16.0f * 2.0f + (float)iconWidth + windowPadding.x;
 			ImGui::SetCursorPos(ImVec2(iconHorizontalOffset, 6.0f + titlebarVerticalOffset));
 			DrawMenuBarUI();
