@@ -315,7 +315,7 @@ namespace Sofia {
 			if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
 				m_Running = false;
 
-			UI::DrawButtonImage(m_MinimizeIcon, buttonNormalColor, buttonHoveredColor, buttonPressedColor, UI::GetItemRect());
+			UI::DrawButtonImage(m_CloseIcon, buttonNormalColor, buttonHoveredColor, buttonPressedColor, UI::GetItemRect());
 		}
 
 		ImGui::Spring(-1.0f, 18.0f);
