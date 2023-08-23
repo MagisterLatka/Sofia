@@ -70,6 +70,9 @@ namespace Sofia {
 		virtual uint32_t GetWidth() const noexcept override { return m_Data.width; }
 		virtual uint32_t GetHeight() const noexcept override { return m_Data.height; }
 
+		virtual uint32_t GetXClientPos() const noexcept { return m_Data.pos.x; };
+		virtual uint32_t GetYClientPos() const noexcept { return m_Data.pos.y; };
+
 		virtual Keyboard& GetKeyboard() noexcept { return m_Keyboard; };
 		virtual Mouse& GetMouse() noexcept { return m_Mouse; }
 

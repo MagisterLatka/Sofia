@@ -9,6 +9,8 @@
 
 #include "Sofia/Application.h"
 
+#include "Sofia/Renderer/Renderer.h"
+
 #include <shellapi.h>
 #include <dxgi1_3.h>
 #include <imgui.h>
@@ -49,19 +51,27 @@ namespace Sofia {
 
 	void WindowsWindow::BindToRender() noexcept
 	{
-		DX11Context::GetContextFromApplication()->GetContext()->OMSetRenderTargets(1u, m_TargetView.GetAddressOf(), nullptr);
-		D3D11_VIEWPORT viewport;
-		viewport.Width = (float)m_Data.width;
-		viewport.Height = (float)m_Data.height;
-		viewport.TopLeftX = 0.0f;
-		viewport.TopLeftY = 0.0f;
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
-		DX11Context::GetContextFromApplication()->GetContext()->RSSetViewports(1u, &viewport);
+		Ref<WindowsWindow> instance = this;
+		Renderer::Submit([instance]()
+		{
+			DX11Context::GetContextFromApplication()->GetContext()->OMSetRenderTargets(1u, instance->m_TargetView.GetAddressOf(), nullptr);
+			D3D11_VIEWPORT viewport;
+			viewport.Width = (float)instance->m_Data.width;
+			viewport.Height = (float)instance->m_Data.height;
+			viewport.TopLeftX = 0.0f;
+			viewport.TopLeftY = 0.0f;
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
+			DX11Context::GetContextFromApplication()->GetContext()->RSSetViewports(1u, &viewport);
+		});
 	}
 	void WindowsWindow::Clear(const glm::vec4& color) noexcept
 	{
-		DX11Context::GetContextFromApplication()->GetContext()->ClearRenderTargetView(m_TargetView.Get(), glm::value_ptr(color));
+		Ref<WindowsWindow> instance = this;
+		Renderer::Submit([instance, color]()
+		{
+			DX11Context::GetContextFromApplication()->GetContext()->ClearRenderTargetView(instance->m_TargetView.Get(), glm::value_ptr(color));
+		});
 	}
 
 	void WindowsWindow::SetTitle(const std::string& title)
@@ -232,7 +242,7 @@ namespace Sofia {
 		ShowWindow(m_Window, SW_SHOWNA);
 
 		DXGI_SWAP_CHAIN_DESC swapChain = {};
-		swapChain.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		swapChain.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		swapChain.BufferDesc.Width = m_Data.width;
 		swapChain.BufferDesc.Height = m_Data.height;
 		swapChain.BufferDesc.RefreshRate.Numerator = 0u;

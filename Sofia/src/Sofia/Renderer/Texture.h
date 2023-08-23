@@ -10,7 +10,8 @@ namespace Sofia {
 		None = 0,
 		R8, R32F,
 		RGB8, RGB32F,
-		RGBA8, RGBA32F
+		RGBA8, RGBA32F,
+		Last = RGBA32F
 	};
 	struct Texture2DProps
 	{

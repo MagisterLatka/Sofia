@@ -58,8 +58,11 @@ namespace Sofia {
 
 		virtual void SetIcon(const std::filesystem::path& iconPath) = 0;
 
-		virtual unsigned int GetWidth() const noexcept = 0;
-		virtual unsigned int GetHeight() const noexcept = 0;
+		virtual uint32_t GetWidth() const noexcept = 0;
+		virtual uint32_t GetHeight() const noexcept = 0;
+
+		virtual uint32_t GetXClientPos() const noexcept = 0;
+		virtual uint32_t GetYClientPos() const noexcept = 0;
 
 		virtual Keyboard& GetKeyboard() noexcept = 0;
 		virtual Mouse& GetMouse() noexcept = 0;

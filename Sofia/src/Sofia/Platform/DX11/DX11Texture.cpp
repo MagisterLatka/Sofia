@@ -24,10 +24,14 @@ namespace Sofia {
 	DX11Texture2D::DX11Texture2D(const Texture2DProps& props)
 		: m_Props(props)
 	{
+		SOF_CORE_ASSERT(props.Width > 0u && props.Height > 0u, "Render target expect non-zero width and height");
+		SOF_CORE_ASSERT((uint32_t)props.Format > 0 && (uint32_t)props.Format <= (uint32_t)TextureFormat::Last, "Unknown texture format");
 		Init();
 	}
 	DX11Texture2D::DX11Texture2D(uint32_t width, uint32_t height, void* data, TextureFormat format)
 	{
+		SOF_CORE_ASSERT(width > 0u && height > 0u, "Render target expect non-zero width and height");
+		SOF_CORE_ASSERT((uint32_t)format > 0 && (uint32_t)format <= (uint32_t)TextureFormat::Last, "Unknown texture format");
 		m_Props.Width = width;
 		m_Props.Height = height;
 		m_Props.Format = format;
