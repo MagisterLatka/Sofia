@@ -12,43 +12,35 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	m_Shader = Sofia::Shader::Create(L"assets/shaders/basic.vert.cso", L"assets/shaders/basic.frag.cso");
-
-	float vertices[] = {
-		 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 1.0f, 1.0f
-	};
-	Sofia::BufferLayout layout = {
-		{ "Position", Sofia::BufferLayoutElementDataType::Float3 },
-		{ "Color", Sofia::BufferLayoutElementDataType::Float4 }
-	};
-	Ref<Sofia::VertexBuffer> vbo = Sofia::VertexBuffer::Create(layout, vertices, sizeof(vertices));
-	uint32_t indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-	Ref<Sofia::IndexBuffer> ibo = Sofia::IndexBuffer::Create(indices, sizeof(indices), Sofia::BufferUsage::Immutable);
-	m_InputLayout = Sofia::InputLayout::Create({ vbo }, m_Shader, ibo);
-
 	auto window = Sofia::Application::Get().GetWindow();
 	m_RenderTarget = Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight());
+	Sofia::Texture2DProps textureProps;
+	textureProps.Filepath = L"assets/textures/checkerboard.png";
+	textureProps.Sampling = Sofia::TextureSampling::Point;
+	m_Texture = Sofia::Texture2D::Create(textureProps);
+
+	float aspectRatio = (float)window->GetWidth() / (float)window->GetHeight();
+	Sofia::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
 }
 void ExampleLayer::OnDetach()
 {}
 void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 {
 	if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
+	{
 		m_RenderTarget->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		float aspectRatio = m_ViewportSize.x / m_ViewportSize.y;
+		Sofia::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
+	}
 
 	m_RenderTarget->Bind();
 	m_RenderTarget->Clear();
 
-	m_Shader->Bind();
-	m_InputLayout->Bind();
-
-	Sofia::RenderCommand::DrawIndexed(Sofia::RendererAPI::Topology::Triangles, 6u);
+	static float time = 0.0f;
+	time += (float)ts;
+	time = glm::mod(time, glm::two_pi<float>());
+	Sofia::Renderer2D::SubmitQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, time, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture);
+	Sofia::Renderer2D::Draw();
 
 	Sofia::Application::Get().GetWindow()->Clear();
 	Sofia::Application::Get().GetWindow()->BindToRender();

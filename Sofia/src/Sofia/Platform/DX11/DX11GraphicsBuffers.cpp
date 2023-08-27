@@ -22,8 +22,9 @@ namespace Sofia {
 	}
 
 	DX11VertexBuffer::DX11VertexBuffer(const BufferLayout& layout, void* data, uint32_t size, BufferUsage usage)
-		: m_Size(size), m_Data(Buffer::Copy(data, size)), m_Usage(usage), m_Layout(layout)
+		: m_Size(size), m_Usage(usage), m_Layout(layout)
 	{
+		if (data) m_Data = Buffer::Copy(data, size);
 		Create();
 	}
 	DX11VertexBuffer::DX11VertexBuffer(const BufferLayout& layout, const Buffer & buffer, BufferUsage usage)
@@ -52,7 +53,8 @@ namespace Sofia {
 			bufferDesc.Usage = GetUsage(instance->m_Usage);
 			D3D11_SUBRESOURCE_DATA data = { 0 };
 			data.pSysMem = instance->m_Data.Data;
-			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+				&instance->m_Buffer));
 		});
 	}
 
@@ -111,8 +113,9 @@ namespace Sofia {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	DX11IndexBuffer::DX11IndexBuffer(uint32_t* data, uint32_t size, BufferUsage usage)
-		: m_Size(size), m_Data(Buffer::Copy(data, size)), m_Usage(usage)
+		: m_Size(size), m_Usage(usage)
 	{
+		if (data) m_Data = Buffer::Copy(data, size);
 		Create();
 	}
 	DX11IndexBuffer::DX11IndexBuffer(const Buffer & buffer, BufferUsage usage)
@@ -141,7 +144,8 @@ namespace Sofia {
 			bufferDesc.Usage = GetUsage(instance->m_Usage);
 			D3D11_SUBRESOURCE_DATA data = { 0 };
 			data.pSysMem = instance->m_Data.Data;
-			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+				&instance->m_Buffer));
 		});
 	}
 
@@ -199,8 +203,9 @@ namespace Sofia {
 
 
 	DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, void* data, uint32_t size)
-		: m_Size(size), m_Data(Buffer::Copy(data, size)), m_Binding(binding)
+		: m_Size(size), m_Binding(binding)
 	{
+		if (data) m_Data = Buffer::Copy(data, size);
 		Create();
 	}
 	DX11ConstantBuffer::DX11ConstantBuffer(BufferShaderBinding binding, const Buffer & buffer)
@@ -234,7 +239,8 @@ namespace Sofia {
 			bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 			D3D11_SUBRESOURCE_DATA data = { 0 };
 			data.pSysMem = instance->m_Data.Data;
-			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+				&instance->m_Buffer));
 		});
 	}
 

@@ -115,6 +115,14 @@ namespace Sofia {
 		Renderer::Submit([instance]()
 		{
 			DX11Context::GetContextFromApplication()->GetContext()->OMSetRenderTargets(1u, instance->m_RenderTarget.GetAddressOf(), nullptr);
+			D3D11_VIEWPORT viewport;
+			viewport.Width = (float)instance->m_Width;
+			viewport.Height = (float)instance->m_Height;
+			viewport.TopLeftX = 0.0f;
+			viewport.TopLeftY = 0.0f;
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
+			DX11Context::GetContextFromApplication()->GetContext()->RSSetViewports(1u, &viewport);
 		});
 	}
 
