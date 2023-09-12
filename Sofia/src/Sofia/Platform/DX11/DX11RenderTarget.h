@@ -12,14 +12,14 @@ namespace Sofia {
 		DX11RenderTarget(uint32_t width, uint32_t height, RenderTargetFormat format);
 		virtual ~DX11RenderTarget() = default;
 
-		virtual void Bind() const noexcept override;
-		virtual void Clear(const glm::vec4& clearVal) noexcept override;
+		virtual void Clear(const glm::vec4& clearVal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), float depth = 0.0f, uint8_t stencil = 0u) noexcept override;
 		virtual void Resize(uint32_t width, uint32_t height, bool forceResize = false) override;
 
 		virtual void BindTexture(uint32_t slot = 0u) const noexcept override;
 		virtual void* GetRawTexturePointer() const noexcept override { return m_View.Get(); }
 	private:
 		ComPtr<ID3D11RenderTargetView> m_RenderTarget;
+		ComPtr<ID3D11DepthStencilView> m_DepthStencil;
 		ComPtr<ID3D11ShaderResourceView> m_View;
 		uint32_t m_Width = 0, m_Height = 0;
 		RenderTargetFormat m_Format;

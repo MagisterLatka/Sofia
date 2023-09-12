@@ -13,4 +13,4 @@
 #include <Sofia/Renderer/RenderCommand.h>
 #include <Sofia/Renderer/InputLayout.h>
 #include <Sofia/Renderer/Shader.h>
-#include <Sofia/Renderer/RenderTarget.h>
+#include <Sofia/Renderer/RenderPass.h>

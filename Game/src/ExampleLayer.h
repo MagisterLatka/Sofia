@@ -16,7 +16,7 @@ public:
 private:
 	bool OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e);
 private:
-	Ref<Sofia::RenderTarget> m_RenderTarget;
+	Ref<Sofia::RenderPass> m_RenderPass;
 	Ref<Sofia::Texture2D> m_Texture;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
