@@ -15,7 +15,7 @@ namespace Sofia {
 		virtual Ref<RenderTarget> GetDepthStencilTarget() const noexcept = 0;
 
 		virtual void Bind() const noexcept = 0;
-		virtual void Clear(const glm::vec4& clearVal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), float depth = 0.0f, uint8_t stencil = 0u) noexcept = 0;
+		virtual void Clear(const glm::vec4& clearVal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), float depth = 1.0f, uint8_t stencil = 0u) noexcept = 0;
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 
 		static Ref<RenderPass> Create();

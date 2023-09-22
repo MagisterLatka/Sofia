@@ -15,7 +15,7 @@ void ExampleLayer::OnAttach()
 	auto window = Sofia::Application::Get().GetWindow();
 	m_RenderPass = Sofia::RenderPass::Create();
 	m_RenderPass->SetRenderTarget(0u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
-	//m_RenderPass->SetDepthStencilTarget(Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::Depth32F)); TODO: not working
+	m_RenderPass->SetDepthStencilTarget(Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::Depth32F));
 
 	Sofia::Texture2DProps textureProps;
 	textureProps.Filepath = L"assets/textures/checkerboard.png";
@@ -23,7 +23,8 @@ void ExampleLayer::OnAttach()
 	m_Texture = Sofia::Texture2D::Create(textureProps);
 
 	float aspectRatio = (float)window->GetWidth() / (float)window->GetHeight();
-	Sofia::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
+	Sofia::Renderer2D::SetViewProjectionMatrix(glm::transpose(glm::orthoLH_ZO(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f)));
+	Sofia::RenderCommand::SetBlendOptions(true, Sofia::RendererAPI::BlendOption::SourceAlpha, Sofia::RendererAPI::BlendOption::SourceAlphaInvert);
 }
 void ExampleLayer::OnDetach()
 {}
@@ -33,7 +34,7 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	{
 		m_RenderPass->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		float aspectRatio = m_ViewportSize.x / m_ViewportSize.y;
-		Sofia::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
+		Sofia::Renderer2D::SetViewProjectionMatrix(glm::transpose(glm::orthoLH_ZO(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f)));
 	}
 
 	m_RenderPass->Bind();
@@ -43,6 +44,7 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	time += (float)ts;
 	time = glm::mod(time, glm::two_pi<float>());
 	Sofia::Renderer2D::SubmitQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, time, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture);
+	Sofia::Renderer2D::SubmitQuad({ 0.0f, 0.0f, m_ZPos }, { 1.0f, 1.0f }, 0.0f, { 1.0f, 0.0f, 0.0f, 0.5f });
 	Sofia::Renderer2D::Draw();
 
 	Sofia::Application::Get().GetWindow()->Clear();
@@ -57,6 +59,7 @@ void ExampleLayer::OnUIRender()
 	ImGui::Begin("Settings");
 
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
+	ImGui::SliderFloat("ZPos", &m_ZPos, -0.99f, 0.99f);
 
 	ImGui::End();
 

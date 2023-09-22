@@ -21,4 +21,6 @@ private:
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
 	glm::vec2 m_ViewportSize, m_ViewportPos;
+
+	float m_ZPos = 0.0f;
 };
