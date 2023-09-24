@@ -23,11 +23,12 @@ void ExampleLayer::OnAttach()
 	m_Texture = Sofia::Texture2D::Create(textureProps);
 
 	float aspectRatio = (float)window->GetWidth() / (float)window->GetHeight();
-	Sofia::Renderer2D::SetViewProjectionMatrix(glm::transpose(glm::orthoLH_ZO(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f)));
 	Sofia::RenderCommand::SetBlendOptions(true, Sofia::RendererAPI::BlendOption::SourceAlpha, Sofia::RendererAPI::BlendOption::SourceAlphaInvert);
 
 
 	m_Scene = Ref<Sofia::Scene>::Create("Game scene");
+	m_Camera = m_Scene->SetCameraEntity();
+	m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 
 	auto quad = m_Scene->CreateEntity("Quad");
 	quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
@@ -40,11 +41,10 @@ void ExampleLayer::OnDetach()
 {}
 void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 {
-	if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
+	if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && m_ViewportSize.x != m_RenderPass->GetWidth() && m_ViewportSize.y != m_RenderPass->GetHeight())
 	{
-		m_RenderPass->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		float aspectRatio = m_ViewportSize.x / m_ViewportSize.y;
-		Sofia::Renderer2D::SetViewProjectionMatrix(glm::transpose(glm::orthoLH_ZO(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f)));
+		m_RenderPass->Resize(m_ViewportSize.x, m_ViewportSize.y);
+		m_Scene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
 	}
 
 	m_RenderPass->Bind();
@@ -55,6 +55,9 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	time += (float)ts;
 	time = glm::mod(time, glm::two_pi<float>());
 	m_Quad.GetTransformComponent().Orientation.z = time;
+
+	m_Camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>()->SetSize(m_CameraSize);
+
 	m_Scene->OnUpdate(ts);
 
 	Sofia::Application::Get().GetWindow()->Clear();
@@ -71,6 +74,7 @@ void ExampleLayer::OnUIRender()
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
 	ImGui::Text("Draw calls: %d", Sofia::Renderer2D::GetStats().DrawCalls);
 	ImGui::Text("Quad count: %d", Sofia::Renderer2D::GetStats().QuadCount);
+	ImGui::DragFloat("Camera size", &m_CameraSize, 0.025f, 0.1f, 10.0f);
 
 	ImGui::End();
 

@@ -17,6 +17,9 @@ namespace Sofia {
 
 		virtual void BindTexture(uint32_t slot = 0u) const noexcept override;
 		virtual void* GetRawTexturePointer() const noexcept override { return m_View.Get(); }
+
+		virtual uint32_t GetWidth() const noexcept override { return m_Width; };
+		virtual uint32_t GetHeight() const noexcept override { return m_Height; };
 	private:
 		ComPtr<ID3D11RenderTargetView> m_RenderTarget;
 		ComPtr<ID3D11DepthStencilView> m_DepthStencil;
