@@ -31,7 +31,8 @@ project "Sofia"
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.imgui}",
-		"%{IncludeDirs.stb_image}"
+		"%{IncludeDirs.stb_image}",
+		"%{IncludeDirs.entt}"
 	}
 
 	links

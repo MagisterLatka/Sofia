@@ -21,6 +21,7 @@ namespace Sofia {
 		virtual void SetBlendOptions(bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation, BlendOption sourceAlphaBlend,
 			BlendOption destinationAlphaBlend, BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor) override;
 	private:
+		void InitShaders();
 		void SetTopology(ComPtr<ID3D11DeviceContext> context, Topology topology);
 		void RecreateDepthStencilState();
 	private:

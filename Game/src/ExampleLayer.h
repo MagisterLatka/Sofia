@@ -1,7 +1,5 @@
 #pragma once
 
-#include <d3d11.h>
-
 class ExampleLayer : public Sofia::Layer
 {
 public:
@@ -19,8 +17,9 @@ private:
 	Ref<Sofia::RenderPass> m_RenderPass;
 	Ref<Sofia::Texture2D> m_Texture;
 
+	Ref<Sofia::Scene> m_Scene;
+	Sofia::Entity m_Quad;
+
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
 	glm::vec2 m_ViewportSize, m_ViewportPos;
-
-	float m_ZPos = 0.0f;
 };

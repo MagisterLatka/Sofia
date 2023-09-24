@@ -25,6 +25,16 @@ void ExampleLayer::OnAttach()
 	float aspectRatio = (float)window->GetWidth() / (float)window->GetHeight();
 	Sofia::Renderer2D::SetViewProjectionMatrix(glm::transpose(glm::orthoLH_ZO(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f)));
 	Sofia::RenderCommand::SetBlendOptions(true, Sofia::RendererAPI::BlendOption::SourceAlpha, Sofia::RendererAPI::BlendOption::SourceAlphaInvert);
+
+
+	m_Scene = Ref<Sofia::Scene>::Create("Game scene");
+
+	auto quad = m_Scene->CreateEntity("Quad");
+	quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
+	quad.GetTransformComponent().Position = glm::vec3(0.0f, 0.0f, -0.1f);
+
+	m_Quad = m_Scene->CreateEntity("Textured quad");
+	m_Quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 }
 void ExampleLayer::OnDetach()
 {}
@@ -39,13 +49,13 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 
 	m_RenderPass->Bind();
 	m_RenderPass->Clear();
+	Sofia::Renderer2D::ResetStats();
 
 	static float time = 0.0f;
 	time += (float)ts;
 	time = glm::mod(time, glm::two_pi<float>());
-	Sofia::Renderer2D::SubmitQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, time, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture);
-	Sofia::Renderer2D::SubmitQuad({ 0.0f, 0.0f, m_ZPos }, { 1.0f, 1.0f }, 0.0f, { 1.0f, 0.0f, 0.0f, 0.5f });
-	Sofia::Renderer2D::Draw();
+	m_Quad.GetTransformComponent().Orientation.z = time;
+	m_Scene->OnUpdate(ts);
 
 	Sofia::Application::Get().GetWindow()->Clear();
 	Sofia::Application::Get().GetWindow()->BindToRender();
@@ -59,7 +69,8 @@ void ExampleLayer::OnUIRender()
 	ImGui::Begin("Settings");
 
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
-	ImGui::SliderFloat("ZPos", &m_ZPos, -0.99f, 0.99f);
+	ImGui::Text("Draw calls: %d", Sofia::Renderer2D::GetStats().DrawCalls);
+	ImGui::Text("Quad count: %d", Sofia::Renderer2D::GetStats().QuadCount);
 
 	ImGui::End();
 
