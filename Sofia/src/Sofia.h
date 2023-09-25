@@ -17,3 +17,4 @@
 
 #include <Sofia/Scene/Scene.h>
 #include <Sofia/Scene/Entity.h>
+#include <Sofia/Scene/ScriptableEntity.h>

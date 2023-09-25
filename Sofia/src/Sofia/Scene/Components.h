@@ -115,4 +115,26 @@ namespace Sofia {
 		CameraComponent& operator=(const CameraComponent& other) noexcept { Camera = other.Camera; return *this; }
 		CameraComponent& operator=(CameraComponent&& other) noexcept { Camera = other.Camera; return *this; }
 	};
+
+	class ScriptableEntity;
+	struct NativeScriptComponent
+	{
+		ScriptableEntity* Instance = nullptr;
+
+		ScriptableEntity* (*InstantiateScript)();
+		void (*DestroyScript)(NativeScriptComponent*);
+
+		template<typename T>
+		void Bind()
+		{
+			static_assert(std::is_base_of<ScriptableEntity, T>::value, "T must be derrived from ScriptableEntity");
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+		}
+		template<typename T>
+		T* GetInstance()
+		{
+			return dynamic_cast<T*>(Instance);
+		}
+	};
 }

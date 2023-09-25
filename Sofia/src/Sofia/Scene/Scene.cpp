@@ -1,8 +1,8 @@
 #include <pch.h>
 #include "Scene.h"
 
+#include "Sofia/Scene/ScriptableEntity.h"
 #include "Sofia/Scene/Components.h"
-#include "Sofia/Scene/Entity.h"
 #include "Sofia/Renderer/Renderer2D.h"
 
 namespace Sofia {
@@ -50,9 +50,33 @@ namespace Sofia {
 		return entity;
 	}
 
+	void Scene::OnEvent(Event& e)
+	{
+		m_Registry.view<NativeScriptComponent>().each([&](entt::entity entity, NativeScriptComponent& nsc)
+		{
+			if (!nsc.Instance)
+			{
+				nsc.Instance = nsc.InstantiateScript();
+				nsc.Instance->m_Entity = Entity(entity, this);
+				nsc.Instance->OnCreate();
+			}
+			nsc.Instance->OnEvent(e);
+		});
+	}
 	void Scene::OnUpdate(Timestep ts)
 	{
-		m_Registry.view<TransformComponent>().each([=](entt::entity entity, TransformComponent& tc)
+		m_Registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
+		{
+			if (!nsc.Instance)
+			{
+				nsc.Instance = nsc.InstantiateScript();
+				nsc.Instance->m_Entity = Entity(entity, this);
+				nsc.Instance->OnCreate();
+			}
+			nsc.Instance->OnUpdate(ts);
+		});
+
+		m_Registry.view<TransformComponent>().each([](entt::entity entity, TransformComponent& tc)
 		{
 			tc.Orientation = glm::mod(tc.Orientation, glm::two_pi<float>());
 			glm::quat rotation = glm::quat(tc.Orientation);
@@ -62,8 +86,7 @@ namespace Sofia {
 		if (m_Camera != entt::null)
 		{
 			auto camera = m_Registry.get<CameraComponent>(m_Camera).Camera.As<OrthographicCamera>();
-			auto& transform = m_Registry.get<TransformComponent>(m_Camera).Transform;
-			Renderer2D::SetViewProjectionMatrix(camera->GetProjection() * glm::inverse(transform));
+			Renderer2D::SetViewProjectionMatrix(camera->GetProjection() * Camera::GetCameraViewMatrix(m_Registry.get<TransformComponent>(m_Camera).Transform));
 
 			auto group = m_Registry.group<SpriteComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)
@@ -77,5 +100,30 @@ namespace Sofia {
 	void Scene::OnViewportResize(uint32_t width, uint32_t height) noexcept
 	{
 		m_ViewportSize = { width, height };
+
+		m_Registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
+		{
+			if (!nsc.Instance)
+			{
+				nsc.Instance = nsc.InstantiateScript();
+				nsc.Instance->m_Entity = Entity(entity, this);
+				nsc.Instance->OnCreate();
+			}
+			nsc.Instance->OnViewportResize(width, height);
+		});
 	}
+
+	template<>
+	void Scene::OnComponentAdd<TagComponent>(Entity entity, TagComponent& component) {}
+	template<>
+	void Scene::OnComponentAdd<TransformComponent>(Entity entity, TransformComponent& component) {}
+	template<>
+	void Scene::OnComponentAdd<SpriteComponent>(Entity entity, SpriteComponent& component) {}
+	template<>
+	void Scene::OnComponentAdd<CameraComponent>(Entity entity, CameraComponent& component)
+	{
+		component.Camera->SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+	}
+	template<>
+	void Scene::OnComponentAdd<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 }

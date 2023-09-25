@@ -5,6 +5,22 @@
 
 namespace Sofia {
 
+	glm::mat4 Camera::GetCameraViewMatrix(const glm::mat4& cameraTransform)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return glm::mat4(1.0f);
+		case RendererAPI::API::OpenGL:
+		case RendererAPI::API::Vulkan:
+			return glm::inverse(cameraTransform);
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:
+			return glm::transpose(glm::inverse(cameraTransform));
+		}
+		SOF_CORE_THROW_INFO("Unknown API");
+		return glm::mat4(1.0f);
+	}
+
 	OrthographicCamera::OrthographicCamera(float width, float height, float nearClip, float farClip)
 		: m_AspectRatio(width / height), m_NearClip(nearClip), m_FarClip(farClip)
 	{
