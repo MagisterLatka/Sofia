@@ -7,3 +7,6 @@
 [submodule "Sofia/vendor/ImGui"]
 	path = Sofia/vendor/ImGui
 	url = https://github.com/MagisterLatka/imgui
+[submodule "Sofia/vendor/yaml-cpp"]
+	path = Sofia/vendor/yaml-cpp
+	url = https://github.com/MagisterLatka/yaml-cpp

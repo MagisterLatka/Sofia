@@ -13,6 +13,10 @@ public:
 	virtual void OnEvent(Sofia::Event& e) override;
 private:
 	bool OnKeyPressed(Sofia::KeyPressedEvent& e);
+
+	void NewScene();
+	void OpenScene();
+	void SaveScene();
 private:
 	Ref<Sofia::RenderPass> m_RenderPass;
 	Ref<Sofia::Texture2D> m_Texture;

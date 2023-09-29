@@ -42,7 +42,7 @@ namespace Sofia {
 	Entity Scene::SetCameraEntity()
 	{
 		auto entity = CreateEntity("Camera");
-		entity.AddComponent<CameraComponent>(Ref<OrthographicCamera>::Create(16.0f / 9.0f));
+		entity.AddComponent<CameraComponent>(Ref<OrthographicCamera>::Create(16.0f / 9.0f, -1.0f, 1.0f));
 		m_Camera = entity;
 		return entity;
 	}

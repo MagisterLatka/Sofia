@@ -32,7 +32,8 @@ project "Sofia"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.imgui}",
 		"%{IncludeDirs.stb_image}",
-		"%{IncludeDirs.entt}"
+		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.yaml}"
 	}
 
 	links
@@ -40,7 +41,8 @@ project "Sofia"
 		"ImGui",
 		"d3d11.lib",
 		"D3DCompiler.lib",
-		"dxguid.lib"
+		"dxguid.lib",
+		"yaml-cpp"
 	}
 	
 	buildoptions

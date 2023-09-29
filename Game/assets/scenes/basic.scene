@@ -1,0 +1,37 @@
+Scene: Game scene
+Scene ID: 1
+Scene camera: 1
+Entities:
+  - Entity: 3
+    Tag component:
+      Tag: Textured quad
+    Transform component:
+      Position: [0, 0, 0]
+      Orientation: [0, 0, 0]
+      Size: [1, 1, 1]
+    Sprite component:
+      Color: [1, 1, 1, 1]
+      Tilling factor: 1
+  - Entity: 2
+    Tag component:
+      Tag: Quad
+    Transform component:
+      Position: [0, 0, -0.100000001]
+      Orientation: [0, 0, 0]
+      Size: [1, 1, 1]
+    Sprite component:
+      Color: [1, 0, 0, 0.5]
+      Tilling factor: 1
+  - Entity: 1
+    Tag component:
+      Tag: Camera
+    Transform component:
+      Position: [0, 0, 0]
+      Orientation: [0, 0, 0]
+      Size: [1, 1, 1]
+    Camera component:
+      Type: Orthographic
+      Size: 2
+      Aspect ratio: 1.4373523
+      Near clip: -1
+      Far clip: 1

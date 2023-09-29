@@ -198,12 +198,55 @@ void ExampleLayer::OnEvent(Sofia::Event& e)
 
 bool ExampleLayer::OnKeyPressed(Sofia::KeyPressedEvent& e)
 {
+	bool shift = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftShift) || Sofia::Input::IsKeyPressed(Sofia::KeyCode::RightShift);
+	bool control = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftControl) || Sofia::Input::IsKeyPressed(Sofia::KeyCode::RightControl);
 	switch (e.GetKeyCode())
 	{
-	case Sofia::KeyCode::Q: m_GuizmoType = -1; break;
-	case Sofia::KeyCode::W: m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE; break;
-	case Sofia::KeyCode::E: m_GuizmoType = ImGuizmo::OPERATION::ROTATE; break;
-	case Sofia::KeyCode::R: m_GuizmoType = ImGuizmo::OPERATION::SCALE; break;
+		case Sofia::KeyCode::Q: m_GuizmoType = -1; break;
+		case Sofia::KeyCode::W: m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE; break;
+		case Sofia::KeyCode::E: m_GuizmoType = ImGuizmo::OPERATION::ROTATE; break;
+		case Sofia::KeyCode::R: m_GuizmoType = ImGuizmo::OPERATION::SCALE; break;
+		case Sofia::KeyCode::N:
+			if (control)
+				NewScene();
+			break;
+		case Sofia::KeyCode::O:
+			if (control)
+				OpenScene();
+			break;
+		case Sofia::KeyCode::S:
+			if (control && shift)
+				SaveScene();
+			break;
 	}
 	return false;
+}
+
+void ExampleLayer::NewScene()
+{
+	m_Scene = Ref<Sofia::Scene>::Create();
+	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel->SetScene(m_Scene);
+}
+void ExampleLayer::OpenScene()
+{
+	std::filesystem::path filepath = Sofia::FileDialogs::WindowsOpen(L"Saba scene (*.scene)\0*.scene\0");
+	if (filepath.empty())
+		return;
+
+	m_Scene = Ref<Sofia::Scene>::Create();
+	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel->SetScene(m_Scene);
+
+	Sofia::SceneSerializer serializer(m_Scene);
+	serializer.Deserialize(filepath);
+}
+void ExampleLayer::SaveScene()
+{
+	std::filesystem::path filepath = Sofia::FileDialogs::WindowsSave(L"Saba scene (*.scene)\0*.scene\0");
+	if (filepath.empty())
+		return;
+
+	Sofia::SceneSerializer serializer(m_Scene);
+	serializer.Serialize(filepath);
 }

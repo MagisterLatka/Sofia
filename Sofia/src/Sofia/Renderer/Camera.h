@@ -14,7 +14,6 @@ namespace Sofia {
 		virtual void SetViewportSize(uint32_t width, uint32_t height) = 0;
 
 		const glm::mat4& GetProjection() const noexcept { return m_Projection; }
-		static glm::mat4 GetCameraViewMatrix(const glm::mat4& cameraTransform);
 	protected:
 		glm::mat4 m_Projection = glm::mat4(1.0f);
 	};
@@ -25,8 +24,8 @@ namespace Sofia {
 	public:
 		OrthographicCamera() = default;
 		OrthographicCamera(const glm::mat4& projection) noexcept : Camera(projection) {}
-		OrthographicCamera(float width, float height, float nearClip = -1.0f, float farClip = 1.0f);
-		OrthographicCamera(float aspectRatio, float nearClip = -1.0f, float farClip = 1.0f);
+		OrthographicCamera(float width, float height, float nearClip, float farClip);
+		OrthographicCamera(float aspectRatio, float nearClip, float farClip);
 		~OrthographicCamera() = default;
 
 		virtual void SetViewportSize(uint32_t width, uint32_t height) override;
