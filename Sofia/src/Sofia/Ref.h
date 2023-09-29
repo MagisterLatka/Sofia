@@ -18,7 +18,7 @@ namespace Sofia {
 	template<typename T>
 	class Ref
 	{
-		static_assert(std::is_base_of<RefCounted, T>::value);
+		static_assert(std::is_base_of_v<RefCounted, T>);
 	public:
 		Ref() noexcept : m_Instance(nullptr) {}
 		Ref(std::nullptr_t) noexcept : m_Instance(nullptr) {}
@@ -35,14 +35,16 @@ namespace Sofia {
 		template<typename T2>
 		Ref(const Ref<T2>& other) noexcept
 		{
-			static_assert(std::is_base_of<RefCounted, T2>::value);
+			static_assert(std::is_base_of_v<RefCounted, T2>);
+			static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
 			m_Instance = (T*)other.m_Instance;
 			Increment();
 		}
 		template<typename T2>
 		Ref(Ref<T2>&& other) noexcept
 		{
-			static_assert(std::is_base_of<RefCounted, T2>::value);
+			static_assert(std::is_base_of_v<RefCounted, T2>);
+			static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
 			m_Instance = (T*)other.m_Instance;
 			other.m_Instance = nullptr;
 		}
@@ -73,7 +75,8 @@ namespace Sofia {
 		template<typename T2>
 		Ref& operator=(const Ref<T2>& other) noexcept
 		{
-			static_assert(std::is_base_of<RefCounted, T2>::value);
+			static_assert(std::is_base_of_v<RefCounted, T2>);
+			static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
 			other.Increment();
 			Decrement();
 
@@ -83,7 +86,8 @@ namespace Sofia {
 		template<typename T2>
 		Ref& operator=(Ref<T2>&& other) noexcept
 		{
-			static_assert(std::is_base_of<RefCounted, T2>::value);
+			static_assert(std::is_base_of_v<RefCounted, T2>);
+			static_assert(std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>);
 			Decrement();
 
 			m_Instance = (T*)other.m_Instance;
@@ -113,7 +117,12 @@ namespace Sofia {
 		}
 
 		template<typename T2>
-		Ref<T2> As() noexcept { static_assert(std::is_base_of<RefCounted, T2>::value); return Ref<T2>(*this); }
+		static constexpr bool IsConvertible() noexcept { return std::is_convertible_v<T2*, T*> || std::is_convertible_v<T*, T2*>; }
+		template<typename T2>
+		bool CanConvert() noexcept { return dynamic_cast<T2*>(m_Instance) != nullptr; }
+
+		template<typename T2>
+		Ref<T2> As() noexcept { return Ref<T2>(*this); }
 
 		template<typename ...Args>
 		static Ref<T> Create(Args&& ...args) noexcept

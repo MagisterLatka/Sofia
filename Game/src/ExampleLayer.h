@@ -17,10 +17,11 @@ private:
 	Ref<Sofia::RenderPass> m_RenderPass;
 	Ref<Sofia::Texture2D> m_Texture;
 
+	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
 	Ref<Sofia::Scene> m_Scene;
 	Sofia::Entity m_Quad;
 	Sofia::Entity m_Camera;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
-	glm::ivec2 m_ViewportSize, m_ViewportPos;
+	glm::ivec2 m_ViewportSize = { 0, 0 }, m_ViewportPos = { 0, 0 };
 };

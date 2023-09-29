@@ -107,7 +107,7 @@ namespace Sofia {
 	{
 		Ref<Sofia::Camera> Camera;
 
-		CameraComponent() = delete;
+		CameraComponent() = default;
 		CameraComponent(Ref<Sofia::Camera> camera) noexcept : Camera(camera) {}
 		CameraComponent(const CameraComponent& other) noexcept : Camera(other.Camera) {}
 		CameraComponent(CameraComponent&& other) noexcept : Camera(other.Camera) {}

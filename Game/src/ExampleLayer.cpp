@@ -83,6 +83,7 @@ void ExampleLayer::OnAttach()
 	m_Scene = Ref<Sofia::Scene>::Create("Game scene");
 	m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 	m_Camera = m_Scene->SetCameraEntity();
+	m_Camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>()->SetSize(2.0f);
 	m_Camera.AddComponent<Sofia::NativeScriptComponent>().Bind<CameraController>();
 
 	auto quad = m_Scene->CreateEntity("Quad");
@@ -91,12 +92,19 @@ void ExampleLayer::OnAttach()
 
 	m_Quad = m_Scene->CreateEntity("Textured quad");
 	m_Quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
+
+	m_SceneHierarchyPanel = CreateScope<Sofia::SceneHierarchyPanel>(m_Scene);
 }
 void ExampleLayer::OnDetach()
-{}
+{
+	m_SceneHierarchyPanel.reset();
+	m_Scene.Reset();
+	m_RenderPass.Reset();
+	m_Texture.Reset();
+}
 void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 {
-	if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && m_ViewportSize.x != m_RenderPass->GetWidth() && m_ViewportSize.y != m_RenderPass->GetHeight())
+	if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (m_ViewportSize.x != m_RenderPass->GetWidth() || m_ViewportSize.y != m_RenderPass->GetHeight()))
 	{
 		m_RenderPass->Resize(m_ViewportSize.x, m_ViewportSize.y);
 		m_Scene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
@@ -127,10 +135,6 @@ void ExampleLayer::OnUIRender()
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
 	ImGui::Text("Draw calls: %d", Sofia::Renderer2D::GetStats().DrawCalls);
 	ImGui::Text("Quad count: %d", Sofia::Renderer2D::GetStats().QuadCount);
-	auto camera = m_Camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>();
-	float cameraSize = camera->GetSize();
-	if (ImGui::DragFloat("Camera size", &cameraSize, 0.025f, 0.1f, 10.0f))
-		camera->SetSize(cameraSize);
 
 	ImGui::End();
 
@@ -155,6 +159,8 @@ void ExampleLayer::OnUIRender()
 
 	ImGui::End();
 	ImGui::PopStyleVar();
+
+	m_SceneHierarchyPanel->OnUIRender();
 }
 void ExampleLayer::OnEvent(Sofia::Event& e)
 {
