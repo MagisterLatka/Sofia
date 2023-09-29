@@ -10,6 +10,8 @@
 #include "Sofia/Platform/Win32/WindowsWindow.h"
 #include "Sofia/Platform/DX11/DX11Context.h"
 
+#include "Sofia/ImGui/ImGuizmo.h"
+
 namespace Sofia {
 
 	static void SetDarkThemeColors()
@@ -144,6 +146,7 @@ namespace Sofia {
 			case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); break;
 		}
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::End()

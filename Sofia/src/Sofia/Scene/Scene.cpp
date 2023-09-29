@@ -95,7 +95,7 @@ namespace Sofia {
 		if (m_Camera != entt::null)
 		{
 			auto camera = m_Registry.get<CameraComponent>(m_Camera).Camera.As<OrthographicCamera>();
-			Renderer2D::SetViewProjectionMatrix(camera->GetProjection() * Camera::GetCameraViewMatrix(m_Registry.get<TransformComponent>(m_Camera).Transform));
+			Renderer2D::SetViewProjectionMatrix(camera->GetProjection() * glm::inverse(m_Registry.get<TransformComponent>(m_Camera).Transform));
 
 			auto group = m_Registry.group<SpriteComponent>(entt::get<TransformComponent>);
 			for (auto entity : group)

@@ -12,7 +12,7 @@ public:
 	virtual void OnUIRender() override;
 	virtual void OnEvent(Sofia::Event& e) override;
 private:
-	bool OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e);
+	bool OnKeyPressed(Sofia::KeyPressedEvent& e);
 private:
 	Ref<Sofia::RenderPass> m_RenderPass;
 	Ref<Sofia::Texture2D> m_Texture;
@@ -24,4 +24,5 @@ private:
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
 	glm::ivec2 m_ViewportSize = { 0, 0 }, m_ViewportPos = { 0, 0 };
+	int m_GuizmoType = -1;
 };

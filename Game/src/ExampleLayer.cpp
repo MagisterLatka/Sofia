@@ -2,7 +2,8 @@
 #include <Sofia.h>
 #include "ExampleLayer.h"
 
-#include <imgui.h>
+#include <Sofia/ImGui/ImGui.h>
+#include <Sofia/ImGui/ImGuizmo.h>
 
 class CameraController : public Sofia::ScriptableEntity
 {
@@ -114,11 +115,6 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	m_RenderPass->Clear();
 	Sofia::Renderer2D::ResetStats();
 
-	static float time = 0.0f;
-	time += (float)ts;
-	time = glm::mod(time, glm::two_pi<float>());
-	m_Quad.GetTransformComponent().Orientation.z = time;
-
 	m_Scene->OnUpdate(ts);
 
 	Sofia::Application::Get().GetWindow()->Clear();
@@ -157,6 +153,36 @@ void ExampleLayer::OnUIRender()
 
 	ImGui::Image(m_RenderPass->GetRenderTarget()->GetRawTexturePointer(), viewportSize);
 
+	if (Sofia::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GuizmoType != -1 && selected) 
+	{
+		bool snap = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftControl);
+		float snapValue = m_GuizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : m_GuizmoType == ImGuizmo::OPERATION::SCALE ? 0.5f : 0.1f;
+		float snapValues[3] = { snapValue, snapValue, snapValue };
+
+		ImGuizmo::SetOrthographic(true);
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+
+		const glm::mat4 viewMat = glm::inverse(m_Camera.GetTransform());
+		const glm::mat4& projMat = m_Camera.GetComponent<Sofia::CameraComponent>().Camera->GetProjection();
+		glm::mat4 transform = selected.GetTransform();
+
+		ImGuizmo::Manipulate(glm::value_ptr(viewMat), glm::value_ptr(projMat), (ImGuizmo::OPERATION)m_GuizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr,
+			snap ? snapValues : nullptr);
+
+		if (ImGuizmo::IsUsing())
+		{
+			auto& tc = selected.GetTransformComponent();
+			glm::vec3 pos, size, skew;
+			glm::quat orientation;
+			glm::vec4 perspective;
+			glm::decompose(transform, size, orientation, pos, skew, perspective);
+			tc.Position = pos;
+			tc.Orientation += glm::eulerAngles(orientation) - tc.Orientation;
+			tc.Size = size;
+		}
+	}
+
 	ImGui::End();
 	ImGui::PopStyleVar();
 
@@ -165,12 +191,19 @@ void ExampleLayer::OnUIRender()
 void ExampleLayer::OnEvent(Sofia::Event& e)
 {
 	Sofia::Dispatcher dispatcher(e);
-	dispatcher.Dispatch<Sofia::MouseButtonPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
+	dispatcher.Dispatch<Sofia::KeyPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
 
 	m_Scene->OnEvent(e);
 }
 
-bool ExampleLayer::OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e)
+bool ExampleLayer::OnKeyPressed(Sofia::KeyPressedEvent& e)
 {
+	switch (e.GetKeyCode())
+	{
+	case Sofia::KeyCode::Q: m_GuizmoType = -1; break;
+	case Sofia::KeyCode::W: m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE; break;
+	case Sofia::KeyCode::E: m_GuizmoType = ImGuizmo::OPERATION::ROTATE; break;
+	case Sofia::KeyCode::R: m_GuizmoType = ImGuizmo::OPERATION::SCALE; break;
+	}
 	return false;
 }
