@@ -7,7 +7,7 @@ namespace Sofia {
 
 	enum struct BufferLayoutElementDataType
 	{
-		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4
+		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, UInt, UInt2, UInt3, UInt4
 	};
 	inline uint32_t BufferLayoutElementDataTypeSize(BufferLayoutElementDataType type)
 	{
@@ -23,6 +23,10 @@ namespace Sofia {
 			case BufferLayoutElementDataType::Int2:		return 2 * sizeof(int);
 			case BufferLayoutElementDataType::Int3:		return 3 * sizeof(int);
 			case BufferLayoutElementDataType::Int4:		return 4 * sizeof(int);
+			case BufferLayoutElementDataType::UInt:		return 1 * sizeof(uint32_t);
+			case BufferLayoutElementDataType::UInt2:	return 2 * sizeof(uint32_t);
+			case BufferLayoutElementDataType::UInt3:	return 3 * sizeof(uint32_t);
+			case BufferLayoutElementDataType::UInt4:	return 4 * sizeof(uint32_t);
 		}
 
 		SOF_CORE_THROW_INFO("Unknown buffer layout element data type");
@@ -55,6 +59,10 @@ namespace Sofia {
 				case BufferLayoutElementDataType::Int2:		return 2;
 				case BufferLayoutElementDataType::Int3:		return 3;
 				case BufferLayoutElementDataType::Int4:		return 4;
+				case BufferLayoutElementDataType::UInt:		return 1;
+				case BufferLayoutElementDataType::UInt2:	return 2;
+				case BufferLayoutElementDataType::UInt3:	return 3;
+				case BufferLayoutElementDataType::UInt4:	return 4;
 			}
 
 			SOF_CORE_THROW_INFO("Unknown buffer layout element data type");

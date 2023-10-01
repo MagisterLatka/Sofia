@@ -82,13 +82,14 @@ namespace Sofia {
 				int tid : TID;
 				float tillingFactor : TillingFactor;
 				float4 pos : SV_Position;
+				uint id : ID;
 			};
 			cbuffer ConstBuf
 			{
 				matrix<float, 4, 4> u_ViewProjMat;
 			}
 
-			VSOut main(float4 pos : Position, float4 color : Color, float2 uv : UV, int tid : TID, float tillingFactor : TillingFactor)
+			VSOut main(float4 pos : Position, float4 color : Color, float2 uv : UV, int tid : TID, float tillingFactor : TillingFactor, uint id : EntityID)
 			{
 				VSOut output;
 				output.color = color;
@@ -96,6 +97,7 @@ namespace Sofia {
 				output.tid = tid;
 				output.tillingFactor = tillingFactor;
 				output.pos = mul(pos, u_ViewProjMat);
+				output.id = id;
 				return output;
 			}
 		)";
@@ -106,6 +108,13 @@ namespace Sofia {
 				float2 uv : UV;
 				int tid : TID;
 				float tillingFactor : TillingFactor;
+				float4 pos : SV_Position;
+				uint id : ID;
+			};
+			struct FSOut
+			{
+				float4 color : SV_Target0;
+				uint id : SV_Target1;
 			};
 
 			Texture2D<float4> u_Textures[16];
@@ -132,9 +141,11 @@ namespace Sofia {
 				return output;
 			}
 
-			float4 main(FSIn input) : SV_Target
+			FSOut main(FSIn input)
 			{
-				float4 output = input.color * GetDataFromTexture(input.tid, input.uv, input.tillingFactor);
+				FSOut output;
+				output.color = input.color * GetDataFromTexture(input.tid, input.uv, input.tillingFactor);
+				output.id = input.id;
 				return output;
 			}
 		)";

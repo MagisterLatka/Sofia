@@ -70,6 +70,7 @@ void ExampleLayer::OnAttach()
 	auto window = Sofia::Application::Get().GetWindow();
 	m_RenderPass = Sofia::RenderPass::Create();
 	m_RenderPass->SetRenderTarget(0u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
+	m_RenderPass->SetRenderTarget(1u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::R32_UINT));
 	m_RenderPass->SetDepthStencilTarget(Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::Depth32F));
 
 	Sofia::Texture2DProps textureProps;
@@ -89,7 +90,7 @@ void ExampleLayer::OnAttach()
 
 	auto quad = m_Scene->CreateEntity("Quad");
 	quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 0.0f, 0.0f, 0.5f));
-	quad.GetTransformComponent().Position = glm::vec3(0.0f, 0.0f, -0.1f);
+	quad.GetTransformComponent().Position = glm::vec3(0.25f, 0.25f, -0.1f);
 
 	m_Quad = m_Scene->CreateEntity("Textured quad");
 	m_Quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
@@ -117,6 +118,19 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 
 	m_Scene->OnUpdate(ts);
 
+	glm::vec2 mousePos = Sofia::Input::GetMousePos();
+	mousePos.x -= m_ViewportPos.x;
+	mousePos.y -= m_ViewportPos.y;
+	if (mousePos.x > 0.0f && mousePos.y >= 0.0f && mousePos.x < m_ViewportSize.x && mousePos.y < m_ViewportSize.y)
+	{
+		static uint32_t data = 0;
+		m_RenderPass->GetRenderTarget(1u)->ReadPixel(&data, (uint32_t)mousePos.x, (uint32_t)mousePos.y);
+		Sofia::Renderer::Submit([this]()
+		{
+			m_HoveredEntity = data == 0 || data == -1 ? Sofia::Entity() : Sofia::Entity((entt::entity)data, m_Scene.Raw());
+		});
+	}
+
 	Sofia::Application::Get().GetWindow()->Clear();
 	Sofia::Application::Get().GetWindow()->BindToRender();
 
@@ -131,6 +145,10 @@ void ExampleLayer::OnUIRender()
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
 	ImGui::Text("Draw calls: %d", Sofia::Renderer2D::GetStats().DrawCalls);
 	ImGui::Text("Quad count: %d", Sofia::Renderer2D::GetStats().QuadCount);
+	std::string name = "None";
+	if (m_HoveredEntity)
+		name = m_HoveredEntity.GetComponent<Sofia::TagComponent>().Tag;
+	ImGui::Text("Hovered entity: %s", name.c_str());
 
 	ImGui::End();
 
@@ -192,20 +210,43 @@ void ExampleLayer::OnEvent(Sofia::Event& e)
 {
 	Sofia::Dispatcher dispatcher(e);
 	dispatcher.Dispatch<Sofia::KeyPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
+	dispatcher.Dispatch<Sofia::MouseButtonPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnMouseButttonPressed));
 
-	m_Scene->OnEvent(e);
+	if (m_GuizmoType == -1)
+		m_Scene->OnEvent(e);
 }
-
+bool ExampleLayer::OnMouseButttonPressed(Sofia::MouseButtonPressedEvent& e)
+{
+	switch (e.GetButton())
+	{
+	case Sofia::MouseCode::ButtonLeft:
+		if (m_ViewportHovered && !ImGuizmo::IsOver())
+			m_SceneHierarchyPanel->SetSelected(m_HoveredEntity);
+	}
+	return false;
+}
 bool ExampleLayer::OnKeyPressed(Sofia::KeyPressedEvent& e)
 {
 	bool shift = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftShift) || Sofia::Input::IsKeyPressed(Sofia::KeyCode::RightShift);
 	bool control = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftControl) || Sofia::Input::IsKeyPressed(Sofia::KeyCode::RightControl);
 	switch (e.GetKeyCode())
 	{
-		case Sofia::KeyCode::Q: m_GuizmoType = -1; break;
-		case Sofia::KeyCode::W: m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE; break;
-		case Sofia::KeyCode::E: m_GuizmoType = ImGuizmo::OPERATION::ROTATE; break;
-		case Sofia::KeyCode::R: m_GuizmoType = ImGuizmo::OPERATION::SCALE; break;
+		case Sofia::KeyCode::Q:
+			if (!ImGuizmo::IsUsing())
+				m_GuizmoType = -1; 
+			break;
+		case Sofia::KeyCode::W:
+			if (!ImGuizmo::IsUsing())
+				m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			break;
+		case Sofia::KeyCode::E:
+			if (!ImGuizmo::IsUsing())
+				m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
+			break;
+		case Sofia::KeyCode::R:
+			if (!ImGuizmo::IsUsing())
+				m_GuizmoType = ImGuizmo::OPERATION::SCALE;
+			break;
 		case Sofia::KeyCode::N:
 			if (control)
 				NewScene();

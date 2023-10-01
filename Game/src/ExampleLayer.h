@@ -12,6 +12,7 @@ public:
 	virtual void OnUIRender() override;
 	virtual void OnEvent(Sofia::Event& e) override;
 private:
+	bool OnMouseButttonPressed(Sofia::MouseButtonPressedEvent& e);
 	bool OnKeyPressed(Sofia::KeyPressedEvent& e);
 
 	void NewScene();
@@ -23,6 +24,7 @@ private:
 
 	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
 	Ref<Sofia::Scene> m_Scene;
+	Sofia::Entity m_HoveredEntity;
 	Sofia::Entity m_Quad;
 	Sofia::Entity m_Camera;
 

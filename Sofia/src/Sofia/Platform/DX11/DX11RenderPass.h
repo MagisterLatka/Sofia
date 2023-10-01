@@ -21,7 +21,7 @@ namespace Sofia {
 		virtual Ref<RenderTarget> GetDepthStencilTarget() const noexcept override { return m_DepthStencilTarget; }
 
 		virtual void Bind() const noexcept override;
-		virtual void Clear(const glm::vec4& clearVal, float depth, uint8_t stencil) noexcept override;
+		virtual void Clear() noexcept override;
 		virtual void Resize(uint32_t width, uint32_t height) override;
 
 		virtual uint32_t GetWidth() const noexcept override { return m_Width; }

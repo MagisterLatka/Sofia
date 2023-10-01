@@ -20,6 +20,10 @@ namespace Sofia {
 			case BufferLayoutElementDataType::Int2:		return DXGI_FORMAT_R32G32_SINT;
 			case BufferLayoutElementDataType::Int3:		return DXGI_FORMAT_R32G32B32_SINT;
 			case BufferLayoutElementDataType::Int4:		return DXGI_FORMAT_R32G32B32A32_SINT;
+			case BufferLayoutElementDataType::UInt:		return DXGI_FORMAT_R32_UINT;
+			case BufferLayoutElementDataType::UInt2:	return DXGI_FORMAT_R32G32_UINT;
+			case BufferLayoutElementDataType::UInt3:	return DXGI_FORMAT_R32G32B32_UINT;
+			case BufferLayoutElementDataType::UInt4:	return DXGI_FORMAT_R32G32B32A32_UINT;
 		}
 		SOF_CORE_THROW_INFO("Unknown buffer layout element data type");
 		return DXGI_FORMAT_UNKNOWN;
