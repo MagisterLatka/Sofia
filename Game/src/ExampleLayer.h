@@ -1,5 +1,8 @@
 #pragma once
 
+#include <Sofia/Panels/SceneHierarchyPanel.h>
+#include <Sofia/Panels/ContentBrowserPanel.h>
+
 class ExampleLayer : public Sofia::Layer
 {
 public:
@@ -17,12 +20,14 @@ private:
 
 	void NewScene();
 	void OpenScene();
+	void OpenScene(const std::filesystem::path& path);
 	void SaveScene();
 private:
 	Ref<Sofia::RenderPass> m_RenderPass;
 	Ref<Sofia::Texture2D> m_Texture;
 
 	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
+	Scope<Sofia::ContentBrowserPanel> m_ContentBrowserPanel;
 	Ref<Sofia::Scene> m_Scene;
 	Sofia::Entity m_HoveredEntity;
 	Sofia::Entity m_Quad;
