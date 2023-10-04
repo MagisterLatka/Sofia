@@ -172,6 +172,15 @@ namespace Sofia {
 		m_DepthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 
 		RecreateDepthStencilState();
+
+		m_BlendDesc.AlphaToCoverageEnable = false;
+		m_BlendDesc.IndependentBlendEnable = true;
+	}
+	void DX11RendererAPI::Shutdown()
+	{
+		m_DepthStencilState.Reset();
+		m_RasterizerState.Reset();
+		m_BlendState.Reset();
 	}
 
 	void DX11RendererAPI::Draw(Topology topology, uint32_t verticesCount)
@@ -262,23 +271,25 @@ namespace Sofia {
 		rasterizerDesc.ScissorEnable = false;
 		rasterizerDesc.MultisampleEnable = false;
 		rasterizerDesc.AntialiasedLineEnable = false;
-	}
-	void DX11RendererAPI::SetBlendOptions(bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation, BlendOption sourceAlphaBlend, BlendOption destinationAlphaBlend, BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
-	{
-		D3D11_BLEND_DESC blendDesc;
-		blendDesc.AlphaToCoverageEnable = false;
-		blendDesc.IndependentBlendEnable = false;
-		blendDesc.RenderTarget[0].BlendEnable = enable;
-		blendDesc.RenderTarget[0].SrcBlend = GetBlendOption(sourceBlend);
-		blendDesc.RenderTarget[0].DestBlend = GetBlendOption(destinationBlend);
-		blendDesc.RenderTarget[0].BlendOp = GetBlendOperation(operation);
-		blendDesc.RenderTarget[0].SrcBlendAlpha = GetBlendOption(sourceAlphaBlend);
-		blendDesc.RenderTarget[0].DestBlendAlpha = GetBlendOption(destinationAlphaBlend);
-		blendDesc.RenderTarget[0].BlendOpAlpha = GetBlendOperation(alphaOperation);
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = writeMask;
 
 		HRESULT hr;
-		SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBlendState(&blendDesc, &m_BlendState));
+		SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateRasterizerState(&rasterizerDesc, &m_RasterizerState));
+		DX11Context::GetContextFromApplication()->GetContext()->RSSetState(m_RasterizerState.Get());
+	}
+	void DX11RendererAPI::SetBlendOptions(uint32_t i, bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation, BlendOption sourceAlphaBlend, BlendOption destinationAlphaBlend, BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
+	{
+		SOF_CORE_ASSERT(0 <= i && i < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, "Exceeding available number of simultaneous render targets");
+		m_BlendDesc.RenderTarget[i].BlendEnable = enable;
+		m_BlendDesc.RenderTarget[i].SrcBlend = GetBlendOption(sourceBlend);
+		m_BlendDesc.RenderTarget[i].DestBlend = GetBlendOption(destinationBlend);
+		m_BlendDesc.RenderTarget[i].BlendOp = GetBlendOperation(operation);
+		m_BlendDesc.RenderTarget[i].SrcBlendAlpha = GetBlendOption(sourceAlphaBlend);
+		m_BlendDesc.RenderTarget[i].DestBlendAlpha = GetBlendOption(destinationAlphaBlend);
+		m_BlendDesc.RenderTarget[i].BlendOpAlpha = GetBlendOperation(alphaOperation);
+		m_BlendDesc.RenderTarget[i].RenderTargetWriteMask = writeMask;
+
+		HRESULT hr;
+		SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBlendState(&m_BlendDesc, &m_BlendState));
 		DX11Context::GetContextFromApplication()->GetContext()->OMSetBlendState(m_BlendState.Get(), glm::value_ptr(blendFactor), 0xffffffffu);
 	}
 }

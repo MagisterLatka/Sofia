@@ -26,6 +26,7 @@ namespace Sofia {
 	{
 		Renderer2D::Shutdown();
 		delete s_RendererData.shaderLibrary;
+		RenderCommand::Shutdown();
 		s_RendererData.commandQueue->Execute();
 		delete s_RendererData.commandQueue;
 	}

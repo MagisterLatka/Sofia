@@ -21,12 +21,13 @@ namespace Sofia {
 		static void SetBackFaceStencilOperations(RendererAPI::StencilOperation stencilFail = RendererAPI::StencilOperation::Keep,
 			RendererAPI::StencilOperation depthFail = RendererAPI::StencilOperation::Keep,
 			RendererAPI::StencilOperation pass = RendererAPI::StencilOperation::Keep);
-		static void SetBlendOptions(bool enable, RendererAPI::BlendOption sourceBlend = RendererAPI::BlendOption::One,
+		static void SetBlendOptions(uint32_t i, bool enable, RendererAPI::BlendOption sourceBlend = RendererAPI::BlendOption::One,
 			RendererAPI::BlendOption destinationBlend = RendererAPI::BlendOption::Zero, RendererAPI::BlendOperation operation = RendererAPI::BlendOperation::Add,
 			RendererAPI::BlendOption sourceAlphaBlend = RendererAPI::BlendOption::One, RendererAPI::BlendOption destinationAlphaBlend = RendererAPI::BlendOption::Zero,
 			RendererAPI::BlendOperation alphaOperation = RendererAPI::BlendOperation::Add, uint8_t writeMask = 1 | 2 | 4 | 8, glm::vec4 blendFactor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	private:
 		static void Init();
+		static void Shutdown();
 	private:
 		static Scope<RendererAPI> s_API;
 	};

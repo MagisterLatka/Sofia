@@ -79,7 +79,8 @@ void ExampleLayer::OnAttach()
 	m_Texture = Sofia::Texture2D::Create(textureProps);
 
 	float aspectRatio = (float)window->GetWidth() / (float)window->GetHeight();
-	Sofia::RenderCommand::SetBlendOptions(true, Sofia::RendererAPI::BlendOption::SourceAlpha, Sofia::RendererAPI::BlendOption::SourceAlphaInvert);
+	Sofia::RenderCommand::SetBlendOptions(0u, true, Sofia::RendererAPI::BlendOption::SourceAlpha, Sofia::RendererAPI::BlendOption::SourceAlphaInvert);
+	Sofia::RenderCommand::SetBlendOptions(1u, false);
 
 
 	m_Scene = Ref<Sofia::Scene>::Create("Game scene");

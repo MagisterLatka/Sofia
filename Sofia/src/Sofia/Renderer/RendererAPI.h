@@ -51,6 +51,7 @@ namespace Sofia {
 		static API GetAPI() { return s_API; }
 	private:
 		virtual void Init() = 0;
+		virtual void Shutdown() = 0;
 
 		virtual void Draw(Topology topology, uint32_t verticesCount) = 0;
 		virtual void DrawIndexed(Topology topology, uint32_t indicesCount) = 0;
@@ -66,7 +67,7 @@ namespace Sofia {
 		virtual void SetRasterizerOptions(TriangleFillMode fillMode = TriangleFillMode::Full, TriangleCullMode cullMode = TriangleCullMode::DrawFrontFace,
 			bool isFrontFaceCounterClockwise = false) = 0;
 
-		virtual void SetBlendOptions(bool enable, BlendOption sourceBlend = BlendOption::One, BlendOption destinationBlend = BlendOption::Zero,
+		virtual void SetBlendOptions(uint32_t i, bool enable, BlendOption sourceBlend = BlendOption::One, BlendOption destinationBlend = BlendOption::Zero,
 			BlendOperation operation = BlendOperation::Add, BlendOption sourceAlphaBlend = BlendOption::One, BlendOption destinationAlphaBlend = BlendOption::Zero,
 			BlendOperation alphaOperation = BlendOperation::Add, uint8_t writeMask = 1 | 2 | 4 | 8, glm::vec4 blendFactor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) = 0;
 

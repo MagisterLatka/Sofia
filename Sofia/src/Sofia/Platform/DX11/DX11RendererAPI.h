@@ -9,6 +9,7 @@ namespace Sofia {
 	{
 	public:
 		virtual void Init() override;
+		virtual void Shutdown() override;
 
 		virtual void Draw(Topology topology, uint32_t verticesCount) override;
 		virtual void DrawIndexed(Topology topology, uint32_t indicesCount) override;
@@ -18,7 +19,7 @@ namespace Sofia {
 		virtual void SetFrontFaceStencilOperations(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) override;
 		virtual void SetBackFaceStencilOperations(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass) override;
 		virtual void SetRasterizerOptions(TriangleFillMode fillMode, TriangleCullMode cullMode, bool isFrontFaceCounterClockwise) override;
-		virtual void SetBlendOptions(bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation, BlendOption sourceAlphaBlend,
+		virtual void SetBlendOptions(uint32_t i, bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation, BlendOption sourceAlphaBlend,
 			BlendOption destinationAlphaBlend, BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor) override;
 	private:
 		void InitShaders();
@@ -31,5 +32,6 @@ namespace Sofia {
 
 		ComPtr<ID3D11RasterizerState> m_RasterizerState;
 		ComPtr<ID3D11BlendState> m_BlendState;
+		D3D11_BLEND_DESC m_BlendDesc;
 	};
 }

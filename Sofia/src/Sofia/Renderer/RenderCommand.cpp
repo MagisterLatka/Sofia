@@ -27,6 +27,10 @@ namespace Sofia {
 		s_API = RendererAPI::Create();
 		Renderer::Submit([]() { s_API->Init(); });
 	}
+	void RenderCommand::Shutdown()
+	{
+		Renderer::Submit([]() { s_API->Shutdown(); });
+	}
 
 	void RenderCommand::Draw(RendererAPI::Topology topology, uint32_t verticesCount)
 	{
@@ -56,11 +60,11 @@ namespace Sofia {
 	{
 		Renderer::Submit([stencilFail, depthFail, pass]() { s_API->SetBackFaceStencilOperations(stencilFail, depthFail, pass); });
 	}
-	void RenderCommand::SetBlendOptions(bool enable, RendererAPI::BlendOption sourceBlend, RendererAPI::BlendOption destinationBlend, RendererAPI::BlendOperation operation, RendererAPI::BlendOption sourceAlphaBlend, RendererAPI::BlendOption destinationAlphaBlend, RendererAPI::BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
+	void RenderCommand::SetBlendOptions(uint32_t i, bool enable, RendererAPI::BlendOption sourceBlend, RendererAPI::BlendOption destinationBlend, RendererAPI::BlendOperation operation, RendererAPI::BlendOption sourceAlphaBlend, RendererAPI::BlendOption destinationAlphaBlend, RendererAPI::BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
 	{
-		Renderer::Submit([enable, sourceBlend, destinationBlend, operation, sourceAlphaBlend, destinationAlphaBlend, alphaOperation, writeMask, blendFactor]()
+		Renderer::Submit([i, enable, sourceBlend, destinationBlend, operation, sourceAlphaBlend, destinationAlphaBlend, alphaOperation, writeMask, blendFactor]()
 		{
-			s_API->SetBlendOptions(enable, sourceBlend, destinationBlend, operation, sourceAlphaBlend, destinationAlphaBlend, alphaOperation, writeMask, blendFactor);
+			s_API->SetBlendOptions(i, enable, sourceBlend, destinationBlend, operation, sourceAlphaBlend, destinationAlphaBlend, alphaOperation, writeMask, blendFactor);
 		});
 	}
 }
