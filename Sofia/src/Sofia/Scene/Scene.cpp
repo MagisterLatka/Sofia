@@ -23,14 +23,16 @@ namespace Sofia {
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		return CreateEntityWithUUID(UUID(), name);
+	}
+	Entity Scene::CreateEntityWithUUID(UUID id, const std::string& name)
+	{
 		auto entity = Entity(m_Registry.create(), this);
 
-		if (!name.empty())
-			entity.AddComponent<TagComponent>(name);
-		else
-			entity.AddComponent<TagComponent>("Entity");
-
+		entity.AddComponent<IDComponent>(id);
 		entity.AddComponent<TransformComponent>(glm::mat4(1.0f));
+		auto& tag = entity.AddComponent<TagComponent>().Tag;
+		tag = name.empty() ? "Entity" : name;
 
 		return entity;
 	}
@@ -122,6 +124,8 @@ namespace Sofia {
 		});
 	}
 
+	template<>
+	void Scene::OnComponentAdd<IDComponent>(Entity entity, IDComponent& component) {}
 	template<>
 	void Scene::OnComponentAdd<TagComponent>(Entity entity, TagComponent& component) {}
 	template<>

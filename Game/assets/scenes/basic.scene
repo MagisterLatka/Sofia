@@ -1,8 +1,8 @@
 Scene: Game scene
 Scene ID: 1
-Scene camera: 1
+Scene camera: 10319742350205580087
 Entities:
-  - Entity: 3
+  - Entity: 11597723215476480856
     Tag component:
       Tag: Textured quad
     Transform component:
@@ -12,17 +12,17 @@ Entities:
     Sprite component:
       Color: [1, 1, 1, 1]
       Tilling factor: 1
-  - Entity: 2
+  - Entity: 13203225161225543467
     Tag component:
       Tag: Quad
     Transform component:
-      Position: [0, 0, -0.100000001]
+      Position: [0.25, 0.25, -0.100000001]
       Orientation: [0, 0, 0]
       Size: [1, 1, 1]
     Sprite component:
       Color: [1, 0, 0, 0.5]
       Tilling factor: 1
-  - Entity: 1
+  - Entity: 10319742350205580087
     Tag component:
       Tag: Camera
     Transform component:
@@ -32,6 +32,6 @@ Entities:
     Camera component:
       Type: Orthographic
       Size: 2
-      Aspect ratio: 1.4373523
+      Aspect ratio: 2.27289724
       Near clip: -1
       Far clip: 1

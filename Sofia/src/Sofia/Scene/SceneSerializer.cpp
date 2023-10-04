@@ -77,8 +77,10 @@ namespace Sofia {
 
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
+		SOF_CORE_ASSERT(entity.HasComponent<IDComponent>());
+
 		out << YAML::BeginMap; // Entity
-		out << YAML::Key << "Entity" << YAML::Value << (uint32_t)entity; //TODO: UUID
+		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
 		if (entity.HasComponent<TagComponent>())
 		{
@@ -143,7 +145,7 @@ namespace Sofia {
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << m_Scene->m_Name;
 		out << YAML::Key << "Scene ID" << YAML::Value << m_Scene->m_ID;
-		out << YAML::Key << "Scene camera" << YAML::Value << (uint32_t)m_Scene->m_Camera;
+		out << YAML::Key << "Scene camera" << YAML::Value << Entity(m_Scene->m_Camera, m_Scene.Raw()).GetUUID();
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		m_Scene->m_Registry.each([&](auto entityID)
 		{
@@ -172,24 +174,23 @@ namespace Sofia {
 		SOF_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 		m_Scene->m_Name = sceneName;
 		m_Scene->m_ID = data["Scene ID"].as<uint32_t>();
-		uint32_t sceneCamera = data["Scene camera"].as<uint32_t>();
+		uint64_t sceneCamera = data["Scene camera"].as<uint64_t>();
 
 		auto entities = data["Entities"];
 		if (entities)
 		{
 			for (auto entity : entities)
 			{
-				uint32_t id = entity["Entity"].as<uint32_t>();
-				//uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
+				uint64_t uuid = entity["Entity"].as<uint64_t>();
 
 				std::string name;
 				auto tagComponent = entity["Tag component"];
 				if (tagComponent)
 					name = tagComponent["Tag"].as<std::string>();
 
-				SOF_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", id, name);
+				SOF_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
-				Entity deserializedEntity = m_Scene->CreateEntity(name);
+				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
 
 				auto transformComponent = entity["Transform component"];
 				if (transformComponent)
@@ -224,7 +225,7 @@ namespace Sofia {
 					src.TillingFactor = spriteComponent["Tilling factor"].as<float>();
 				}
 				
-				if (id == sceneCamera)
+				if (uuid == sceneCamera)
 					m_Scene->SetCameraEntity(deserializedEntity);
 			}
 		}

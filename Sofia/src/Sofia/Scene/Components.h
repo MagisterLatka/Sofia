@@ -1,9 +1,22 @@
 #pragma once
 
+#include "Sofia/UUID.h"
 #include "Sofia/Renderer/Texture.h"
 #include "Sofia/Renderer/Camera.h"
 
 namespace Sofia {
+
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const UUID& id) noexcept : ID(id) {}
+		IDComponent(const IDComponent&) = default;
+		IDComponent(IDComponent&&) = default;
+		IDComponent& operator=(const IDComponent&) = default;
+		IDComponent& operator=(IDComponent&&) = default;
+	};
 
 	struct TagComponent
 	{
@@ -11,10 +24,10 @@ namespace Sofia {
 
 		TagComponent() = default;
 		TagComponent(const std::string& tag) noexcept : Tag(tag) {}
-		TagComponent(const TagComponent& other) noexcept : Tag(other.Tag) {}
-		TagComponent(TagComponent&& other) noexcept : Tag(other.Tag) {}
-		TagComponent& operator=(const TagComponent& other) noexcept { Tag = other.Tag; return *this; }
-		TagComponent& operator=(TagComponent&& other) noexcept { Tag = std::move(other.Tag); return *this; }
+		TagComponent(const TagComponent& other) = default;
+		TagComponent(TagComponent&& other) = default;
+		TagComponent& operator=(const TagComponent& other) = default;
+		TagComponent& operator=(TagComponent&& other) = default;
 
 		operator std::string& () noexcept { return Tag; }
 		operator const std::string& () const noexcept { return Tag; }
@@ -39,34 +52,13 @@ namespace Sofia {
 		}
 		TransformComponent(glm::vec3 position, glm::vec3 orientation = glm::vec3(0.0f), glm::vec3 size = glm::vec3(1.0f)) noexcept
 			: Position(position), Orientation(orientation), Size(size) {}
-		TransformComponent(const TransformComponent& other) noexcept
-			: Transform(other.Transform), Position(other.Position), Orientation(other.Orientation), Size(other.Size) {}
-		TransformComponent(TransformComponent&& other) noexcept
-		{
-			Transform = std::move(other.Transform);
-			Position = std::move(other.Position);
-			Orientation = std::move(other.Orientation);
-			Size = std::move(other.Size);
-		}
+		TransformComponent(const TransformComponent& other) = default;
+		TransformComponent(TransformComponent&& other) = default;
+		TransformComponent& operator=(const TransformComponent& other) = default;
+		TransformComponent& operator=(TransformComponent&& other) = default;
 
 		operator glm::mat4& () noexcept { return Transform; }
 		operator const glm::mat4& () const noexcept { return Transform; }
-		TransformComponent& operator=(const TransformComponent& other) noexcept
-		{
-			Transform = other.Transform;
-			Position = other.Position;
-			Orientation = other.Orientation;
-			Size = other.Size;
-			return *this;
-		}
-		TransformComponent& operator=(TransformComponent&& other) noexcept
-		{
-			Transform = std::move(other.Transform); 
-			Position = std::move(other.Position);
-			Orientation = std::move(other.Orientation);
-			Size = std::move(other.Size);
-			return *this;
-		}
 	};
 
 	struct SpriteComponent
@@ -78,29 +70,10 @@ namespace Sofia {
 		SpriteComponent() = default;
 		SpriteComponent(glm::vec4 color, const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f) noexcept
 			: Color(color), Texture(texture), TillingFactor(tillingFactor) {}
-		SpriteComponent(const SpriteComponent& other) noexcept
-			: Color(other.Color), Texture(other.Texture), TillingFactor(other.TillingFactor) {}
-		SpriteComponent(SpriteComponent&& other) noexcept
-		{
-			Color = std::move(other.Color);
-			Texture = std::move(other.Texture);
-			TillingFactor = std::move(other.TillingFactor);
-		}
-
-		SpriteComponent& operator=(const SpriteComponent& other) noexcept
-		{
-			Color = other.Color;
-			Texture = other.Texture;
-			TillingFactor = other.TillingFactor;
-			return *this;
-		}
-		SpriteComponent& operator=(SpriteComponent&& other) noexcept
-		{
-			Color = std::move(other.Color);
-			Texture = std::move(other.Texture);
-			TillingFactor = std::move(other.TillingFactor);
-			return *this;
-		}
+		SpriteComponent(const SpriteComponent& other) = default;
+		SpriteComponent(SpriteComponent&& other) = default;
+		SpriteComponent& operator=(const SpriteComponent& other) = default;
+		SpriteComponent& operator=(SpriteComponent&& other) = default;
 	};
 
 	struct CameraComponent
@@ -109,11 +82,10 @@ namespace Sofia {
 
 		CameraComponent() = default;
 		CameraComponent(Ref<Sofia::Camera> camera) noexcept : Camera(camera) {}
-		CameraComponent(const CameraComponent& other) noexcept : Camera(other.Camera) {}
-		CameraComponent(CameraComponent&& other) noexcept : Camera(other.Camera) {}
-
-		CameraComponent& operator=(const CameraComponent& other) noexcept { Camera = other.Camera; return *this; }
-		CameraComponent& operator=(CameraComponent&& other) noexcept { Camera = other.Camera; return *this; }
+		CameraComponent(const CameraComponent& other) = default;
+		CameraComponent(CameraComponent&& other) = default;
+		CameraComponent& operator=(const CameraComponent& other) = default;
+		CameraComponent& operator=(CameraComponent&& other) = default;
 	};
 
 	class ScriptableEntity;
