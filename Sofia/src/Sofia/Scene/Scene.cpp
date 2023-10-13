@@ -106,6 +106,14 @@ namespace Sofia {
 				Renderer2D::SubmitQuad(tc, sc.Color, sc.Texture, sc.TillingFactor, (uint32_t)entity);
 			}
 			Renderer2D::DrawQuads();
+
+			auto group1 = m_Registry.group<CircleComponent>(entt::get<TransformComponent>);
+			for (auto entity : group1)
+			{
+				auto [tc, cc] = group1.get<TransformComponent, CircleComponent>(entity);
+				Renderer2D::SubmitCircle(tc, cc.Color, cc.Thickness, cc.Fade, (uint32_t)entity);
+			}
+			Renderer2D::DrawCircles();
 		}
 	}
 	void Scene::OnViewportResize(uint32_t width, uint32_t height) noexcept
@@ -132,6 +140,8 @@ namespace Sofia {
 	void Scene::OnComponentAdd<TransformComponent>(Entity entity, TransformComponent& component) {}
 	template<>
 	void Scene::OnComponentAdd<SpriteComponent>(Entity entity, SpriteComponent& component) {}
+	template<>
+	void Scene::OnComponentAdd<CircleComponent>(Entity entity, CircleComponent& component) {}
 	template<>
 	void Scene::OnComponentAdd<CameraComponent>(Entity entity, CameraComponent& component)
 	{

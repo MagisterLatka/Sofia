@@ -11,11 +11,18 @@ Sofia::Application* Sofia::CreateApplication()
 	spec.WindowIconPath = L"assets/Icon.png";
 	spec.CustomTitleBar = true;
 	Application* app = new Application(spec);
-	app->PushLayer(new ExampleLayer);
-	app->SetMenuBarCallbackFunc([app]()
+	ExampleLayer* layer = (ExampleLayer*)app->PushLayer(new ExampleLayer);
+	app->SetMenuBarCallbackFunc([app, layer]()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+			if (ImGui::MenuItem("New", "Ctrl+N"))
+				layer->NewScene();
+			if (ImGui::MenuItem("Save As", "Ctrl+Shift+S"))
+				layer->SaveScene();
+			if (ImGui::MenuItem("Open", "Ctrl+O"))
+				layer->OpenScene();
+
 			if (ImGui::MenuItem("Close"))
 				app->Close();
 

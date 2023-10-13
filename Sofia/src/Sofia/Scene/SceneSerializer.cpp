@@ -127,14 +127,26 @@ namespace Sofia {
 		if (entity.HasComponent<SpriteComponent>())
 		{
 			out << YAML::Key << "Sprite component";
-			out << YAML::BeginMap; // SpriteRendererComponent
+			out << YAML::BeginMap; // SpriteComponent
 
-			auto& src = entity.GetComponent<SpriteComponent>();
-			out << YAML::Key << "Color" << YAML::Value << src.Color;
+			auto& sc = entity.GetComponent<SpriteComponent>();
+			out << YAML::Key << "Color" << YAML::Value << sc.Color;
 			//TODO texture
-			out << YAML::Key << "Tilling factor" << YAML::Value << src.TillingFactor;
+			out << YAML::Key << "Tilling factor" << YAML::Value << sc.TillingFactor;
 
-			out << YAML::EndMap; // SpriteRendererComponent
+			out << YAML::EndMap; // SpriteComponent
+		}
+		if (entity.HasComponent<CircleComponent>())
+		{
+			out << YAML::Key << "Circle component";
+			out << YAML::BeginMap; // CircleComponent
+
+			auto& cc = entity.GetComponent<CircleComponent>();
+			out << YAML::Key << "Color" << YAML::Value << cc.Color;
+			out << YAML::Key << "Thickness" << YAML::Value << cc.Thickness;
+			out << YAML::Key << "Fade" << YAML::Value << cc.Fade;
+
+			out << YAML::EndMap; //CircleComponent
 		}
 
 		out << YAML::EndMap; // Entity
@@ -220,9 +232,18 @@ namespace Sofia {
 				auto spriteComponent = entity["Sprite component"];
 				if (spriteComponent)
 				{
-					auto& src = deserializedEntity.AddComponent<SpriteComponent>();
-					src.Color = spriteComponent["Color"].as<glm::vec4>();
-					src.TillingFactor = spriteComponent["Tilling factor"].as<float>();
+					auto& sc = deserializedEntity.AddComponent<SpriteComponent>();
+					sc.Color = spriteComponent["Color"].as<glm::vec4>();
+					sc.TillingFactor = spriteComponent["Tilling factor"].as<float>();
+				}
+
+				auto circleComponent = entity["Circle component"];
+				if (circleComponent)
+				{
+					auto& cc = deserializedEntity.AddComponent<CircleComponent>();
+					cc.Color = circleComponent["Color"].as<glm::vec4>();
+					cc.Thickness = circleComponent["Thickness"].as<float>();
+					cc.Fade = circleComponent["Fade"].as<float>();
 				}
 				
 				if (uuid == sceneCamera)

@@ -38,8 +38,8 @@ namespace Sofia {
 		void Shutdown() noexcept;
 		void Close() noexcept;
 
-		void PushLayer(Layer* layer) noexcept { m_LayerStack->PushLayer(layer); }
-		void PushOverlay(Layer* overlay) noexcept { m_LayerStack->PushOverlay(overlay); }
+		Layer* PushLayer(Layer* layer) noexcept { return m_LayerStack->PushLayer(layer); }
+		Layer* PushOverlay(Layer* overlay) noexcept { return m_LayerStack->PushOverlay(overlay); }
 
 		Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
 		Ref<Window> GetWindow() const noexcept { return m_Window; }

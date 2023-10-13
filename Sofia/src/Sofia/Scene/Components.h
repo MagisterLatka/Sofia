@@ -76,6 +76,21 @@ namespace Sofia {
 		SpriteComponent& operator=(SpriteComponent&& other) = default;
 	};
 
+	struct CircleComponent
+	{
+		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		float Thickness = 1.0f;
+		float Fade = 0.005f;
+
+		CircleComponent() = default;
+		CircleComponent(glm::vec4 color, float thickness = 1.0f, float fade = 0.005f) noexcept
+			: Color(color), Thickness(Thickness), Fade(fade) {}
+		CircleComponent(const CircleComponent&) = default;
+		CircleComponent(CircleComponent&&) = default;
+		CircleComponent& operator=(const CircleComponent&) = default;
+		CircleComponent& operator=(CircleComponent&&) = default;
+	};
+
 	struct CameraComponent
 	{
 		Ref<Sofia::Camera> Camera;

@@ -5,6 +5,7 @@
 
 class ExampleLayer : public Sofia::Layer
 {
+	friend Sofia::Application* Sofia::CreateApplication();
 public:
 	ExampleLayer();
 	~ExampleLayer();
