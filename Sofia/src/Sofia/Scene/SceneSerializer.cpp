@@ -10,6 +10,46 @@
 namespace YAML {
 
 	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& value)
+		{
+			Node node;
+			node.push_back(value.x);
+			node.push_back(value.y);
+			return node;
+		}
+		static bool decode(const Node& node, glm::vec2& value)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			value.x = node[0].as<float>();
+			value.y = node[1].as<float>();
+			return true;
+		}
+	};
+	template<>
+	struct convert<glm::uvec2>
+	{
+		static Node encode(const glm::uvec2& value)
+		{
+			Node node;
+			node.push_back(value.x);
+			node.push_back(value.y);
+			return node;
+		}
+		static bool decode(const Node& node, glm::uvec2& value)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			value.x = node[0].as<uint32_t>();
+			value.y = node[1].as<uint32_t>();
+			return true;
+		}
+	};
+	template<>
 	struct convert<glm::vec3>
 	{
 		static Node encode(const glm::vec3& value)
@@ -20,7 +60,6 @@ namespace YAML {
 			node.push_back(value.z);
 			return node;
 		}
-
 		static bool decode(const Node& node, glm::vec3& value)
 		{
 			if (!node.IsSequence() || node.size() != 3)
@@ -32,7 +71,6 @@ namespace YAML {
 			return true;
 		}
 	};
-
 	template<>
 	struct convert<glm::vec4>
 	{
@@ -45,7 +83,6 @@ namespace YAML {
 			node.push_back(value.w);
 			return node;
 		}
-
 		static bool decode(const Node& node, glm::vec4& value)
 		{
 			if (!node.IsSequence() || node.size() != 4)
@@ -58,10 +95,21 @@ namespace YAML {
 			return true;
 		}
 	};
-
 }
 namespace Sofia {
 
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& value)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << value.x << value.y << YAML::EndSeq;
+		return out;
+	}
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::uvec2& value)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << value.x << value.y << YAML::EndSeq;
+		return out;
+	}
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& value)
 	{
 		out << YAML::Flow;
@@ -123,7 +171,6 @@ namespace Sofia {
 
 			out << YAML::EndMap; // CameraComponent
 		}
-
 		if (entity.HasComponent<SpriteComponent>())
 		{
 			out << YAML::Key << "Sprite component";
@@ -131,7 +178,24 @@ namespace Sofia {
 
 			auto& sc = entity.GetComponent<SpriteComponent>();
 			out << YAML::Key << "Color" << YAML::Value << sc.Color;
-			//TODO texture
+			if (sc.Texture)
+			{
+				out << YAML::Key << "Texture";
+				out << YAML::BeginMap; //Texture
+
+				auto& props = sc.Texture->GetProps();
+				std::string path = props.Filepath.empty() ? std::string() : props.Filepath.string();
+				out << YAML::Key << "Path" << YAML::Value << path;
+				out << YAML::Key << "Size" << YAML::Value << glm::uvec2(props.Width, props.Height); //TODO: do it in asset manager
+				out << YAML::Key << "Format" << YAML::Value << (int)props.Format;
+				out << YAML::Key << "GenerateMips" << YAML::Value << props.GenerateMipMaps;
+				out << YAML::Key << "Sampling" << YAML::Value << (int)props.Sampling;
+				out << YAML::Key << "MaxAnisotropy" << YAML::Value << props.MaxAnisotropy;
+				out << YAML::Key << "Wrap" << YAML::Value << (int)props.Wrap;
+				out << YAML::Key << "BorderColor" << YAML::Value << props.BorderColor;
+
+				out << YAML::EndMap; //Texture
+			}
 			out << YAML::Key << "Tilling factor" << YAML::Value << sc.TillingFactor;
 
 			out << YAML::EndMap; // SpriteComponent
@@ -203,18 +267,15 @@ namespace Sofia {
 				SOF_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
 
 				Entity deserializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);
-
-				auto transformComponent = entity["Transform component"];
-				if (transformComponent)
+				
+				if (auto transformComponent = entity["Transform component"])
 				{
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
 					tc.Position = transformComponent["Position"].as<glm::vec3>();
 					tc.Orientation = transformComponent["Orientation"].as<glm::vec3>();
 					tc.Size = transformComponent["Size"].as<glm::vec3>();
 				}
-
-				auto cameraComponent = entity["Camera component"];
-				if (cameraComponent)
+				if (auto cameraComponent = entity["Camera component"])
 				{
 					std::string cameraType = cameraComponent["Type"].as<std::string>();
 					if (cameraType == "Orthographic")
@@ -228,17 +289,28 @@ namespace Sofia {
 						deserializedEntity.AddComponent<CameraComponent>(camera);
 					}
 				}
-
-				auto spriteComponent = entity["Sprite component"];
-				if (spriteComponent)
+				if (auto spriteComponent = entity["Sprite component"])
 				{
 					auto& sc = deserializedEntity.AddComponent<SpriteComponent>();
 					sc.Color = spriteComponent["Color"].as<glm::vec4>();
+					if (auto camera = spriteComponent["Texture"])
+					{
+						Texture2DProps props;
+						props.Filepath = camera["Path"].as<std::string>();
+						glm::uvec2 size = camera["Size"].as<glm::uvec2>();
+						props.Width = size.x;
+						props.Height = size.y;
+						props.Format = (TextureFormat)camera["Format"].as<int>();
+						props.GenerateMipMaps = camera["GenerateMips"].as<bool>();
+						props.Sampling = (TextureSampling)camera["Sampling"].as<int>();
+						props.MaxAnisotropy = camera["MaxAnisotropy"].as<int>();
+						props.Wrap = (TextureWrap)camera["Wrap"].as<int>();
+						props.BorderColor = camera["BorderColor"].as<glm::vec4>();
+						sc.Texture = Texture2D::Create(props);
+					}
 					sc.TillingFactor = spriteComponent["Tilling factor"].as<float>();
 				}
-
-				auto circleComponent = entity["Circle component"];
-				if (circleComponent)
+				if (auto circleComponent = entity["Circle component"])
 				{
 					auto& cc = deserializedEntity.AddComponent<CircleComponent>();
 					cc.Color = circleComponent["Color"].as<glm::vec4>();

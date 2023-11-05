@@ -2,27 +2,6 @@ Scene: Game scene
 Scene ID: 1
 Scene camera: 16807581318092124512
 Entities:
-  - Entity: 10876014582533508667
-    Tag component:
-      Tag: Entity
-    Transform component:
-      Position: [0, 0, -0.200000003]
-      Orientation: [0, 0, 0]
-      Size: [1, 1, 1]
-    Circle component:
-      Color: [1, 1, 1, 1]
-      Thickness: 0.289999992
-      Fade: 0.100000001
-  - Entity: 5428758644485757241
-    Tag component:
-      Tag: Quad
-    Transform component:
-      Position: [0.25, 0.25, 0]
-      Orientation: [0, 0, 0]
-      Size: [1, 1, 1]
-    Sprite component:
-      Color: [1, 0, 0, 0.517647088]
-      Tilling factor: 1
   - Entity: 16807581318092124512
     Tag component:
       Tag: Camera
@@ -33,6 +12,36 @@ Entities:
     Camera component:
       Type: Orthographic
       Size: 2
-      Aspect ratio: 2.21755028
+      Aspect ratio: 2.25988698
       Near clip: -1
       Far clip: 1
+  - Entity: 5428758644485757241
+    Tag component:
+      Tag: Quad
+    Transform component:
+      Position: [0.25, 0.25, -0.600000024]
+      Orientation: [0, 0, 0]
+      Size: [1, 1, 1]
+    Sprite component:
+      Color: [1, 0, 0, 1]
+      Texture:
+        Path: assets\textures\checkerboard.png
+        Size: [64, 64]
+        Format: 5
+        GenerateMips: false
+        Sampling: 2
+        MaxAnisotropy: 1
+        Wrap: 2
+        BorderColor: [0, 0, 0, 1]
+      Tilling factor: 1
+  - Entity: 10876014582533508667
+    Tag component:
+      Tag: Circle
+    Transform component:
+      Position: [0, 0, -0.200000003]
+      Orientation: [0, 0, 0]
+      Size: [1, 1, 1]
+    Circle component:
+      Color: [0.0352941193, 1, 1, 0.564705908]
+      Thickness: 0.200000003
+      Fade: 0.0710000023

@@ -24,7 +24,14 @@ namespace Sofia {
 		T& AddComponent(Args&& ...args)
 		{
 			SOF_CORE_ASSERT(!HasComponent<T>(), "Entity already has this component!");
-			auto& component = m_Scene->m_Registry.emplace<T>(m_Handle, std::forward<Args>(args)...);
+			T& component = m_Scene->m_Registry.emplace<T>(m_Handle, std::forward<Args>(args)...);
+			m_Scene->OnComponentAdd<T>(*this, component);
+			return component;
+		}
+		template<typename T, typename ...Args>
+		T& AddReplaceComponent(Args&&... args)
+		{
+			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_Handle, std::forward<Args>(args)...);
 			m_Scene->OnComponentAdd<T>(*this, component);
 			return component;
 		}

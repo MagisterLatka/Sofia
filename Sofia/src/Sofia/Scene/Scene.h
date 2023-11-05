@@ -3,6 +3,7 @@
 #include "Sofia/Core.h"
 #include "Sofia/Timestep.h"
 #include "Sofia/Renderer/Camera.h"
+#include "Sofia/Scene/EditorCamera.h"
 #include "Sofia/Events/Event.h"
 #include "Sofia/UUID.h"
 
@@ -28,14 +29,18 @@ namespace Sofia {
 		Entity CreateEntity(const std::string& name = {});
 		Entity CreateEntityWithUUID(UUID id, const std::string& name = {});
 		void DestroyEntity(Entity entity);
+		void DuplicateEntity(Entity entity);
 
 		Entity SetCameraEntity(); //creates new camera entity
 		Entity SetCameraEntity(Entity cameraEntity);
 		Entity SetCameraEntity(Ref<Camera> camera); //creates new camera entity
 
 		void OnEvent(Event& e);
-		void OnUpdate(Timestep ts);
+		void OnUpdateEditor(Timestep ts, const EditorCamera& camera);
+		void OnUpdateRuntime(Timestep ts);
 		void OnViewportResize(uint32_t width, uint32_t height) noexcept;
+
+		static Ref<Scene> Copy(Ref<Scene> scene);
 	private:
 		template<typename T>
 		void OnComponentAdd(Entity entity, T& component);
@@ -47,6 +52,6 @@ namespace Sofia {
 		entt::entity m_SceneEntity;
 		entt::entity m_Camera = entt::null;
 
-		glm::ivec2 m_ViewportSize = { 0, 0 };
+		glm::ivec2 m_ViewportSize = { 1600, 900 };
 	};
 }

@@ -23,15 +23,26 @@ private:
 	void OpenScene();
 	void OpenScene(const std::filesystem::path& path);
 	void SaveScene();
+	void SaveSceneAs();
+	void OnScenePlay();
+	void OnSceneStop();
+	void OnDuplicateEntity();
 private:
 	Ref<Sofia::RenderPass> m_RenderPass;
-	Ref<Sofia::Texture2D> m_Texture;
 
 	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
 	Scope<Sofia::ContentBrowserPanel> m_ContentBrowserPanel;
-	Ref<Sofia::Scene> m_Scene;
+
+	enum class SceneState
+	{
+		Edit = 0, Play = 1
+	};
+	Ref<Sofia::Scene> m_ActiveScene, m_EditorScene;
+	Ref<Sofia::Texture2D> m_PlayButton, m_StopButton;
+	SceneState m_SceneState = SceneState::Edit;
+	std::filesystem::path m_EditorScenePath;
+	Sofia::EditorCamera m_EditorCamera;
 	Sofia::Entity m_HoveredEntity;
-	Sofia::Entity m_Quad;
 	Sofia::Entity m_Camera;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;

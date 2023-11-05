@@ -45,11 +45,9 @@ namespace Sofia {
 			m_Projection = glm::orthoRH_NO(-m_AspectRatio * m_Size * 0.5f, m_AspectRatio * m_Size * 0.5f, -m_Size * 0.5f, m_Size * 0.5f, m_NearClip, m_FarClip);
 			return;
 		case RendererAPI::API::Vulkan:
-			m_Projection = glm::orthoRH_ZO(-m_AspectRatio * m_Size * 0.5f, m_AspectRatio * m_Size * 0.5f, -m_Size * 0.5f, m_Size * 0.5f, m_NearClip, m_FarClip);
-			return;
 		case RendererAPI::API::DX11:
 		case RendererAPI::API::DX12:
-			m_Projection = glm::orthoLH_ZO(-m_AspectRatio * m_Size * 0.5f, m_AspectRatio * m_Size * 0.5f, -m_Size * 0.5f, m_Size * 0.5f, m_NearClip, m_FarClip);
+			m_Projection = glm::orthoRH_ZO(-m_AspectRatio * m_Size * 0.5f, m_AspectRatio * m_Size * 0.5f, -m_Size * 0.5f, m_Size * 0.5f, m_NearClip, m_FarClip);
 			return;
 		}
 		SOF_CORE_THROW_INFO("Unknown API");
