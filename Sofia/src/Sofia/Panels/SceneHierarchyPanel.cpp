@@ -4,6 +4,8 @@
 #include "Sofia/ImGui/ImGui.h"
 #include "Sofia/Panels/ContentBrowserPanel.h"
 
+#include "Sofia/Scripting/ScriptEngine.h"
+
 namespace Sofia {
 
 	void SceneHierarchyPanel::SetScene(Ref<Scene> scene) noexcept
@@ -166,6 +168,14 @@ namespace Sofia {
 					ImGui::CloseCurrentPopup();
 				}
 			}
+			if (!entity.HasComponent<ScriptComponent>())
+			{
+				if (ImGui::MenuItem("Script"))
+				{
+					entity.AddComponent<ScriptComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
 			ImGui::EndPopup();
 		}
 		ImGui::PopItemWidth();
@@ -227,6 +237,39 @@ namespace Sofia {
 
 				if (changed) camera->Recalc();
 			}
+		});
+		DrawComponent<ScriptComponent>(m_Scene, "Script component", entity, [entity](ScriptComponent& component, Ref<Scene> scene) mutable
+		{
+			static char buffer[128];
+			strcpy(buffer, component.ClassName.c_str());
+
+			bool classExist = ScriptEngine::EntityClassExist(component.ClassName);
+			if (!classExist)
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.2f, 0.3f, 1.0f));
+
+			if (ImGui::InputText("Class", buffer, sizeof(buffer)))
+				component.ClassName = buffer;
+
+			if (auto instance = ScriptEngine::GetEntityScriptInstance(entity.GetUUID()))
+			{
+				const auto& fields = instance->GetScriptClass()->GetFields();
+				for (const auto& [name, field] : fields)
+				{
+					switch (field.Type)
+					{
+						case ScriptFieldType::Float:
+						{
+							float data = instance->GetFieldValue<float>(name);
+							if (Sofia::UI::DragFloat(name, data, 0.0f, -10.0f, 10.0f))
+								instance->SetFieldValue(name, data);
+							break;
+						}
+					}
+				}
+			}
+
+			if (!classExist)
+				ImGui::PopStyleColor();
 		});
 	}
 }

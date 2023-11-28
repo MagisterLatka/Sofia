@@ -2,7 +2,7 @@ project "Sofia"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++20"
-	staticruntime "on"
+	staticruntime "off"
 	characterset ("MBCS")
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -33,7 +33,8 @@ project "Sofia"
 		"%{IncludeDirs.imgui}",
 		"%{IncludeDirs.stb_image}",
 		"%{IncludeDirs.entt}",
-		"%{IncludeDirs.yaml}"
+		"%{IncludeDirs.yaml}",
+		"%{IncludeDirs.mono}"
 	}
 
 	links
@@ -42,7 +43,8 @@ project "Sofia"
 		"d3d11.lib",
 		"D3DCompiler.lib",
 		"dxguid.lib",
-		"yaml-cpp"
+		"yaml-cpp",
+		"%{Library.mono}"
 	}
 	
 	buildoptions
@@ -51,8 +53,16 @@ project "Sofia"
 	}
 
 	filter "system:windows"
-		systemversion "latest"	
-
+		systemversion "latest"
+		
+		links
+		{
+			"%{Library.WinSocket}",
+			"%{Library.WinMM}",
+			"%{Library.WinVersion}",
+			"%{Library.BCrypt}"
+		}
+		
 	filter "configurations:Debug"
 		defines "SOF_DEBUG"
 		symbols "On"

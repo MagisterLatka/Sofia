@@ -16,3 +16,4 @@ bin-int/
 *.cso
 
 scripts/__pycache__
+Intermediates/

@@ -8,6 +8,8 @@
 #include "Sofia/Embed/DefaultIcon.embed"
 #include "Sofia/Embed/WindowIcons.embed"
 
+#include "Sofia/Scripting/ScriptEngine.h"
+
 namespace Sofia {
 
 	Application* Application::s_Application = nullptr;
@@ -63,6 +65,8 @@ namespace Sofia {
 		data = Texture2D::Decode((void*)s_WindowRestoreIcon, sizeof(s_WindowRestoreIcon), width, height);
 		m_RestoreIcon = Texture2D::Create(width, height, data);
 		Renderer::Render();
+
+		ScriptEngine::Init();
 	}
 	Application::~Application()
 	{
@@ -73,6 +77,8 @@ namespace Sofia {
 	{}
 	void Application::Shutdown() noexcept
 	{
+		ScriptEngine::Shutdown();
+
 		m_Window.Reset();
 		m_LayerStack.reset();
 		Renderer::Shutdown();

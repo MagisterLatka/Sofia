@@ -212,6 +212,16 @@ namespace Sofia {
 
 			out << YAML::EndMap; //CircleComponent
 		}
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			out << YAML::Key << "Script component";
+			out << YAML::BeginMap; //ScriptComponent
+
+			auto& sc = entity.GetComponent<ScriptComponent>();
+			out << YAML::Key << "Class name" << YAML::Value << sc.ClassName;
+			
+			out << YAML::EndMap; //ScriptComponent
+		}
 
 		out << YAML::EndMap; // Entity
 	}
@@ -316,6 +326,11 @@ namespace Sofia {
 					cc.Color = circleComponent["Color"].as<glm::vec4>();
 					cc.Thickness = circleComponent["Thickness"].as<float>();
 					cc.Fade = circleComponent["Fade"].as<float>();
+				}
+				if (auto scriptComponent = entity["Script component"])
+				{
+					auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
+					sc.ClassName = scriptComponent["Class name"].as<std::string>();
 				}
 				
 				if (uuid == sceneCamera)

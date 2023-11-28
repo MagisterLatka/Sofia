@@ -342,14 +342,17 @@ bool ExampleLayer::OnKeyPressed(Sofia::KeyPressedEvent& e)
 }
 void ExampleLayer::OnScenePlay()
 {
+	if (!m_EditorScene)
+		return;
 	m_SceneState = SceneState::Play;
 	m_ActiveScene = Sofia::Scene::Copy(m_EditorScene);
-	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_ActiveScene->OnRuntimeStart();
 	m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 }
 void ExampleLayer::OnSceneStop()
 {
 	m_SceneState = SceneState::Edit;
+	m_ActiveScene->OnRuntimeStop();
 	m_ActiveScene = m_EditorScene;
 	m_SceneHierarchyPanel->SetScene(m_ActiveScene);
 }

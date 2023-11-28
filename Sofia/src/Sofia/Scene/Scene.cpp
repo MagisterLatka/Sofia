@@ -4,6 +4,7 @@
 #include "Sofia/Scene/ScriptableEntity.h"
 #include "Sofia/Scene/Components.h"
 #include "Sofia/Renderer/Renderer2D.h"
+#include "Sofia/Scripting/ScriptEngine.h"
 
 namespace Sofia {
 
@@ -33,12 +34,14 @@ namespace Sofia {
 		entity.AddComponent<TransformComponent>(glm::mat4(1.0f));
 		auto& tag = entity.AddComponent<TagComponent>().Tag;
 		tag = name.empty() ? "Entity" : name;
+		m_Entities[id] = entity;
 
 		return entity;
 	}
 	void Scene::DestroyEntity(Entity entity)
 	{
 		m_Registry.destroy(entity.m_Handle);
+		m_Entities.erase(entity.GetUUID());
 	}
 	template<typename T>
 	static void CopyComponent(Entity src, Entity dst)
@@ -55,6 +58,13 @@ namespace Sofia {
 		CopyComponent<CircleComponent>(entity, e);
 		CopyComponent<CameraComponent>(entity, e);
 		CopyComponent<NativeScriptComponent>(entity, e);
+		CopyComponent<ScriptComponent>(entity, e);
+	}
+	Entity Scene::GetEntity(UUID id)
+	{
+		if (m_Entities.find(id) != m_Entities.end())
+			return { m_Entities.at(id), this };
+		return {};
 	}
 
 	Entity Scene::SetCameraEntity()
@@ -77,6 +87,20 @@ namespace Sofia {
 		return entity;
 	}
 
+	void Scene::OnRuntimeStart()
+	{
+		ScriptEngine::OnRuntimeStart(this);
+		auto view = m_Registry.view<ScriptComponent>();
+		for (auto e : view)
+		{
+			Entity entity = { e, this };
+			ScriptEngine::OnCreateEntity(entity);
+		}
+	}
+	void Scene::OnRuntimeStop()
+	{
+		ScriptEngine::OnRuntimeStop();
+	}
 	void Scene::OnEvent(Event& e)
 	{
 		m_Registry.view<NativeScriptComponent>().each([&](entt::entity entity, NativeScriptComponent& nsc)
@@ -121,6 +145,15 @@ namespace Sofia {
 	}
 	void Scene::OnUpdateRuntime(Timestep ts)
 	{
+		{
+			auto view = m_Registry.view<ScriptComponent>();
+			for (auto e : view)
+			{
+				Entity entity = { e, this };
+				ScriptEngine::OnUpdateEntity(entity, ts);
+			}
+		}
+
 		//native scripts
 		m_Registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
 		{
@@ -218,6 +251,7 @@ namespace Sofia {
 		CopyComponent<CircleComponent>(scene->m_Registry, newScene->m_Registry, entities);
 		CopyComponent<CameraComponent>(scene->m_Registry, newScene->m_Registry, entities);
 		CopyComponent<NativeScriptComponent>(scene->m_Registry, newScene->m_Registry, entities);
+		CopyComponent<ScriptComponent>(scene->m_Registry, newScene->m_Registry, entities);
 
 		newScene->m_Camera = entities.at(scene->m_Registry.get<IDComponent>(scene->m_Camera).ID);
 
@@ -239,6 +273,8 @@ namespace Sofia {
 	{
 		component.Camera->SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 	}
+	template<>
+	void Scene::OnComponentAdd<ScriptComponent>(Entity entity, ScriptComponent& component) {}
 	template<>
 	void Scene::OnComponentAdd<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 }

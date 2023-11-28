@@ -30,7 +30,8 @@ group "Dep"
 group ""
 
 group "Core"
-include "Sofia"
+	include "Sofia"
+	include "Sofia-ScriptCore"
 group ""
 
 include "Game"

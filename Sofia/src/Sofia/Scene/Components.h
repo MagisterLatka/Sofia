@@ -103,6 +103,18 @@ namespace Sofia {
 		CameraComponent& operator=(CameraComponent&& other) = default;
 	};
 
+	struct ScriptComponent
+	{
+		std::string ClassName;
+
+		ScriptComponent() = default;
+		ScriptComponent(const std::string& className) noexcept : ClassName(className) {}
+		ScriptComponent(const ScriptComponent&) = default;
+		ScriptComponent(ScriptComponent&&) = default;
+		ScriptComponent& operator=(const ScriptComponent& other) = default;
+		ScriptComponent& operator=(ScriptComponent&& other) = default;
+	};
+
 	class ScriptableEntity;
 	struct NativeScriptComponent
 	{
@@ -124,4 +136,8 @@ namespace Sofia {
 			return dynamic_cast<T*>(Instance);
 		}
 	};
+
+	template<typename ...Component>
+	struct ComponentGroup {};
+	using AllComponents = ComponentGroup<TransformComponent, SpriteComponent, CircleComponent, CameraComponent, ScriptComponent, NativeScriptComponent>;
 }

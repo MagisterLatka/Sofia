@@ -30,11 +30,14 @@ namespace Sofia {
 		Entity CreateEntityWithUUID(UUID id, const std::string& name = {});
 		void DestroyEntity(Entity entity);
 		void DuplicateEntity(Entity entity);
+		Entity GetEntity(UUID id);
 
 		Entity SetCameraEntity(); //creates new camera entity
 		Entity SetCameraEntity(Entity cameraEntity);
 		Entity SetCameraEntity(Ref<Camera> camera); //creates new camera entity
 
+		void OnRuntimeStart();
+		void OnRuntimeStop();
 		void OnEvent(Event& e);
 		void OnUpdateEditor(Timestep ts, const EditorCamera& camera);
 		void OnUpdateRuntime(Timestep ts);
@@ -51,6 +54,7 @@ namespace Sofia {
 		entt::registry m_Registry;
 		entt::entity m_SceneEntity;
 		entt::entity m_Camera = entt::null;
+		std::unordered_map<UUID, entt::entity> m_Entities;
 
 		glm::ivec2 m_ViewportSize = { 1600, 900 };
 	};

@@ -2,7 +2,7 @@ project "Game"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"
-	staticruntime "on"
+	staticruntime "off"
 	characterset ("MBCS")
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")

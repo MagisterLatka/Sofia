@@ -20,6 +20,7 @@
 #include <exception>
 #include <bitset>
 #include <queue>
+#include <map>
 
 #include <Sofia/Log.h>
 
