@@ -2,17 +2,19 @@ Scene: Game scene
 Scene ID: 1
 Scene camera: 16807581318092124512
 Entities:
-  - Entity: 10876014582533508667
+  - Entity: 16807581318092124512
     Tag component:
-      Tag: Circle
+      Tag: Camera
     Transform component:
-      Position: [0, 0, -0.200000003]
+      Position: [0, 0, 0]
       Orientation: [0, 0, 0]
       Size: [1, 1, 1]
-    Circle component:
-      Color: [0.0352941193, 1, 1, 0.564705908]
-      Thickness: 0.200000003
-      Fade: 0.0710000023
+    Camera component:
+      Type: Orthographic
+      Size: 2
+      Aspect ratio: 2.27703977
+      Near clip: -1
+      Far clip: 1
   - Entity: 5428758644485757241
     Tag component:
       Tag: Quad
@@ -34,16 +36,18 @@ Entities:
       Tilling factor: 1
     Script component:
       Class name: Game.Player
-  - Entity: 16807581318092124512
+      Script Fields:
+        - Name: Speed
+          Type: Float
+          Data: 1
+  - Entity: 10876014582533508667
     Tag component:
-      Tag: Camera
+      Tag: Circle
     Transform component:
-      Position: [0, 0, 0]
+      Position: [0, 0, -0.200000003]
       Orientation: [0, 0, 0]
       Size: [1, 1, 1]
-    Camera component:
-      Type: Orthographic
-      Size: 2
-      Aspect ratio: 2.25988698
-      Near clip: -1
-      Far clip: 1
+    Circle component:
+      Color: [0.0352941193, 1, 1, 0.564705908]
+      Thickness: 0.200000003
+      Fade: 0.0710000023

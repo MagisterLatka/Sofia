@@ -31,7 +31,7 @@ namespace Game
 			else if (Input.IsKeyDown(KeyCode.D))
 				velocity.X = 1.0f;
 
-			velocity *= speed;
+			velocity *= speed * (float)ts;
 
 			Vector3 position = m_Transform.Position;
 			position += velocity * (float)ts;

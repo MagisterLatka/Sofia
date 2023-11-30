@@ -89,6 +89,8 @@ namespace Sofia {
 
 	void Scene::OnRuntimeStart()
 	{
+		m_Running = true;
+
 		ScriptEngine::OnRuntimeStart(this);
 		auto view = m_Registry.view<ScriptComponent>();
 		for (auto e : view)
@@ -99,6 +101,7 @@ namespace Sofia {
 	}
 	void Scene::OnRuntimeStop()
 	{
+		m_Running = false;
 		ScriptEngine::OnRuntimeStop();
 	}
 	void Scene::OnEvent(Event& e)

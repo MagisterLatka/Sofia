@@ -43,6 +43,8 @@ namespace Sofia {
 		void OnUpdateRuntime(Timestep ts);
 		void OnViewportResize(uint32_t width, uint32_t height) noexcept;
 
+		bool IsRunning() const noexcept { return m_Running; }
+
 		static Ref<Scene> Copy(Ref<Scene> scene);
 	private:
 		template<typename T>
@@ -57,5 +59,6 @@ namespace Sofia {
 		std::unordered_map<UUID, entt::entity> m_Entities;
 
 		glm::ivec2 m_ViewportSize = { 1600, 900 };
+		bool m_Running = false;
 	};
 }

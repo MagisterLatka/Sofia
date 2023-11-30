@@ -4,6 +4,8 @@
 #include "Sofia/Scene/Scene.h"
 #include "Sofia/Scene/Entity.h"
 #include "Sofia/Scene/Components.h"
+#include "Sofia/Scripting/ScriptEngine.h"
+#include "Sofia/UUID.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -95,6 +97,24 @@ namespace YAML {
 			return true;
 		}
 	};
+	template<>
+	struct convert<Sofia::UUID>
+	{
+		static Node encode(const Sofia::UUID& value)
+		{
+			Node node;
+			node.push_back((uint64_t)value);
+			return node;
+		}
+		static bool decode(const Node& node, Sofia::UUID& value)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			value = node.as<uint64_t>();
+			return true;
+		}
+	};
 }
 namespace Sofia {
 
@@ -121,6 +141,18 @@ namespace Sofia {
 		out << YAML::Flow;
 		out << YAML::BeginSeq << value.x << value.y << value.z << value.w << YAML::EndSeq;
 		return out;
+	}
+
+#define WriteScriptField(FieldType, Type)\
+	case ScriptFieldType::FieldType:\
+		out << scriptField.GetValue<Type>();\
+		break;
+#define ReadScriptField(FieldType, Type)\
+	case ScriptFieldType::FieldType:\
+	{\
+		Type data = scriptField["Data"].as<Type>();\
+		fieldInstance.SetValue(data);\
+		break;\
 	}
 
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
@@ -219,7 +251,49 @@ namespace Sofia {
 
 			auto& sc = entity.GetComponent<ScriptComponent>();
 			out << YAML::Key << "Class name" << YAML::Value << sc.ClassName;
-			
+
+			Ref<ScriptClass> entityClass = ScriptEngine::GetEntityClass(sc.ClassName);
+			const auto& fields = entityClass->GetFields();
+			if (fields.size() > 0)
+			{
+				out << YAML::Key << "Script Fields" << YAML::Value;
+				auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
+				out << YAML::BeginSeq;
+				for (const auto& [name, field] : fields)
+				{
+					if (entityFields.find(name) == entityFields.end())
+						continue;
+
+					out << YAML::BeginMap; // ScriptField
+					out << YAML::Key << "Name" << YAML::Value << name;
+					out << YAML::Key << "Type" << YAML::Value << Utils::ScriptFieldTypeToString(field.Type);
+
+					out << YAML::Key << "Data" << YAML::Value;
+					ScriptFieldInstance& scriptField = entityFields.at(name);
+					switch (field.Type)
+					{
+						WriteScriptField(Float,		float);
+						WriteScriptField(Double,	double);
+						WriteScriptField(Bool,		bool);
+						WriteScriptField(Char,		char);
+						WriteScriptField(Byte,		int8_t);
+						WriteScriptField(Short,		int16_t);
+						WriteScriptField(Int,		int32_t);
+						WriteScriptField(Long,		int64_t);
+						WriteScriptField(UByte,		uint8_t);
+						WriteScriptField(UShort,	uint16_t);
+						WriteScriptField(UInt,		uint32_t);
+						WriteScriptField(ULong,		uint64_t);
+						WriteScriptField(Vector2,	glm::vec2);
+						WriteScriptField(Vector3,	glm::vec3);
+						WriteScriptField(Vector4,	glm::vec4);
+						WriteScriptField(Entity,	UUID);
+					}
+					out << YAML::EndMap; // ScriptField
+				}
+				out << YAML::EndSeq;
+			}
+
 			out << YAML::EndMap; //ScriptComponent
 		}
 
@@ -331,6 +405,48 @@ namespace Sofia {
 				{
 					auto& sc = deserializedEntity.AddComponent<ScriptComponent>();
 					sc.ClassName = scriptComponent["Class name"].as<std::string>();
+
+					if (auto scriptFields = scriptComponent["Script Fields"])
+					{
+						Ref<ScriptClass> entityClass = ScriptEngine::GetEntityClass(sc.ClassName);
+						SOF_CORE_ASSERT(entityClass);
+						const auto& fields = entityClass->GetFields();
+						auto& entityFields = ScriptEngine::GetScriptFieldMap(deserializedEntity);
+
+						for (auto scriptField : scriptFields)
+						{
+							std::string name = scriptField["Name"].as<std::string>();
+							std::string typeString = scriptField["Type"].as<std::string>();
+							ScriptFieldType type = Utils::ScriptFieldTypeFromString(typeString);
+							ScriptFieldInstance& fieldInstance = entityFields[name];
+							if (fields.find(name) == fields.end())
+							{
+								SOF_CORE_WARN("Class {0} has no field called \"{1}\" (type: {2})", sc.ClassName, name, typeString);
+								continue;
+							}
+
+							fieldInstance.Field = fields.at(name);
+							switch (type)
+							{
+								ReadScriptField(Float,		float);
+								ReadScriptField(Double,		double);
+								ReadScriptField(Bool,		bool);
+								ReadScriptField(Char,		char);
+								ReadScriptField(Byte,		int8_t);
+								ReadScriptField(Short,		int16_t);
+								ReadScriptField(Int,		int32_t);
+								ReadScriptField(Long,		int64_t);
+								ReadScriptField(UByte,		uint8_t);
+								ReadScriptField(UShort,		uint16_t);
+								ReadScriptField(UInt,		uint32_t);
+								ReadScriptField(ULong,		uint64_t);
+								ReadScriptField(Vector2,	glm::vec2);
+								ReadScriptField(Vector3,	glm::vec3);
+								ReadScriptField(Vector4,	glm::vec4);
+								ReadScriptField(Entity,		UUID);
+							}
+						}
+					}
 				}
 				
 				if (uuid == sceneCamera)

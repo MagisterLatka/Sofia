@@ -101,29 +101,6 @@ namespace Sofia {
 
 			return it->second;
 		}
-		const char* ScriptFieldTypeToString(ScriptFieldType type)
-		{
-			switch (type)
-			{
-			case ScriptFieldType::Float:	return "Float";
-			case ScriptFieldType::Double:	return "Double";
-			case ScriptFieldType::Bool:		return "Bool";
-			case ScriptFieldType::Char:		return "Char";
-			case ScriptFieldType::Byte:		return "Byte";
-			case ScriptFieldType::Short:	return "Short";
-			case ScriptFieldType::Int:		return "Int";
-			case ScriptFieldType::Long:		return "Long";
-			case ScriptFieldType::UByte:	return "UByte";
-			case ScriptFieldType::UShort:	return "UShort";
-			case ScriptFieldType::UInt:		return "UInt";
-			case ScriptFieldType::ULong:	return "ULong";
-			case ScriptFieldType::Vector2:	return "Vector2";
-			case ScriptFieldType::Vector3:	return "Vector3";
-			case ScriptFieldType::Vector4:	return "Vector4";
-			case ScriptFieldType::Entity:	return "Entity";
-			}
-			return "<Invalid>";
-		}
 	}
 
 	struct ScriptEngineData
@@ -141,6 +118,7 @@ namespace Sofia {
 
 		std::unordered_map<std::string, Ref<ScriptClass>> entityClasses;
 		std::unordered_map<UUID, Ref<ScriptInstance>> entityInstances;
+		std::unordered_map<UUID, ScriptFieldMap> entityScriptFields;
 
 		Scene* scene = nullptr;
 	};
@@ -223,8 +201,17 @@ namespace Sofia {
 		auto& sc = entity.GetComponent<ScriptComponent>();
 		if (EntityClassExist(sc.ClassName))
 		{
+			UUID id = entity.GetUUID();
 			Ref<ScriptInstance> instance = Ref<ScriptInstance>::Create(s_ScriptEngineData->entityClasses[sc.ClassName], entity);
-			s_ScriptEngineData->entityInstances[entity.GetUUID()] = instance;
+			s_ScriptEngineData->entityInstances[id] = instance;
+
+			if (s_ScriptEngineData->entityScriptFields.find(id) != s_ScriptEngineData->entityScriptFields.end())
+			{
+				const ScriptFieldMap& fieldMap = s_ScriptEngineData->entityScriptFields.at(id);
+				for (const auto& [name, fieldInstance] : fieldMap)
+					instance->SetFieldValueInternal(name, fieldInstance.m_Buffer);
+			}
+
 			instance->InvokeOnCreate();
 		}
 	}
@@ -247,9 +234,20 @@ namespace Sofia {
 			return nullptr;
 		return it->second;
 	}
+	Ref<ScriptClass> ScriptEngine::GetEntityClass(const std::string& name)
+	{
+		if (s_ScriptEngineData->entityClasses.find(name) == s_ScriptEngineData->entityClasses.end())
+			return nullptr;
+		return s_ScriptEngineData->entityClasses.at(name);
+	}
 	const std::unordered_map<std::string, Ref<ScriptClass>>& ScriptEngine::GetEntityClasses()
 	{
 		return s_ScriptEngineData->entityClasses;
+	}
+	ScriptFieldMap& ScriptEngine::GetScriptFieldMap(Entity entity)
+	{
+		SOF_CORE_ASSERT(entity);
+		return s_ScriptEngineData->entityScriptFields[entity.GetUUID()];
 	}
 	MonoImage* ScriptEngine::GetCoreAssemblyImage()
 	{

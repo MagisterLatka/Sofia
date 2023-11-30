@@ -238,10 +238,10 @@ namespace Sofia {
 				if (changed) camera->Recalc();
 			}
 		});
-		DrawComponent<ScriptComponent>(m_Scene, "Script component", entity, [entity](ScriptComponent& component, Ref<Scene> scene) mutable
+		DrawComponent<ScriptComponent>(m_Scene, "Script component", entity, [entity, scene = m_Scene](ScriptComponent& component, Ref<Scene> scene) mutable
 		{
 			static char buffer[128];
-			strcpy(buffer, component.ClassName.c_str());
+			strcpy_s(buffer, component.ClassName.c_str());
 
 			bool classExist = ScriptEngine::EntityClassExist(component.ClassName);
 			if (!classExist)
@@ -250,19 +250,62 @@ namespace Sofia {
 			if (ImGui::InputText("Class", buffer, sizeof(buffer)))
 				component.ClassName = buffer;
 
-			if (auto instance = ScriptEngine::GetEntityScriptInstance(entity.GetUUID()))
+			if (scene->IsRunning())
 			{
-				const auto& fields = instance->GetScriptClass()->GetFields();
-				for (const auto& [name, field] : fields)
+				if (auto instance = ScriptEngine::GetEntityScriptInstance(entity.GetUUID()))
 				{
-					switch (field.Type)
+					const auto& fields = instance->GetScriptClass()->GetFields();
+					for (const auto& [name, field] : fields)
 					{
-						case ScriptFieldType::Float:
+						switch (field.Type)
 						{
-							float data = instance->GetFieldValue<float>(name);
-							if (Sofia::UI::DragFloat(name, data, 0.0f, -10.0f, 10.0f))
-								instance->SetFieldValue(name, data);
-							break;
+							case ScriptFieldType::Float:
+							{
+								float data = instance->GetFieldValue<float>(name);
+								if (UI::DragFloat(name, data, 0.0f, -100.0f, 100.0f))
+									instance->SetFieldValue(name, data);
+								break;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if (classExist)
+				{
+					Ref<ScriptClass> entityClass = ScriptEngine::GetEntityClass(component.ClassName);
+					const auto& fields = entityClass->GetFields();
+
+					auto& entityFields = ScriptEngine::GetScriptFieldMap(entity);
+					for (const auto& [name, field] : fields)
+					{
+						if (entityFields.find(name) != entityFields.end())
+						{
+							ScriptFieldInstance& scriptField = entityFields.at(name);
+							if (field.Type == ScriptFieldType::Float)
+							{
+								float data = scriptField.GetValue<float>();
+								if (UI::DragFloat(name, data, 0.0f, -100.0f, 100.0f))
+									scriptField.SetValue(data);
+							}
+						}
+						else
+						{
+							switch (field.Type)
+							{
+								case ScriptFieldType::Float:
+								{
+									float data = 0.0f;
+									if (UI::DragFloat(name, data, 0.0f, -100.0f, 100.0f))
+									{
+										ScriptFieldInstance& fieldInstance = entityFields[name];
+										fieldInstance.Field = field;
+										fieldInstance.SetValue(data);
+									}
+									break;
+								}
+							}
 						}
 					}
 				}
