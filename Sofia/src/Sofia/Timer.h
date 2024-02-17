@@ -14,7 +14,8 @@ namespace Sofia {
 
 		SOF_CORE double Elapsed() noexcept
 		{
-			return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - m_Start).count() * 0.001 * 0.001;
+			//note: nanoseconds are required here, because microseconds are not enough on linux (process is running too fast)
+			return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_Start).count() * 0.001 * 0.001 * 0.001;
 		}
 	private:
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_Start;

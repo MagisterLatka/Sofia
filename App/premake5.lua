@@ -34,12 +34,7 @@ project "App"
 	links
 	{
 		"Sofia"
-	}
-		
-	postbuildcommands
-	{
-		"{COPYFILE} \"%{cfg.targetdir}/../Sofia/*\" \"%{cfg.targetdir}\""
-	}
+	}	
 	
 	filter "system:windows"
 		systemversion "latest"
@@ -47,6 +42,16 @@ project "App"
 		buildoptions
 		{
 			"/Zc:preprocessor"
+		}
+		postbuildcommands
+		{
+			"{COPYFILE} \"%{cfg.targetdir}/../Sofia/Sofia.dll\" \"%{cfg.targetdir}\""
+		}
+
+	filter "system:linux"
+		postbuildcommands
+		{
+			"{COPYFILE} \"%{cfg.targetdir}/../Sofia/libSofia.so\" \"%{cfg.targetdir}\""
 		}
 
 	filter "configurations:Debug"

@@ -1,7 +1,7 @@
 .vs/
 bin/
 bin-int/
-scripts/__pycache__
+**/__pycache__
 
 *.ini
 *.lib
@@ -15,4 +15,5 @@ scripts/__pycache__
 *.log
 *.cache
 *.cso
+Makefile
 
