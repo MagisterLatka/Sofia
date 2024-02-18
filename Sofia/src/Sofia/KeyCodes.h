@@ -132,6 +132,10 @@ namespace Sofia
 		os << static_cast<uint32_t>(keyCode);
 		return os;
 	}
+	inline uint8_t GetVKCode(KeyCode keyCode) noexcept
+	{
+		return (uint8_t)keyCode;
+	}
 }
 
 #define SOF_KEY_SPACE			::Sofia::KeyCode::Space

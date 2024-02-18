@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Sofia/Application.h>
+#include <Sofia/Input.h>
 
 #include <Sofia/Events/Event.h>
 #include <Sofia/Events/ApplicationEvents.h>

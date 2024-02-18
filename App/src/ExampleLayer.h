@@ -13,5 +13,7 @@ public:
 	virtual void OnUIRender() override;
 	virtual void OnEvent(Sofia::Event& e) override;
 private:
-	double m_Time = 0.0;
+	bool OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e);
+private:
+	std::string m_Title;
 };

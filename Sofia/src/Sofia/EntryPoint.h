@@ -27,9 +27,20 @@ int main(int argc, char** argv, char** envp)
 		MessageBoxA(nullptr, "No details available", "Unknown Exception", MB_OK | MB_ICONEXCLAMATION);
 	}
 #else
+	catch (const Sofia::SofiaException& e)
+	{
+		SOF_CORE_CRITICAL(e.GetType());
+		SOF_CORE_ERROR(e.what());
+	}
+	catch (const std::exception& e)
+	{
+		SOF_CORE_CRITICAL("Standard Exception");
+		SOF_CORE_ERROR(e.what());
+	}
 	catch (...)
 	{
-		
+		SOF_CORE_CRITICAL("Unknown Exception");
+		SOF_CORE_ERROR("No details available");
 	}
 #endif
 	if (app) delete app;

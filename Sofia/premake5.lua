@@ -33,15 +33,21 @@ project "Sofia"
 	links
 	{
 		
-	}
-	
-	
+	}	
 
 	filter "system:windows"
 		systemversion "latest"
+		
 		buildoptions
 		{
 			"/Zc:preprocessor"
+		}
+		
+		links
+		{
+			"d3d11.lib",
+			"D3DCompiler.lib",
+			"dxguid.lib"
 		}
 		
 	filter "configurations:Debug"
