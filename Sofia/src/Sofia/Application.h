@@ -16,7 +16,11 @@ namespace Sofia {
 		std::string Name = "Sofia Engine";
 		uint32_t Width = 1600u, Height = 900;
 
+#if defined(SOF_PLATROFM_WINDOWS)
 		RendererAPI::API GraphicsAPI = RendererAPI::API::DX11;
+#else
+		RendererAPI::API GraphicsAPI = RendererAPI::API::OpenGL;
+#endif
 	};
 	
 	class Application

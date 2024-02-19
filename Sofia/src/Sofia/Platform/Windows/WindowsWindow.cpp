@@ -13,7 +13,7 @@
 
 namespace Sofia {
 
-	WindowsWindow::WindowsWindow(const WindowProps& props) noexcept
+	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
 		Init(props);
 	}

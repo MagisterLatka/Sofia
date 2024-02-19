@@ -15,6 +15,11 @@ project "Sofia"
 		"src/**.cpp",
 		"src/**.h"
 	}
+	
+	removefiles
+	{
+		"src/Sofia/Platform/**"
+	}
 
 	defines
 	{
@@ -27,7 +32,9 @@ project "Sofia"
 		"src",
 		"vendor",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.glm}"
+		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.glfw}",
+		"%{IncludeDirs.glad}"
 	}
 
 	links
@@ -37,6 +44,14 @@ project "Sofia"
 
 	filter "system:windows"
 		systemversion "latest"
+		
+		files
+		{
+			"src/Sofia/Platform/DX11/**.cpp",
+			"src/Sofia/Platform/DX11/**.h",
+			"src/Sofia/Platform/Windows/**.cpp",
+			"src/Sofia/Platform/Windows/**.h"
+		}
 		
 		buildoptions
 		{
@@ -50,6 +65,28 @@ project "Sofia"
 			"dxguid.lib"
 		}
 		
+	filter "system:linux"
+		pic "On"
+		
+		files
+		{
+			"src/Sofia/Platform/Linux/**.cpp",
+			"src/Sofia/Platform/Linux/**.h",
+			"src/Sofia/Platform/OpenGL/**.cpp",
+			"src/Sofia/Platform/OpenGL/**.h"
+		}
+		
+		links
+		{
+			"GLFW",
+			"GLAD"
+		}
+
+		defines
+		{
+			"GLFW_INCLUDE_NONE"
+		}
+
 	filter "configurations:Debug"
 		defines "SOF_DEBUG"
 		symbols "On"

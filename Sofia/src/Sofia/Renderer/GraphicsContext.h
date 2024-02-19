@@ -11,6 +11,6 @@ namespace Sofia {
 
 		SOF_CORE virtual void Init() = 0;
 
-		SOF_CORE static Ref<GraphicsContext> Create();
+		SOF_CORE static Ref<GraphicsContext> Create(void* data = nullptr);
 	};
 }

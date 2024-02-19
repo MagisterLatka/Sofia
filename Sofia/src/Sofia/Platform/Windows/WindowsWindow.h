@@ -39,7 +39,7 @@ namespace Sofia {
 			HINSTANCE m_Instance;
 		};
 	public:
-		SOF_CORE WindowsWindow(const WindowProps& props) noexcept;
+		SOF_CORE WindowsWindow(const WindowProps& props);
 		WindowsWindow(const WindowsWindow&) = delete;
 		SOF_CORE ~WindowsWindow();
 
@@ -51,7 +51,7 @@ namespace Sofia {
 		SOF_CORE virtual void Clear(const glm::vec4& color) noexcept override;
 
 		SOF_CORE virtual void SetTitle(const std::string& title) override;
-		SOF_CORE virtual const std::string& GetTille() const noexcept override { return m_Data.title; }
+		SOF_CORE virtual const std::string& GetTitle() const noexcept override { return m_Data.title; }
 
 		SOF_CORE virtual void SetEventCallback(const EventCallbackFn& callback) noexcept override { m_Data.eventCallback = callback; }
 		SOF_CORE virtual void SetVSync(bool vsync) noexcept override { m_Data.vSync = vsync; }
@@ -72,23 +72,23 @@ namespace Sofia {
 
 		SOF_CORE void DefaultEventCallback(Event& e) {}
 	private:
-		HWND m_Window = nullptr;
-		ComPtr<IDXGISwapChain> m_SwapChain;
-		ComPtr<ID3D11RenderTargetView> m_TargetView;
-
-		Keyboard m_Keyboard;
-		Mouse m_Mouse;
-
 		struct WindowData
 		{
 			std::string title;
 			uint32_t width, height;
 			glm::ivec2 pos;
-			bool vSync;
+			bool vSync = false;
 
 			EventCallbackFn eventCallback;
 		};
 		WindowData m_Data;
+
+		Keyboard m_Keyboard;
+		Mouse m_Mouse;
+		
+		HWND m_Window = nullptr;
+		ComPtr<IDXGISwapChain> m_SwapChain;
+		ComPtr<ID3D11RenderTargetView> m_TargetView;
 	};
 
 }

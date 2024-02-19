@@ -33,7 +33,7 @@ namespace Sofia {
 		SOF_CORE virtual void Clear(const glm::vec4& color = { 0.0f, 0.0f, 0.0f, 1.0f }) noexcept = 0;
 
 		SOF_CORE virtual void SetTitle(const std::string& title) = 0;
-		SOF_CORE virtual const std::string& GetTille() const noexcept = 0;
+		SOF_CORE virtual const std::string& GetTitle() const noexcept = 0;
 
 		SOF_CORE virtual void SetEventCallback(const EventCallbackFn& callback) noexcept = 0;
 		SOF_CORE virtual void SetVSync(bool vsync) noexcept = 0;

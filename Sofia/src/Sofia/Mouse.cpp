@@ -70,6 +70,9 @@ namespace Sofia {
 		m_Buffer.push(Event(Event::Type::WheelDown, *this));
 		TrimBuffer();
 	}
+#if !defined(WHEEL_DELTA)
+#	define WHEEL_DELTA 120
+#endif
 	void Mouse::OnWheelDelta(int x, int y, int delta) noexcept
 	{
 		m_WheelDelta += delta;

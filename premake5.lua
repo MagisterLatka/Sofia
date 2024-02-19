@@ -18,6 +18,8 @@ workspace "Sofia"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dep"
+	include "Sofia/vendor/glfw"
+	include "Sofia/vendor/glad"
 group ""
 
 group "Core"

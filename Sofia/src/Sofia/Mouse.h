@@ -7,6 +7,7 @@ namespace Sofia {
 	class Mouse
 	{
 		friend class WindowsWindow;
+		friend class LinuxWindow;
 	public:
 		class Event
 		{

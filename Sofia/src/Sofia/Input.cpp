@@ -8,16 +8,7 @@ namespace Sofia {
 
 	bool Input::IsKeyPressed(KeyCode key)
 	{
-		uint8_t keycode = 0;
-		switch (RendererAPI::GetAPI())
-		{
-		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); break;
-		case RendererAPI::API::OpenGL:	SOF_CORE_THROW_INFO("OpenGL is not supported yet"); break;
-		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); break;
-		case RendererAPI::API::DX11:
-		case RendererAPI::API::DX12:	keycode = GetVKCode(key);
-		}
-		return Application::Get().GetWindow()->GetKeyboard().IsKeyPressed(keycode);
+		return Application::Get().GetWindow()->GetKeyboard().IsKeyPressed(static_cast<uint8_t>(key));
 	}
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
