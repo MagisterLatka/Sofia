@@ -6,15 +6,15 @@
 
 namespace Sofia {
 
-    class OpenGLContext : public GraphicsContext
-    {
-    public:
-        SOF_CORE OpenGLContext(void* window);
-        SOF_CORE ~OpenGLContext() = default;
+	class OpenGLContext : public GraphicsContext
+	{
+	public:
+		SOF_CORE OpenGLContext(void* window);
+		SOF_CORE ~OpenGLContext() = default;
 
-        SOF_CORE virtual void Init() override {}
-        SOF_CORE void InitWindow();
-    private:
-        GLFWwindow* m_Window = nullptr;
-    };
+		SOF_CORE virtual void Init() override {}
+		SOF_CORE void InitWindow();
+	private:
+		GLFWwindow* m_Window = nullptr;
+	};
 }

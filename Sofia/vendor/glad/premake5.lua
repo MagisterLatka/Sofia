@@ -19,7 +19,7 @@ project "GLAD"
 	}
 
 	filter "system:windows"
-		systemversion "Latest"
+		systemversion "latest"
 		
 	filter "system:linux"
 		pic "On"
