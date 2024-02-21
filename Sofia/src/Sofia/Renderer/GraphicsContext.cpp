@@ -11,12 +11,12 @@
 
 namespace Sofia {
 
-	Ref<GraphicsContext> GraphicsContext::Create(void* data)
+	Ref<GraphicsContext> GraphicsContext::Create()
 	{
 		switch (RendererAPI::GetAPI())
 		{
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
-		case RendererAPI::API::OpenGL:	return Ref<OpenGLContext>::Create(data);
+		case RendererAPI::API::OpenGL:	return Ref<OpenGLContext>::Create();
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
 #if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11Context>::Create();

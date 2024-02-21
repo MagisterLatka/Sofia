@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "Application.h"
 
+#include "Sofia/Renderer/Renderer.h"
+
 namespace Sofia {
 
 	SOF_CORE Application* Application::s_Application = nullptr;
@@ -29,13 +31,19 @@ namespace Sofia {
 		m_Window = Window::Create(windowProps);
 		m_Window->SetEventCallback(SOF_BIND_EVENT_FN(Application::OnEvent));
 
+		//init renderer command queue & shader library
+		Renderer::Init();
+
 		//call OnAttach() on layers in LayerStack
 		m_LayerStack->Init();
+
+		Renderer::Render();
 	}
 	void Application::Shutdown()
 	{
 		m_LayerStack.reset();
 
+		Renderer::Shutdown();
 		m_Window.Reset();
 		m_GraphicsContext.Reset();
 	}

@@ -5,11 +5,7 @@
 #include "Sofia/Events/KeyEvents.h"
 #include "Sofia/Events/MouseEvents.h"
 
-#include "Sofia/Platform/DX11/DX11Context.h"
-
 #include "Sofia/Application.h"
-
-#include <dxgi1_3.h>
 
 namespace Sofia {
 
@@ -24,8 +20,7 @@ namespace Sofia {
 
 	void WindowsWindow::OnUpdate()
 	{
-		HRESULT hr;
-		SOF_DX_GRAPHICS_CALL_INFO(m_SwapChain->Present(m_Data.vSync ? 1u : 0u, 0u));
+		Application::Get().GetGraphicsContext()->SwapBuffers(this);
 	}
 
 	std::optional<int> WindowsWindow::ProcessEvents()
@@ -44,19 +39,11 @@ namespace Sofia {
 
 	void WindowsWindow::BindToRender() noexcept
 	{
-		DX11Context::GetContextFromApplication()->GetContext()->OMSetRenderTargets(1u, m_TargetView.GetAddressOf(), nullptr);
-		D3D11_VIEWPORT viewport;
-		viewport.Width = (float)m_Data.width;
-		viewport.Height = (float)m_Data.height;
-		viewport.TopLeftX = 0.0f;
-		viewport.TopLeftY = 0.0f;
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
-		DX11Context::GetContextFromApplication()->GetContext()->RSSetViewports(1u, &viewport);
+		Application::Get().GetGraphicsContext()->BindToRender(this);
 	}
 	void WindowsWindow::Clear(const glm::vec4& color) noexcept
 	{
-		DX11Context::GetContextFromApplication()->GetContext()->ClearRenderTargetView(m_TargetView.Get(), glm::value_ptr(color));
+		Application::Get().GetGraphicsContext()->Clear(this, color);
 	}
 
 	void WindowsWindow::SetTitle(const std::string& title)
@@ -88,43 +75,14 @@ namespace Sofia {
 			WindowClass::GetInstance(), this); m_Window == nullptr)
 			throw SOF_WINDOWS_WINDOW_LAST_EXCEPTION();
 
+		Application::Get().GetGraphicsContext()->InitForWindow(this);
+
 		ShowWindow(m_Window, SW_SHOW);
-
-		DXGI_SWAP_CHAIN_DESC swapChain = {};
-		swapChain.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		swapChain.BufferDesc.Width = m_Data.width;
-		swapChain.BufferDesc.Height = m_Data.height;
-		swapChain.BufferDesc.RefreshRate.Numerator = 0u;
-		swapChain.BufferDesc.RefreshRate.Denominator = 0u;
-		swapChain.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		swapChain.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		swapChain.SampleDesc.Count = 1u;
-		swapChain.SampleDesc.Quality = 0u;
-		swapChain.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChain.BufferCount = 2u;
-		swapChain.OutputWindow = m_Window;
-		swapChain.Windowed = TRUE;
-		swapChain.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		swapChain.Flags = 0u;
-
-		ComPtr<IDXGIDevice3> dxgiDevice;
-		ComPtr<IDXGIAdapter> adapter;
-		ComPtr<IDXGIFactory> factory;
-		DX11Context::GetContextFromApplication()->GetDevice().As(&dxgiDevice);
-		HRESULT hr = dxgiDevice->GetAdapter(&adapter);
-		if (SUCCEEDED(hr))
-		{
-			adapter->GetParent(IID_PPV_ARGS(&factory));
-			SOF_DX_GRAPHICS_CALL_INFO(factory->CreateSwapChain(DX11Context::GetContextFromApplication()->GetDevice().Get(), &swapChain, &m_SwapChain));
-		}
-
-		ComPtr<ID3D11Resource> backBuffer;
-		SOF_DX_GRAPHICS_CALL_INFO(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), &backBuffer));
-		SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_TargetView));
 	}
 
 	void WindowsWindow::Shutdown()
 	{
+		Application::Get().GetGraphicsContext()->ShutdownForWindow(this);
 		DestroyWindow(m_Window);
 	}
 
@@ -190,6 +148,7 @@ namespace Sofia {
 			int ypos = HIWORD(lParam);
 			m_Data.pos = { xpos, ypos };
 			WindowMovedEvent e(xpos, ypos);
+			break;
 		}
 
 		case WM_KEYDOWN:
@@ -318,7 +277,7 @@ namespace Sofia {
 	{
 		WNDCLASSEXA windowClass = { 0 };
 		windowClass.cbSize = sizeof(WNDCLASSEXA);
-		windowClass.style = CS_OWNDC;
+		windowClass.style = CS_HREDRAW | CS_VREDRAW;
 		windowClass.lpfnWndProc = WindowsWindow::HandleMsgSetup;
 		windowClass.cbClsExtra = 0;
 		windowClass.cbWndExtra = 0;

@@ -39,6 +39,11 @@ project "App"
 	filter "system:windows"
 		systemversion "latest"
 		
+		files
+		{
+			"assets/shaders/**.hlsl"
+		}
+		
 		buildoptions
 		{
 			"/Zc:preprocessor"
@@ -64,3 +69,11 @@ project "App"
 		optimize "Full"
 		runtime "Release"
 		inlining "Auto"
+
+	filter "files:**.vert.hlsl"
+		shadertype ("Vertex")
+		shaderobjectfileoutput ("%{prj.location}/assets/shaders/%{file.basename}.cso")
+
+	filter "files:**.frag.hlsl"
+		shadertype ("Pixel")
+		shaderobjectfileoutput ("%{prj.location}/assets/shaders/%{file.basename}.cso")

@@ -13,7 +13,22 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
+	//Later some basic shaders will be defined in engine, other shaders are up to the user to be saved in correct file
+	if (Sofia::RendererAPI::GetAPI() == Sofia::RendererAPI::API::DX11)
+		m_Shader = Sofia::Shader::Create(L"assets/shaders/basic.vert.cso", L"assets/shaders/basic.frag.cso");
+	else
+		m_Shader = Sofia::Shader::Create(L"assets/shaders/basic.shader");
 
+	float vertices[] = {
+		 0.0f,  0.5f,
+		 0.5f, -0.5f,
+		-0.5f, -0.5f
+	};
+	Sofia::BufferLayout layout = {
+		{ "Position", Sofia::BufferLayoutElementDataType::Float2 }
+	};
+	Ref<Sofia::VertexBuffer> vbo = Sofia::VertexBuffer::Create(layout, vertices, sizeof(vertices));
+	m_InputLayout = Sofia::InputLayout::Create({ vbo }, m_Shader);
 }
 void ExampleLayer::OnDetach()
 {
@@ -22,12 +37,14 @@ void ExampleLayer::OnDetach()
 
 void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 {
+	Sofia::Application::Get().GetWindow()->BindToRender();
 	Sofia::Application::Get().GetWindow()->Clear();
 
-	glm::vec2 pos = Sofia::Input::GetMousePos();
-	std::ostringstream oss;
-	oss << pos.x << ", " << pos.y;
-	m_Title = oss.str();
+	m_Shader->Bind();
+	m_InputLayout->Bind();
+
+	Sofia::RenderCommand::Draw(Sofia::RendererAPI::Topology::Triangles, 3u);
+	Sofia::Renderer::Render();
 }
 void ExampleLayer::OnUIRender()
 {
@@ -41,11 +58,5 @@ void ExampleLayer::OnEvent(Sofia::Event& e)
 }
 bool ExampleLayer::OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e)
 {
-	if (e.GetButton() == Sofia::MouseCode::ButtonLeft)
-	{
-		Sofia::Application::Get().GetWindow()->SetTitle(m_Title);
-		SOF_TRACE("Set title to {0}", m_Title);
-	}
 	return false;
-
 }

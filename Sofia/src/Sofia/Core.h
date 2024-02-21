@@ -20,16 +20,16 @@
 #define SOF_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
 #define BIT(x) (1 << x)
 
-#define SOF_CORE_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed"; __VA_OPT__(message += Sofia::Format(": {-1}", -1, __VA_ARGS__));\
-									SOF_CORE_CRITICAL(message); throw Sofia::MessageException(__LINE__, __FILE__, message, true); } }
-#define SOF_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed"; __VA_OPT__(message += Sofia::Format(": {-1}", -1, __VA_ARGS__));\
-									SOF_CRITICAL(message); throw Sofia::MessageException(__LINE__, __FILE__, message, false); } }
+#define SOF_CORE_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed"; __VA_OPT__((message) += Sofia::Format(": {-1}", -1, __VA_ARGS__));\
+									SOF_CORE_CRITICAL(message); throw Sofia::MessageException(__LINE__, __FILE__, (message), true); } }
+#define SOF_ASSERT(x, ...) { if (!(x)) { std::string message = "Assertion failed"; __VA_OPT__((message) += Sofia::Format(": {-1}", -1, __VA_ARGS__));\
+									SOF_CRITICAL(message); throw Sofia::MessageException(__LINE__, __FILE__, (message), false); } }
 
 #define SOF_CORE_THROW throw Sofia::SofiaException(__LINE__, __FILE__, true);
 #define SOF_THROW throw Sofia::SofiaException(__LINE__, __FILE__, false);
 
-#define SOF_CORE_THROW_INFO(message) { SOF_CORE_CRITICAL(message);  throw Sofia::MessageException(__LINE__, __FILE__, message, true); }
-#define SOF_THROW_INFO(message) { SOF_CRITICAL(message);  throw Sofia::MessageException(__LINE__, __FILE__, message, false); }
+#define SOF_CORE_THROW_INFO(message) { SOF_CORE_CRITICAL(message);  throw Sofia::MessageException(__LINE__, __FILE__, (message), true); }
+#define SOF_THROW_INFO(message) { SOF_CRITICAL(message);  throw Sofia::MessageException(__LINE__, __FILE__, (message), false); }
 
 #include "Sofia/Timer.h"
 

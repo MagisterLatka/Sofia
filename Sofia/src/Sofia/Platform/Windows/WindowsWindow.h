@@ -9,6 +9,8 @@ namespace Sofia {
 
 	class WindowsWindow : public Window
 	{
+		friend class DX11Context;
+		friend class OpenGLContext;
 	public:
 		class WindowException : public SofiaException
 		{
@@ -47,6 +49,7 @@ namespace Sofia {
 
 		SOF_CORE virtual void OnUpdate() override;
 		SOF_CORE static std::optional<int> ProcessEvents();
+		SOF_CORE virtual void BindWindow() noexcept override {}
 		SOF_CORE virtual void BindToRender() noexcept override;
 		SOF_CORE virtual void Clear(const glm::vec4& color) noexcept override;
 
@@ -87,8 +90,7 @@ namespace Sofia {
 		Mouse m_Mouse;
 		
 		HWND m_Window = nullptr;
-		ComPtr<IDXGISwapChain> m_SwapChain;
-		ComPtr<ID3D11RenderTargetView> m_TargetView;
+		HGLRC m_Context = nullptr;
 	};
 
 }

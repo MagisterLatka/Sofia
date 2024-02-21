@@ -36,7 +36,8 @@ project "Sofia"
 	links
 	{
 		"GLFW",
-		"GLAD"
+		"GLAD",
+		"opengl32.lib"
 	}	
 
 	filter "system:windows"

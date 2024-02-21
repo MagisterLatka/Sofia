@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "LinuxWindow.h"
 
+#include "Sofia/Application.h"
+
 #include "Sofia/Events/ApplicationEvents.h"
 #include "Sofia/Events/MouseEvents.h"
 #include "Sofia/Events/KeyEvents.h"
@@ -20,7 +22,7 @@ namespace Sofia {
 
 	void LinuxWindow::OnUpdate()
 	{
-		glfwSwapBuffers(m_Window);
+		Application::Get().GetGraphicsContext()->SwapBuffers(this);
 	}
 
 	std::optional<int> LinuxWindow::ProcessEvents()
@@ -29,13 +31,13 @@ namespace Sofia {
 		return {};
 	}
 
-	void LinuxWindow::BindToRender() noexcept
+	void LinuxWindow::BindWindow() noexcept
 	{
-		glfwMakeContextCurrent(m_Window);
+		Application::Get().GetGraphicsContext()->BindWindow(this);
 	}
 	void LinuxWindow::Clear(const glm::vec4& color) noexcept
 	{
-		glClearColor(color.x, color.y, color.r, color.a);
+		Application::Get().GetGraphicsContext()->Clear(this, color);
 	}
 
 	void LinuxWindow::SetTitle(const std::string& title)
@@ -70,9 +72,6 @@ namespace Sofia {
 
 		glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
-
-		m_Context = GraphicsContext::Create(m_Window).As<OpenGLContext>();
-		m_Context->InitWindow();
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 		{

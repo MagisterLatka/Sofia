@@ -29,6 +29,7 @@ namespace Sofia {
 
 		SOF_CORE virtual void OnUpdate() = 0;
 		SOF_CORE static std::optional<int> ProcessEvents();
+		SOF_CORE virtual void BindWindow() noexcept = 0;
 		SOF_CORE virtual void BindToRender() noexcept = 0;
 		SOF_CORE virtual void Clear(const glm::vec4& color = { 0.0f, 0.0f, 0.0f, 1.0f }) noexcept = 0;
 

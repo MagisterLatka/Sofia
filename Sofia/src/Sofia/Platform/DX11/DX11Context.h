@@ -33,6 +33,13 @@ namespace Sofia {
 		SOF_CORE ~DX11Context() = default;
 
 		SOF_CORE virtual void Init() override;
+		SOF_CORE virtual void InitForWindow(void* window) override;
+		SOF_CORE virtual void ShutdownForWindow(void* window) override;
+
+		SOF_CORE virtual void SwapBuffers(void* window) override;
+		SOF_CORE virtual void BindWindow(void* window) override {}
+		SOF_CORE virtual void BindToRender(void* window) override;
+		SOF_CORE virtual void Clear(void* window, const glm::vec4& color) override;
 
 		SOF_CORE ComPtr<ID3D11Device> GetDevice() { SOF_CORE_ASSERT(m_Device, "No DX11Device created"); return m_Device; }
 		SOF_CORE ComPtr<ID3D11DeviceContext> GetContext() { SOF_CORE_ASSERT(m_Context, "No DX11Device created"); return m_Context; }
@@ -41,6 +48,8 @@ namespace Sofia {
 	private:
 		ComPtr<ID3D11Device> m_Device;
 		ComPtr<ID3D11DeviceContext> m_Context;
+
+		std::unordered_map<HWND, std::pair<ComPtr<IDXGISwapChain>, ComPtr<ID3D11RenderTargetView>>> m_WindowData;
 	};
 }
 
