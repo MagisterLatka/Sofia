@@ -36,8 +36,7 @@ project "Sofia"
 	links
 	{
 		"GLFW",
-		"GLAD",
-		"opengl32.lib"
+		"GLAD"
 	}	
 
 	filter "system:windows"
@@ -52,7 +51,8 @@ project "Sofia"
 		{
 			"d3d11.lib",
 			"D3DCompiler.lib",
-			"dxguid.lib"
+			"dxguid.lib",
+			"opengl32.lib"
 		}
 		
 	filter "system:linux"

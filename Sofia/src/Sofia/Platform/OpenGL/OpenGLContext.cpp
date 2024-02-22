@@ -21,17 +21,6 @@ typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
 namespace Sofia {
 
-	void OpenGLContext::Init()
-	{
-#if !defined(SOF_PLATFORM_WINDOWS)
-		int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		SOF_CORE_ASSERT(success, "Failed to initialize GLAD");
-
-		SOF_CORE_INFO("OpenGL Info:");
-		SOF_CORE_INFO("\tRenderer: {0}", (char*)glGetString(GL_RENDERER));
-		SOF_CORE_INFO("\tVersion: {0}", (char*)glGetString(GL_VERSION));
-#endif
-	}
 	void OpenGLContext::InitForWindow(void* window)
 	{
 #if defined(SOF_PLATFORM_WINDOWS)
@@ -90,6 +79,18 @@ namespace Sofia {
 			m_WGLSwapInternalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
 			PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
 		}
+#else
+		int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		SOF_CORE_ASSERT(success, "Failed to initialize GLAD");
+
+		static bool initialized = false;
+		if (!initialized)
+		{
+			SOF_CORE_INFO("OpenGL Info:");
+			SOF_CORE_INFO("\tRenderer: {0}", (char*)glGetString(GL_RENDERER));
+			SOF_CORE_INFO("\tVersion: {0}", (char*)glGetString(GL_VERSION));
+			initialized = true;
+		}
 #endif
 	}
 	void OpenGLContext::ShutdownForWindow(void* window)
@@ -122,10 +123,16 @@ namespace Sofia {
 	void OpenGLContext::BindWindow(void* window)
 	{
 #if defined(SOF_PLATFORM_WINDOWS)
-
+		WindowsWindow* wnd = (WindowsWindow*)window;
+		HDC hdc = GetDC(wnd->m_Window);
+		wglMakeCurrent(hdc, wnd->m_Context);
 #else
 		glfwMakeContextCurrent(((LinuxWindow*)window)->m_Window);
 #endif
+	}
+	void OpenGLContext::BindToRender(void* window)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 	void OpenGLContext::Clear(void* window, const glm::vec4& color)
 	{

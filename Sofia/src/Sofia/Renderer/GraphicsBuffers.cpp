@@ -17,8 +17,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLVertexBuffer>::Create(layout, data, size, usage);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11VertexBuffer>::Create(layout, data, size, usage);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -31,8 +36,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLVertexBuffer>::Create(layout, buffer, usage);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11VertexBuffer>::Create(layout, buffer, usage);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -45,8 +55,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLVertexBuffer>::Create(layout, buffer, usage);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11VertexBuffer>::Create(layout, buffer, usage);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -62,8 +77,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLIndexBuffer>::Create(data, size, usage);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11IndexBuffer>::Create(data, size, usage);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -76,8 +96,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLIndexBuffer>::Create(buffer, usage);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11IndexBuffer>::Create(buffer, usage);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -90,8 +115,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLIndexBuffer>::Create(buffer, usage);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11IndexBuffer>::Create(buffer, usage);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -107,8 +137,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLConstantBuffer>::Create(binding, data, size);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11ConstantBuffer>::Create(binding, data, size);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -121,8 +156,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLConstantBuffer>::Create(binding, buffer);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11ConstantBuffer>::Create(binding, buffer);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -135,8 +175,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLConstantBuffer>::Create(binding, buffer);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11ConstantBuffer>::Create(binding, buffer);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -149,8 +194,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLConstantBuffer>::Create(binding, buffer);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11ConstantBuffer>::Create(binding, buffer);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");

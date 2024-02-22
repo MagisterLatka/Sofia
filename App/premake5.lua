@@ -34,7 +34,12 @@ project "App"
 	links
 	{
 		"Sofia"
-	}	
+	}
+
+	postbuildcommands
+	{
+		"{COPYDIR} \"%{prj.location}/assets\" \"%{cfg.targetdir}\""
+	}
 	
 	filter "system:windows"
 		systemversion "latest"
@@ -54,6 +59,8 @@ project "App"
 		}
 
 	filter "system:linux"
+		pic "On"
+		
 		postbuildcommands
 		{
 			"{COPYFILE} \"%{cfg.targetdir}/../Sofia/libSofia.so\" \"%{cfg.targetdir}\""

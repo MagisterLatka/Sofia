@@ -12,13 +12,13 @@ namespace Sofia {
 		SOF_CORE OpenGLContext() = default;
 		SOF_CORE ~OpenGLContext() = default;
 
-		SOF_CORE virtual void Init() override;
+		SOF_CORE virtual void Init() override {}
 		SOF_CORE virtual void InitForWindow(void* window) override;
 		SOF_CORE virtual void ShutdownForWindow(void* window) override;
 
 		SOF_CORE virtual void SwapBuffers(void* window) override;
 		SOF_CORE virtual void BindWindow(void* window) override;
-		SOF_CORE virtual void BindToRender(void* window) override {}
+		SOF_CORE virtual void BindToRender(void* window) override;
 		SOF_CORE virtual void Clear(void* window, const glm::vec4& color) override;
 	private:
 #if defined(SOF_PLATFORM_WINDOWS)

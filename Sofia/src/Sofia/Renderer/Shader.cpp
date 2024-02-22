@@ -17,8 +17,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLShader>::Create(vertexPath, fragmentPath);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11Shader>::Create(vertexPath, fragmentPath);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -31,8 +36,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLShader>::Create(path);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11Shader>::Create(path);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");
@@ -45,8 +55,13 @@ namespace Sofia {
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
 		case RendererAPI::API::OpenGL:	return Ref<OpenGLShader>::Create(vertexSource, fragmentSource, debugName);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
+#if defined(SOF_PLATFORM_WINDOWS)
 		case RendererAPI::API::DX11:	return Ref<DX11Shader>::Create(vertexSource, fragmentSource, debugName);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
+#else
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+#endif
 		}
 
 		SOF_CORE_THROW_INFO("Unknown API");

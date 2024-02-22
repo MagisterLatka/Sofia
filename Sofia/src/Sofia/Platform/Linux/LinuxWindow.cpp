@@ -73,6 +73,8 @@ namespace Sofia {
 		glfwMakeContextCurrent(m_Window);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 
+		Application::Get().GetGraphicsContext()->InitForWindow(this);
+
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 		{
 			auto& data = *(WindowData*)glfwGetWindowUserPointer(window);

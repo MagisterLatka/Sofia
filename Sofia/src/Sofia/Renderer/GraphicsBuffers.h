@@ -176,14 +176,13 @@ namespace Sofia {
 		uint32_t Offset = 0;
 		uint32_t index = 0;
 
-		virtual const uint8_t* GetBuffer() const override { return Buffer; }
+		virtual const uint8_t* GetBuffer() const noexcept override { return Buffer; }
 		virtual uint32_t GetBufferSize() const noexcept override { return N; };
-		virtual const UniformDecl* GetUniforms() const override { return Uniforms; }
-		virtual uint32_t GetUniformCount() const override { return U; }
+		virtual const UniformDecl* GetUniforms() const noexcept override { return Uniforms; }
+		virtual uint32_t GetUniformCount() const noexcept override { return U; }
 
 		template<typename T>
-		void Push(const std::string& name, const T& data) noexcept {}
-		template<>
+		void Push(const std::string& name, const T& data) {}
 		void Push(const std::string& name, const float& data)
 		{
 			SOF_CORE_ASSERT(index < U && Offset + sizeof(float) <= N, "Uniform buffer overflow");

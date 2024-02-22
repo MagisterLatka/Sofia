@@ -49,7 +49,7 @@ namespace Sofia {
 				switch (m_Allocator)
 				{
 				case Allocator::New:
-					delete[] Data;
+					delete[] (uint8_t*)Data;
 					break;
 				case Allocator::Malloc:
 					free(Data);
@@ -68,7 +68,7 @@ namespace Sofia {
 				default:
 					SOF_CORE_THROW_INFO("Invalid allocator");
 				case Allocator::New:
-					delete[] Data;
+					delete[] (uint8_t*)Data;
 					break;
 				case Allocator::Malloc:
 					free(Data);
@@ -107,7 +107,7 @@ namespace Sofia {
 				case Allocator::None:
 					break;
 				case Allocator::New:
-					delete[] Data;
+					delete[] (uint8_t*)Data;
 					break;
 				case Allocator::Malloc:
 					free(Data);
@@ -169,10 +169,10 @@ namespace Sofia {
 					case Allocator::None:
 					default:
 						SOF_CORE_THROW_INFO("Invalid allocator");
-						delete[] Data;
+						delete[] (uint8_t*)Data;
 						break;
 					case Allocator::New:
-						delete[] Data;
+						delete[] (uint8_t*)Data;
 						break;
 					case Allocator::Malloc:
 						free(Data);
