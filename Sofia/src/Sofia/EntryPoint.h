@@ -4,7 +4,7 @@ extern Sofia::Application* Sofia::CreateApplication();
 
 int main(int argc, char** argv, char** envp)
 {
-	Sofia::InitializeCore();
+	Sofia::InitializeCore(argc, argv, envp);
 
 	Sofia::Application* app = nullptr;
 	int returnVal = 0;

@@ -35,7 +35,7 @@
 
 namespace Sofia {
 
-	void SOF_CORE InitializeCore();
+	void SOF_CORE InitializeCore(int argc, char** argv, char** envp);
 	void SOF_CORE ShutdownCore();
 	uint64_t SOF_CORE GetTime() noexcept;
 }
