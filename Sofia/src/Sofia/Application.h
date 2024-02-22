@@ -6,6 +6,7 @@
 #include "Sofia/Renderer/GraphicsContext.h"
 #include "Sofia/Events/ApplicationEvents.h"
 #include "Sofia/Renderer/RendererAPI.h"
+#include "Sofia/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv, char** envp);
 
@@ -16,7 +17,7 @@ namespace Sofia {
 		std::string Name = "Sofia Engine";
 		uint32_t Width = 1600u, Height = 900;
 
-#if defined(SOF_PLATROFM_WINDOWS)
+#if defined(SOF_PLATFORM_WINDOWS)
 		RendererAPI::API GraphicsAPI = RendererAPI::API::DX11;
 #else
 		RendererAPI::API GraphicsAPI = RendererAPI::API::OpenGL;
@@ -37,6 +38,7 @@ namespace Sofia {
 
 		SOF_CORE Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
 		SOF_CORE Ref<Window> GetWindow() const noexcept { return m_Window; }
+		SOF_CORE ImGuiLayer* GetImGuiLayer() noexcept { return m_ImGuiLayer; }
 
 		SOF_CORE const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
@@ -49,6 +51,8 @@ namespace Sofia {
 		SOF_CORE void OnEvent(Event& e);
 		SOF_CORE bool OnWindowClose(WindowCloseEvent& e) noexcept;
 		SOF_CORE bool OnWindowResize(WindowResizeEvent& e) noexcept;
+
+		SOF_CORE void ImGuiRender();
 	private:
 		ApplicationSpecifications m_Specs;
 
@@ -56,6 +60,7 @@ namespace Sofia {
 		Ref<Window> m_Window;
 
 		Scope<LayerStack> m_LayerStack;
+		ImGuiLayer* m_ImGuiLayer;
 
 		Timer m_Timer;
 		Timestep m_Timestep;

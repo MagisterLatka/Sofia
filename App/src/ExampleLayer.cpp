@@ -2,6 +2,8 @@
 #include "Sofia.h"
 #include "ExampleLayer.h"
 
+#include <imgui.h>
+
 ExampleLayer::ExampleLayer()
 {
 
@@ -29,6 +31,8 @@ void ExampleLayer::OnAttach()
 	};
 	Ref<Sofia::VertexBuffer> vbo = Sofia::VertexBuffer::Create(layout, vertices, sizeof(vertices));
 	m_InputLayout = Sofia::InputLayout::Create({ vbo }, m_Shader);
+
+	ImGui::SetCurrentContext(Sofia::Application::Get().GetImGuiLayer()->GetContext());
 }
 void ExampleLayer::OnDetach()
 {
@@ -48,7 +52,13 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 }
 void ExampleLayer::OnUIRender()
 {
+	ImGuiIO& io = ImGui::GetIO();
 
+	ImGui::Begin("Settings");
+
+	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
+
+	ImGui::End();
 }
 
 void ExampleLayer::OnEvent(Sofia::Event& e)

@@ -43,7 +43,7 @@ namespace Sofia {
 		swapChainDesc.OutputWindow = wind->m_Window;
 		swapChainDesc.Windowed = TRUE;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		swapChainDesc.Flags = 0u;
+		swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
 		ComPtr<IDXGIDevice3> dxgiDevice;
 		ComPtr<IDXGIAdapter> adapter;
@@ -74,7 +74,14 @@ namespace Sofia {
 		WindowsWindow* wind = (WindowsWindow*)window;
 		auto& [swapChain, buffer] = m_WindowData[wind->m_Window];
 		HRESULT hr;
-		SOF_DX_GRAPHICS_CALL_INFO(swapChain->Present(wind->m_Data.vSync ? 1u : 0u, 0u));
+		if (wind->m_Data.vSync)
+		{
+			SOF_DX_GRAPHICS_CALL_INFO(swapChain->Present(1u, 0u));
+		}
+		else
+		{
+			SOF_DX_GRAPHICS_CALL_INFO(swapChain->Present(0u, DXGI_PRESENT_ALLOW_TEARING));
+		}
 	}
 	void DX11Context::BindToRender(void* window)
 	{

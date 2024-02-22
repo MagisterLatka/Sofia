@@ -7,6 +7,9 @@
 
 #include "Sofia/Application.h"
 
+#include <imgui.h>
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 namespace Sofia {
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
@@ -75,6 +78,8 @@ namespace Sofia {
 			WindowClass::GetInstance(), this); m_Window == nullptr)
 			throw SOF_WINDOWS_WINDOW_LAST_EXCEPTION();
 
+		m_DC = GetDC(m_Window);
+
 		Application::Get().GetGraphicsContext()->InitForWindow(this);
 
 		ShowWindow(m_Window, SW_SHOW);
@@ -109,6 +114,12 @@ namespace Sofia {
 	}
 	LRESULT WindowsWindow::HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
+		if (m_HandleImGuiInput)
+		{
+			if (ImGui_ImplWin32_WndProcHandler(windowHandle, msg, wParam, lParam))
+				return true;
+		}
+
 		switch (msg)
 		{
 		case WM_CLOSE:

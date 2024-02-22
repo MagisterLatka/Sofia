@@ -34,6 +34,10 @@ namespace Sofia {
 		//init renderer command queue & shader library
 		Renderer::Init();
 
+		//init ui layer
+		m_ImGuiLayer = new ImGuiLayer;
+		m_LayerStack->PushOverlay(m_ImGuiLayer);
+
 		//call OnAttach() on layers in LayerStack
 		m_LayerStack->Init();
 
@@ -72,6 +76,11 @@ namespace Sofia {
 			}
 			{ auto e = AppUpdateEvent(); OnEvent(e); }
 
+			//update ui
+			m_ImGuiLayer->Begin();
+			ImGuiRender();
+			m_ImGuiLayer->End();
+
 			//update frame
 			m_Window->OnUpdate();
 			{ auto e = AppRenderEvent(); OnEvent(e); }
@@ -85,6 +94,11 @@ namespace Sofia {
 		}
 		Shutdown();
 		return returnVal;
+	}
+	void Application::ImGuiRender()
+	{
+		for (auto layer : *m_LayerStack)
+			layer->OnUIRender();
 	}
 
 	void Application::OnEvent(Event& e)

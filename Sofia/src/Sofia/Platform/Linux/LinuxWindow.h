@@ -9,6 +9,7 @@ namespace Sofia {
 	class LinuxWindow : public Window
 	{
 		friend class OpenGLContext;
+		friend class ImGuiLayer;
 	public:
 		SOF_CORE LinuxWindow(const WindowProps& props);
 		LinuxWindow(const LinuxWindow&) = delete;

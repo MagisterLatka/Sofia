@@ -28,11 +28,13 @@ project "App"
 		"%{wks.location}/Sofia/src",
 		"%{wks.location}/Sofia/vendor",
 		"%{IncludeDirs.spdlog}",
-		"%{IncludeDirs.glm}"
+		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.imgui}"
 	}
 
 	links
 	{
+		"ImGui",
 		"Sofia"
 	}
 
@@ -75,7 +77,6 @@ project "App"
 		defines "SOF_RELEASE"
 		optimize "Full"
 		runtime "Release"
-		inlining "Auto"
 
 	filter "files:**.vert.hlsl"
 		shadertype ("Vertex")

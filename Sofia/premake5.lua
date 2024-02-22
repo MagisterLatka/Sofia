@@ -30,13 +30,15 @@ project "Sofia"
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.glfw}",
-		"%{IncludeDirs.glad}"
+		"%{IncludeDirs.glad}",
+		"%{IncludeDirs.imgui}"
 	}
 
 	links
 	{
 		"GLFW",
-		"GLAD"
+		"GLAD",
+		"ImGui"
 	}	
 
 	filter "system:windows"
@@ -75,4 +77,3 @@ project "Sofia"
 		defines "SOF_RELEASE"
 		optimize "Full"
 		runtime "Release"
-		inlining "Auto"

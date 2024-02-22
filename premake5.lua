@@ -20,6 +20,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 group "Dep"
 	include "Sofia/vendor/glfw"
 	include "Sofia/vendor/glad"
+	include "Sofia/vendor/ImGui"
 group ""
 
 group "Core"

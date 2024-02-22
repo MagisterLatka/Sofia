@@ -11,6 +11,7 @@ namespace Sofia {
 	{
 		friend class DX11Context;
 		friend class OpenGLContext;
+		friend class ImGuiLayer;
 	public:
 		class WindowException : public SofiaException
 		{
@@ -72,6 +73,7 @@ namespace Sofia {
 		SOF_CORE static LRESULT CALLBACK HandleMsgSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 		SOF_CORE static LRESULT CALLBACK HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 		SOF_CORE LRESULT HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+		SOF_CORE void HandleImGuiInput(bool handle = true) noexcept { m_HandleImGuiInput = handle; }
 
 		SOF_CORE void DefaultEventCallback(Event& e) {}
 	private:
@@ -90,7 +92,10 @@ namespace Sofia {
 		Mouse m_Mouse;
 		
 		HWND m_Window = nullptr;
+		HDC m_DC = nullptr;
 		HGLRC m_Context = nullptr;
+
+		bool m_HandleImGuiInput = false;
 	};
 
 }

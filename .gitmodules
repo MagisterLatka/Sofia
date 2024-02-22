@@ -4,3 +4,11 @@
 [submodule "Sofia/vendor/glm"]
 	path = Sofia/vendor/glm
 	url = https://github.com/g-truc/glm
+[submodule "imgui"]
+	path = imgui
+	url = https://github.com/MagisterLatka/imgui.git
+	branch = docking
+[submodule "Sofia/vendor/ImGui"]
+	path = Sofia/vendor/ImGui
+	url = https://github.com/MagisterLatka/imgui.git
+	branch = docking

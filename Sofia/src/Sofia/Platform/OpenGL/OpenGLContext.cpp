@@ -78,6 +78,7 @@ namespace Sofia {
 		{
 			m_WGLSwapInternalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
 			PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)wglGetProcAddress("wglGetSwapIntervalEXT");
+			m_WGLSwapInternalEXT(0);
 		}
 #else
 		int success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -108,13 +109,18 @@ namespace Sofia {
 	{
 #if defined(SOF_PLATFORM_WINDOWS)
 		WindowsWindow* wnd = (WindowsWindow*)window;
-		HDC hdc = GetDC(wnd->m_Window);
-		if (wnd->m_Data.vSync)
-			m_WGLSwapInternalEXT(1);
+		HDC hdc = wnd->m_DC;
+		static bool vsync = false;
+
+		if (vsync != wnd->m_Data.vSync)
+		{
+			vsync = wnd->m_Data.vSync;
+			m_WGLSwapInternalEXT(vsync ? 1 : 0);
+		}
 
 		::SwapBuffers(hdc);
 
-		if (wnd->m_Data.vSync)
+		if (vsync)
 			glFinish();
 #else
 		glfwSwapBuffers(((LinuxWindow*)window)->m_Window);

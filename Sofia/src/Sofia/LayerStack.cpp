@@ -15,8 +15,8 @@ namespace Sofia {
 	void LayerStack::Init()
 	{
 		m_IsInitialized = true;
-		for (auto layer : m_Layers)
-			layer->OnAttach();
+		for (auto it = m_Layers.rbegin(); it != m_Layers.rend(); ++it)
+			(*it)->OnAttach();
 	}
 	void LayerStack::Shutdown()
 	{
