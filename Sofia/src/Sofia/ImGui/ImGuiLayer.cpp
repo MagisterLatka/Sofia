@@ -88,7 +88,7 @@ namespace Sofia {
 			window->HandleImGuiInput();
 #else
 			auto window = Application::Get().GetWindow().As<LinuxWindow>();
-			ImGui_ImglGlfw_InitForOpenGL(window->m_Window, true);
+			ImGui_ImplGlfw_InitForOpenGL(window->m_Window, true);
 #endif
 			ImGui_ImplOpenGL3_Init("#version 460");
 			break;
@@ -107,7 +107,7 @@ namespace Sofia {
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); break;
 #else
 		case RendererAPI::API::DX11:
-		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); break;
 #endif
 		}
 	}
@@ -137,7 +137,7 @@ namespace Sofia {
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); break;
 #else
 		case RendererAPI::API::DX11:
-		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); break;
 #endif
 		}
 		ImGui::DestroyContext();
@@ -179,7 +179,7 @@ namespace Sofia {
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); break;
 #else
 		case RendererAPI::API::DX11:
-		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); break;
 #endif
 		}
 		ImGui::NewFrame();
@@ -210,7 +210,7 @@ namespace Sofia {
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); break;
 #else
 		case RendererAPI::API::DX11:
-		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); return nullptr;
+		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); break;
 #endif
 		}
 

@@ -33,6 +33,7 @@ namespace Sofia {
 		SOF_CORE ~DX11Context() = default;
 
 		SOF_CORE virtual void Init() override;
+		SOF_CORE virtual void Shutdown() override {}
 		SOF_CORE virtual void InitForWindow(void* window) override;
 		SOF_CORE virtual void ShutdownForWindow(void* window) override;
 

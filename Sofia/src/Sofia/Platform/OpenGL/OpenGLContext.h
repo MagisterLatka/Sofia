@@ -2,7 +2,7 @@
 
 #include "Sofia/Renderer/GraphicsContext.h"
 
-#include <glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Sofia {
 
@@ -13,6 +13,7 @@ namespace Sofia {
 		SOF_CORE ~OpenGLContext() = default;
 
 		SOF_CORE virtual void Init() override {}
+		SOF_CORE virtual void Shutdown() override;
 		SOF_CORE virtual void InitForWindow(void* window) override;
 		SOF_CORE virtual void ShutdownForWindow(void* window) override;
 

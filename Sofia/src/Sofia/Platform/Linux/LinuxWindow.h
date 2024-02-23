@@ -2,7 +2,7 @@
 
 #include "Sofia/Core.h"
 #include "Sofia/Window.h"
-#include <glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Sofia {
 

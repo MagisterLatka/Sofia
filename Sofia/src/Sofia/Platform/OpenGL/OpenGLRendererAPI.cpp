@@ -2,7 +2,7 @@
 #include "OpenGLRendererAPI.h"
 
 #include <glad/glad.h>
-#include <glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Sofia {
 
@@ -41,7 +41,7 @@ namespace Sofia {
 	}
 	void OpenGLRendererAPI::Shutdown()
 	{
-		glfwTerminate();
+		
 	}
 
 	void OpenGLRendererAPI::Draw(Topology topology, uint32_t verticesCount)

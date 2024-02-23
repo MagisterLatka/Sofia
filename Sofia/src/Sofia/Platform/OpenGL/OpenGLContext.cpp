@@ -21,6 +21,12 @@ typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
 namespace Sofia {
 
+	void OpenGLContext::Shutdown()
+	{
+#if defined(SOF_PLATFORM_LINUX)
+		glfwTerminate();
+#endif
+	}
 	void OpenGLContext::InitForWindow(void* window)
 	{
 #if defined(SOF_PLATFORM_WINDOWS)

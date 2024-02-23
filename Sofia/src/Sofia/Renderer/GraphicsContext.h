@@ -14,6 +14,7 @@ namespace Sofia {
 
 	protected:
 		SOF_CORE virtual void Init() = 0;
+		SOF_CORE virtual void Shutdown() = 0;
 		SOF_CORE virtual void InitForWindow(void* window) = 0;
 		SOF_CORE virtual void ShutdownForWindow(void* window) = 0;
 
