@@ -19,6 +19,7 @@ namespace Sofia {
 		SOF_CORE virtual void ShutdownForWindow(void* window) = 0;
 
 		SOF_CORE virtual void SwapBuffers(void* window) = 0;
+		SOF_CORE virtual void RecreateSwapChain(void* window) = 0;
 		SOF_CORE virtual void BindWindow(void* window) = 0;
 		SOF_CORE virtual void BindToRender(void* window) = 0;
 		SOF_CORE virtual void Clear(void* window, const glm::vec4& color) = 0;

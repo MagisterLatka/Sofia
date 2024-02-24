@@ -7,6 +7,7 @@
 #include "Sofia/Events/ApplicationEvents.h"
 #include "Sofia/Renderer/RendererAPI.h"
 #include "Sofia/ImGui/ImGuiLayer.h"
+#include "Sofia/Renderer/Texture.h"
 
 int main(int argc, char** argv, char** envp);
 
@@ -15,7 +16,11 @@ namespace Sofia {
 	struct ApplicationSpecifications
 	{
 		std::string Name = "Sofia Engine";
-		uint32_t Width = 1600u, Height = 900;
+		uint32_t Width = 1600u, Height = 900u;
+		std::filesystem::path WindowIconPath;
+		Buffer TitlebarIconData;
+		bool ResizableWindow = true;
+		bool CustomTitleBar = false;
 
 #if defined(SOF_PLATFORM_WINDOWS)
 		RendererAPI::API GraphicsAPI = RendererAPI::API::DX11;
@@ -28,6 +33,8 @@ namespace Sofia {
 	{
 		friend int ::main(int, char**, char**);
 	public:
+		using MenuBarCallbackFunc = std::function<void()>;
+
 		SOF_CORE Application(const ApplicationSpecifications& applicationSpecifications = ApplicationSpecifications());
 		SOF_CORE virtual ~Application() = default;
 
@@ -39,6 +46,7 @@ namespace Sofia {
 		SOF_CORE Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
 		SOF_CORE Ref<Window> GetWindow() const noexcept { return m_Window; }
 		SOF_CORE ImGuiLayer* GetImGuiLayer() noexcept { return m_ImGuiLayer; }
+		void SetMenuBarCallbackFunc(const MenuBarCallbackFunc& callback) noexcept { m_MenuBarCallback = callback; }
 
 		SOF_CORE const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
@@ -53,6 +61,8 @@ namespace Sofia {
 		SOF_CORE bool OnWindowResize(WindowResizeEvent& e) noexcept;
 
 		SOF_CORE void ImGuiRender();
+		SOF_CORE void DrawTitleBar(float& titlebarHeight);
+		SOF_CORE void DrawMenuBarUI();
 	private:
 		ApplicationSpecifications m_Specs;
 
@@ -61,6 +71,13 @@ namespace Sofia {
 
 		Scope<LayerStack> m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
+		MenuBarCallbackFunc m_MenuBarCallback;
+		bool m_TitleBarHovered = false;
+		Ref<Texture2D> m_TitlebarIcon;
+		Ref<Texture2D> m_CloseIcon;
+		Ref<Texture2D> m_MinimizeIcon;
+		Ref<Texture2D> m_MaximizeIcon;
+		Ref<Texture2D> m_RestoreIcon;
 
 		Timer m_Timer;
 		Timestep m_Timestep;

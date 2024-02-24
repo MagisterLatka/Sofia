@@ -19,6 +19,8 @@ typedef int (WINAPI* PFNWGLGETSWAPINTERVALEXTPROC) (void);
 #endif
 #include <glad/glad.h>
 
+#include "Sofia/Renderer/Renderer.h"
+
 namespace Sofia {
 
 	void OpenGLContext::Shutdown()
@@ -32,7 +34,7 @@ namespace Sofia {
 #if defined(SOF_PLATFORM_WINDOWS)
 		WindowsWindow* wnd = (WindowsWindow*)window;
 
-		HDC hdc = GetDC(wnd->m_Window);
+		HDC hdc = wnd->m_DC;
 
 		PIXELFORMATDESCRIPTOR pfd;
 		memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
@@ -144,11 +146,17 @@ namespace Sofia {
 	}
 	void OpenGLContext::BindToRender(void* window)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		Renderer::Submit([]()
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		});
 	}
 	void OpenGLContext::Clear(void* window, const glm::vec4& color)
 	{
-		glClearColor(color.x, color.y, color.r, color.a);
-		glClear(GL_COLOR_BUFFER_BIT);
+		Renderer::Submit([color]()
+		{
+			glClearColor(color.x, color.y, color.r, color.a);
+			glClear(GL_COLOR_BUFFER_BIT);
+		});
 	}
 }

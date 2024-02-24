@@ -13,7 +13,9 @@ project "Sofia"
 	files
 	{
 		"src/**.cpp",
-		"src/**.h"
+		"src/**.h",
+		"vendor/stb_image/**.cpp",
+		"vendor/stb_image/**.h"
 	}
 
 	defines
@@ -31,7 +33,8 @@ project "Sofia"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.glfw}",
 		"%{IncludeDirs.glad}",
-		"%{IncludeDirs.imgui}"
+		"%{IncludeDirs.imgui}",
+		"%{IncludeDirs.stb_image}"
 	}
 
 	links

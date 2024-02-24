@@ -20,6 +20,8 @@ namespace Sofia {
 	public:
 		SOF_CORE static API GetAPI() { return s_API; }
 	public:
+		SOF_CORE virtual ~RendererAPI() = default;
+
 		SOF_CORE virtual void Init() = 0;
 		SOF_CORE virtual void Shutdown() = 0;
 

@@ -8,6 +8,7 @@
 #include "Sofia/Events/KeyEvents.h"
 
 #include <glad/glad.h>
+#include <stb_image.h>
 
 namespace Sofia {
 
@@ -51,6 +52,35 @@ namespace Sofia {
 		m_Data.vSync = vsync;
 	}
 
+	void LinuxWindow::Minimize() noexcept
+	{
+		m_Data.minimized = true;
+		glfwIconifyWindow(m_Window);
+	}
+	void LinuxWindow::Maximize() noexcept
+	{
+		m_Data.maximized = true;
+		glfwMaximizeWindow(m_Window);
+	}
+	void LinuxWindow::Restore() noexcept
+	{
+		m_Data.maximized = false;
+		glfwRestoreWindow(m_Window);
+	}
+
+	void LinuxWindow::SetIcon(const std::filesystem::path& iconPath)
+	{
+		std::string path = iconPath.string();
+		if (std::filesystem::exists(iconPath))
+		{
+			GLFWimage image;
+			int channels;
+			image.pixels = stbi_load(path.c_str(), &image.width, &image.height, &channels, 4);
+			glfwSetWindowIcon(m_Window, 1, &image);
+			stbi_image_free(image.pixels);
+		}
+	}
+
 	static void GLFWErrorCallback(int error, const char* message)
 	{
 		SOF_CORE_ERROR("GLFWError {0}: {1}", error, message);
@@ -65,6 +95,10 @@ namespace Sofia {
 		int success = glfwInit();
 		SOF_CORE_ASSERT(success, "Failed to initialize GLFW");
 		glfwSetErrorCallback(GLFWErrorCallback);
+
+		glfwWindowHint(GLFW_RESIZABLE, props.Resizable);
+		glfwWindowHint(GLFW_DECORATED, props.HasTitleBar);
+		glfwWindowHint(GLFW_MAXIMIZED, props.Maximized);
 
 		m_Window = glfwCreateWindow((int)m_Data.width, (int)m_Data.height, m_Data.title.c_str(), nullptr, nullptr);
 		SOF_CORE_ASSERT(m_Window, "Could not create GLFW window");

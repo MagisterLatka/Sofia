@@ -17,4 +17,8 @@ private:
 private:
 	Ref<Sofia::Shader> m_Shader;
 	Ref<Sofia::InputLayout> m_InputLayout;
+	Ref<Sofia::RenderTarget> m_RenderTarget;
+
+	bool m_ViewportHovered = false, m_ViewportFocused = false;
+	glm::vec2 m_ViewportSize, m_ViewportPos;
 };

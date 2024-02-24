@@ -10,13 +10,17 @@ namespace Sofia {
 	struct WindowProps
 	{
 		std::string Title;
-		unsigned int Width;
-		unsigned int Height;
+		unsigned int Width, Height;
+		bool Resizable = true, Maximized = false, HasTitleBar = true;
 
-		SOF_CORE WindowProps(const std::string& title = "Sofia Engine",
-			unsigned int width = 1280,
-			unsigned int height = 720)
-			: Title(title), Width(width), Height(height)
+		SOF_CORE WindowProps() = default;
+		SOF_CORE WindowProps(const std::string& title,
+			unsigned int width,
+			unsigned int height,
+			bool resizable = true,
+			bool maximized = false,
+			bool hasTitleBar = true)
+			: Title(title), Width(width), Height(height), Resizable(resizable), Maximized(maximized), HasTitleBar(HasTitleBar)
 		{}
 	};
 
@@ -24,6 +28,8 @@ namespace Sofia {
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
+		using TitleBarHitTestCallbackFn = std::function<void(const int xMousePos, const int yMousePos, int& hitTest)>;
+		using InputDropCallbackFn = std::function<void(const int count, wchar_t** const paths)>;
 
 		SOF_CORE virtual ~Window() = default;
 
@@ -37,11 +43,24 @@ namespace Sofia {
 		SOF_CORE virtual const std::string& GetTitle() const noexcept = 0;
 
 		SOF_CORE virtual void SetEventCallback(const EventCallbackFn& callback) noexcept = 0;
+		SOF_CORE virtual void SetTitleBarHitTestCallback(const TitleBarHitTestCallbackFn& callback) noexcept = 0;
+		SOF_CORE virtual void SetInputDropCallback(const InputDropCallbackFn& callback) noexcept = 0;
 		SOF_CORE virtual void SetVSync(bool vsync) noexcept = 0;
 		SOF_CORE virtual bool IsVSyncEnabled() const noexcept = 0;
 
-		SOF_CORE virtual unsigned int GetWidth() const noexcept = 0;
-		SOF_CORE virtual unsigned int GetHeight() const noexcept = 0;
+		SOF_CORE virtual void Minimize() noexcept = 0;
+		SOF_CORE virtual bool IsMinimized() const noexcept = 0;
+		SOF_CORE virtual void Maximize() noexcept = 0;
+		SOF_CORE virtual void Restore() noexcept = 0;
+		SOF_CORE virtual bool IsMaximized() const noexcept = 0;
+
+		SOF_CORE virtual void SetIcon(const std::filesystem::path& iconPath) = 0;
+
+		SOF_CORE virtual uint32_t GetWidth() const noexcept = 0;
+		SOF_CORE virtual uint32_t GetHeight() const noexcept = 0;
+
+		SOF_CORE virtual int GetXClientPos() const noexcept = 0;
+		SOF_CORE virtual int GetYClientPos() const noexcept = 0;
 
 		SOF_CORE virtual Keyboard& GetKeyboard() noexcept = 0;
 		SOF_CORE virtual Mouse& GetMouse() noexcept = 0;
