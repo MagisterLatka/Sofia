@@ -148,7 +148,11 @@ namespace Sofia {
 	{
 		Renderer::Submit([window]()
 		{
+#if defined(SOF_PLATFORM_WINDOWS)
+			WindowsWindow* wnd = (WindowsWindow*)window;
+#else
 			LinuxWindow* wnd = (LinuxWindow*)window;
+#endif
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, wnd->m_Data.width, wnd->m_Data.height);
 		});
