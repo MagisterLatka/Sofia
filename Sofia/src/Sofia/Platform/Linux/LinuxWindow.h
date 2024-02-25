@@ -20,7 +20,7 @@ namespace Sofia {
 		SOF_CORE virtual void OnUpdate() override;
 		SOF_CORE static std::optional<int> ProcessEvents();
 		SOF_CORE virtual void BindWindow() noexcept override;
-		SOF_CORE virtual void BindToRender() noexcept override {}
+		SOF_CORE virtual void BindToRender() noexcept override;
 		SOF_CORE virtual void Clear(const glm::vec4& color) noexcept override;
 
 		SOF_CORE virtual void SetTitle(const std::string& title) override;

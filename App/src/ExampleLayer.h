@@ -20,5 +20,5 @@ private:
 	Ref<Sofia::RenderTarget> m_RenderTarget;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
-	glm::vec2 m_ViewportSize, m_ViewportPos;
+	glm::vec2 m_ViewportSize = { -1.0f, -1.0f }, m_ViewportPos;
 };

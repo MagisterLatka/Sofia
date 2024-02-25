@@ -146,9 +146,11 @@ namespace Sofia {
 	}
 	void OpenGLContext::BindToRender(void* window)
 	{
-		Renderer::Submit([]()
+		Renderer::Submit([window]()
 		{
+			LinuxWindow* wnd = (LinuxWindow*)window;
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, wnd->m_Data.width, wnd->m_Data.height);
 		});
 	}
 	void OpenGLContext::Clear(void* window, const glm::vec4& color)

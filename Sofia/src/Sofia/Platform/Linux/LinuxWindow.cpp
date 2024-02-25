@@ -36,6 +36,10 @@ namespace Sofia {
 	{
 		Application::Get().GetGraphicsContext()->BindWindow(this);
 	}
+	void LinuxWindow::BindToRender() noexcept
+	{
+		Application::Get().GetGraphicsContext()->BindToRender(this);
+	}
 	void LinuxWindow::Clear(const glm::vec4& color) noexcept
 	{
 		Application::Get().GetGraphicsContext()->Clear(this, color);

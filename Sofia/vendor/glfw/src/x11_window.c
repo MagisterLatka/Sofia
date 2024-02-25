@@ -921,6 +921,20 @@ static Atom writeTargetToProperty(const XSelectionRequestEvent* request)
     return None;
 }
 
+static void handleSelectionClear(XEvent* event)
+{
+    if (event->xselectionclear.selection == _glfw.x11.PRIMARY)
+    {
+        _glfw_free(_glfw.x11.primarySelectionString);
+        _glfw.x11.primarySelectionString = NULL;
+    }
+    else
+    {
+        _glfw_free(_glfw.x11.clipboardString);
+        _glfw.x11.clipboardString = NULL;
+    }
+}
+
 static void handleSelectionRequest(XEvent* event)
 {
     const XSelectionRequestEvent* request = &event->xselectionrequest;
@@ -1216,7 +1230,12 @@ static void processEvent(XEvent *event)
         return;
     }
 
-    if (event->type == SelectionRequest)
+   if (event->type == SelectionClear)
+    {
+        handleSelectionClear(event);
+        return;
+    }
+    else if (event->type == SelectionRequest)
     {
         handleSelectionRequest(event);
         return;
@@ -1488,9 +1507,6 @@ static void processEvent(XEvent *event)
             if (event->xconfigure.width != window->x11.width ||
                 event->xconfigure.height != window->x11.height)
             {
-                window->x11.width = event->xconfigure.width;
-                window->x11.height = event->xconfigure.height;
-
                 _glfwInputFramebufferSize(window,
                                           event->xconfigure.width,
                                           event->xconfigure.height);
@@ -1498,6 +1514,9 @@ static void processEvent(XEvent *event)
                 _glfwInputWindowSize(window,
                                      event->xconfigure.width,
                                      event->xconfigure.height);
+
+                window->x11.width = event->xconfigure.width;
+                window->x11.height = event->xconfigure.height;
             }
 
             int xpos = event->xconfigure.x;
@@ -1525,10 +1544,10 @@ static void processEvent(XEvent *event)
 
             if (xpos != window->x11.xpos || ypos != window->x11.ypos)
             {
+                _glfwInputWindowPos(window, xpos, ypos);
+
                 window->x11.xpos = xpos;
                 window->x11.ypos = ypos;
-
-                _glfwInputWindowPos(window, xpos, ypos);
             }
 
             return;
