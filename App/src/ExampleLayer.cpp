@@ -15,25 +15,17 @@ ExampleLayer::~ExampleLayer()
 
 void ExampleLayer::OnAttach()
 {
-	//Later some basic shaders will be defined in engine, other shaders are up to the user to be saved in correct file
-	if (Sofia::RendererAPI::GetAPI() == Sofia::RendererAPI::API::DX11)
-		m_Shader = Sofia::Shader::Create(L"assets/shaders/basic.vert.cso", L"assets/shaders/basic.frag.cso");
-	else
-		m_Shader = Sofia::Shader::Create(L"assets/shaders/basic.shader");
-
-	float vertices[] = {
-		 0.0f,  0.5f,
-		 0.5f, -0.5f,
-		-0.5f, -0.5f
-	};
-	Sofia::BufferLayout layout = {
-		{ "Position", Sofia::BufferLayoutElementDataType::Float2 }
-	};
-	Ref<Sofia::VertexBuffer> vbo = Sofia::VertexBuffer::Create(layout, vertices, sizeof(vertices));
-	m_InputLayout = Sofia::InputLayout::Create({ vbo }, m_Shader);
-
 	auto window = Sofia::Application::Get().GetWindow();
-	m_RenderTarget = Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight());
+	m_RenderPass = Sofia::RenderPass::Create();
+	m_RenderPass->SetRenderTarget(0u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
+
+	Sofia::Texture2DProps textureProps;
+	textureProps.Filepath = L"assets/textures/checkerboard.png";
+	textureProps.Sampling = Sofia::TextureSampling::Point;
+	m_Texture = Sofia::Texture2D::Create(textureProps);
+
+	float aspectRatio = (float)window->GetWidth() / (float)window->GetHeight();
+	Sofia::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
 
 	ImGui::SetCurrentContext(Sofia::Application::Get().GetImGuiLayer()->GetContext());
 }
@@ -47,15 +39,20 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	Sofia::Application::Get().GetWindow()->BindWindow();
 
 	if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
-		m_RenderTarget->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	{
+		m_RenderPass->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		float aspectRatio = m_ViewportSize.x / m_ViewportSize.y;
+		Sofia::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
+	}
 
-	m_RenderTarget->Bind();
-	m_RenderTarget->Clear();
+	m_RenderPass->Bind();
+	m_RenderPass->Clear();
 
-	m_Shader->Bind();
-	m_InputLayout->Bind();
-
-	Sofia::RenderCommand::Draw(Sofia::RendererAPI::Topology::Triangles, 3u);
+	static float time = 0.0f;
+	time += (float)ts;
+	time = glm::mod(time, glm::two_pi<float>());
+	Sofia::Renderer2D::SubmitQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, time, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture);
+	Sofia::Renderer2D::Draw();
 
 	Sofia::Application::Get().GetWindow()->BindToRender();
 	Sofia::Application::Get().GetWindow()->Clear();
@@ -89,9 +86,9 @@ void ExampleLayer::OnUIRender()
 	m_ViewportPos = { viewportPos.x - application.GetWindow()->GetXClientPos(), viewportPos.y - application.GetWindow()->GetYClientPos() };
 
 	if (Sofia::RendererAPI::GetAPI() == Sofia::RendererAPI::API::OpenGL)
-		ImGui::Image(m_RenderTarget->GetRawTexturePointer(), viewportSize, { 0, 1 }, { 1, 0 });
+		ImGui::Image(m_RenderPass->GetRenderTarget()->GetRawTexturePointer(), viewportSize, {0, 1}, {1, 0});
 	else
-		ImGui::Image(m_RenderTarget->GetRawTexturePointer(), viewportSize);
+		ImGui::Image(m_RenderPass->GetRenderTarget()->GetRawTexturePointer(), viewportSize);
 
 	ImGui::End();
 	ImGui::PopStyleVar();

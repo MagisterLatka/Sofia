@@ -40,7 +40,7 @@ project "App"
 
 	postbuildcommands
 	{
-		"{COPYDIR} \"%{prj.location}/assets\" \"%{cfg.targetdir}\""
+		"{COPYDIR} \"%{prj.location}/assets\" \"%{cfg.targetdir}/assets\""
 	}
 	
 	filter "system:windows"

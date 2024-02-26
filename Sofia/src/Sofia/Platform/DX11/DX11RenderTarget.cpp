@@ -10,16 +10,18 @@ namespace Sofia {
 	{
 		switch (format)
 		{
-		case Sofia::RenderTargetFormat::R8:			return DXGI_FORMAT_R8_UNORM;
-		case Sofia::RenderTargetFormat::R32F:		return DXGI_FORMAT_R32_FLOAT;
-		case Sofia::RenderTargetFormat::RG8:		return DXGI_FORMAT_R8G8_UNORM;
-		case Sofia::RenderTargetFormat::RG16F:		return DXGI_FORMAT_R16G16_FLOAT;
-		case Sofia::RenderTargetFormat::RG32F:		return DXGI_FORMAT_R32G32B32_FLOAT;
-		case Sofia::RenderTargetFormat::RGB8:		return DXGI_FORMAT_R8G8B8A8_UNORM;
-		case Sofia::RenderTargetFormat::RGB32F:		return DXGI_FORMAT_R32G32B32_FLOAT;
-		case Sofia::RenderTargetFormat::RGBA8:		return DXGI_FORMAT_R8G8B8A8_UNORM;
-		case Sofia::RenderTargetFormat::RGBA16F:	return DXGI_FORMAT_R16G16B16A16_FLOAT;
-		case Sofia::RenderTargetFormat::RGBA32F:	return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case RenderTargetFormat::R8:				return DXGI_FORMAT_R8_UNORM;
+		case RenderTargetFormat::R32F:				return DXGI_FORMAT_R32_FLOAT;
+		case RenderTargetFormat::RG8:				return DXGI_FORMAT_R8G8_UNORM;
+		case RenderTargetFormat::RG16F:				return DXGI_FORMAT_R16G16_FLOAT;
+		case RenderTargetFormat::RG32F:				return DXGI_FORMAT_R32G32B32_FLOAT;
+		case RenderTargetFormat::RGB8:				return DXGI_FORMAT_R8G8B8A8_UNORM;
+		case RenderTargetFormat::RGB32F:			return DXGI_FORMAT_R32G32B32_FLOAT;
+		case RenderTargetFormat::RGBA8:				return DXGI_FORMAT_R8G8B8A8_UNORM;
+		case RenderTargetFormat::RGBA16F:			return DXGI_FORMAT_R16G16B16A16_FLOAT;
+		case RenderTargetFormat::RGBA32F:			return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case RenderTargetFormat::Depth32F:			return DXGI_FORMAT_D32_FLOAT;
+		case RenderTargetFormat::Depth24Stencil8:	return DXGI_FORMAT_D24_UNORM_S8_UINT;
 		}
 		SOF_CORE_THROW_INFO("Unknown render target format");
 		return DXGI_FORMAT_R8G8B8A8_UINT;
@@ -28,22 +30,24 @@ namespace Sofia {
 	{
 		switch (format)
 		{
-		case Sofia::RenderTargetFormat::R8:
+		case RenderTargetFormat::R8:
 			return 1;
-		case Sofia::RenderTargetFormat::R32F:
-		case Sofia::RenderTargetFormat::RG16F:
-		case Sofia::RenderTargetFormat::RGBA8:
-			return 4;
-		case Sofia::RenderTargetFormat::RG8:
+		case RenderTargetFormat::RG8:
 			return 2;
-		case Sofia::RenderTargetFormat::RG32F:
-		case Sofia::RenderTargetFormat::RGBA16F:
-			return 8;
-		case Sofia::RenderTargetFormat::RGB8:
+		case RenderTargetFormat::RGB8:
 			return 3;
-		case Sofia::RenderTargetFormat::RGB32F:
+		case RenderTargetFormat::R32F:
+		case RenderTargetFormat::RG16F:
+		case RenderTargetFormat::RGBA8:
+		case RenderTargetFormat::Depth32F:
+		case RenderTargetFormat::Depth24Stencil8:
+			return 4;
+		case RenderTargetFormat::RG32F:
+		case RenderTargetFormat::RGBA16F:
+			return 8;
+		case RenderTargetFormat::RGB32F:
 			return 12;
-		case Sofia::RenderTargetFormat::RGBA32F:
+		case RenderTargetFormat::RGBA32F:
 			return 16;
 		}
 		SOF_CORE_THROW_INFO("Unknown render target format");
@@ -78,25 +82,38 @@ namespace Sofia {
 			textureDesc.Format = GetFormat(instance->m_Format);
 			textureDesc.SampleDesc.Count = 1u;
 			textureDesc.Usage = D3D11_USAGE_DEFAULT;
-			textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+			textureDesc.BindFlags = (uint32_t)instance->m_Format & 0x30u ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
 			ComPtr<ID3D11Texture2D> texture;
 			SOF_DX_GRAPHICS_CALL_INFO(device->CreateTexture2D(&textureDesc, nullptr, &texture));
 
-			D3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc;
-			renderTargetDesc.Format = textureDesc.Format;
-			renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-			renderTargetDesc.Texture2D.MipSlice = 0u;
+			if ((uint32_t)instance->m_Format & 0x30u)
+			{
+				D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilDesc;
+				depthStencilDesc.Format = textureDesc.Format; 
+				depthStencilDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+				depthStencilDesc.Flags = 0u;
+				depthStencilDesc.Texture2D.MipSlice = 0u;
 
-			SOF_DX_GRAPHICS_CALL_INFO(device->CreateRenderTargetView(texture.Get(), &renderTargetDesc, &instance->m_RenderTarget));
+				SOF_DX_GRAPHICS_CALL_INFO(device->CreateDepthStencilView(texture.Get(), &depthStencilDesc, &instance->m_DepthStencil));
+			}
+			else
+			{
+				D3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc;
+				renderTargetDesc.Format = textureDesc.Format;
+				renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+				renderTargetDesc.Texture2D.MipSlice = 0u;
 
-			D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
-			shaderResourceDesc.Format = textureDesc.Format;
-			shaderResourceDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			shaderResourceDesc.Texture2D.MostDetailedMip = 0u;
-			shaderResourceDesc.Texture2D.MipLevels = 1u;
+				SOF_DX_GRAPHICS_CALL_INFO(device->CreateRenderTargetView(texture.Get(), &renderTargetDesc, &instance->m_RenderTarget));
 
-			SOF_DX_GRAPHICS_CALL_INFO(device->CreateShaderResourceView(texture.Get(), &shaderResourceDesc, &instance->m_View));
+				D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceDesc;
+				shaderResourceDesc.Format = textureDesc.Format;
+				shaderResourceDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				shaderResourceDesc.Texture2D.MostDetailedMip = 0u;
+				shaderResourceDesc.Texture2D.MipLevels = 1u;
+
+				SOF_DX_GRAPHICS_CALL_INFO(device->CreateShaderResourceView(texture.Get(), &shaderResourceDesc, &instance->m_View));
+			}
 		});
 	}
 
@@ -109,29 +126,16 @@ namespace Sofia {
 		});
 	}
 
-	void DX11RenderTarget::Bind() const noexcept
-	{
-		Ref<const DX11RenderTarget> instance = this;
-		Renderer::Submit([instance]()
-		{
-			DX11Context::GetContextFromApplication()->GetContext()->OMSetRenderTargets(1u, instance->m_RenderTarget.GetAddressOf(), nullptr);
-			D3D11_VIEWPORT viewport;
-			viewport.Width = (float)instance->m_Width;
-			viewport.Height = (float)instance->m_Height;
-			viewport.TopLeftX = 0.0f;
-			viewport.TopLeftY = 0.0f;
-			viewport.MinDepth = 0.0f;
-			viewport.MaxDepth = 1.0f;
-			DX11Context::GetContextFromApplication()->GetContext()->RSSetViewports(1u, &viewport);
-		});
-	}
-
-	void DX11RenderTarget::Clear(const glm::vec4& clearVal) noexcept
+	void DX11RenderTarget::Clear(const glm::vec4& clearVal, float depth, uint8_t stencil) noexcept
 	{
 		Ref<DX11RenderTarget> instance = this;
-		Renderer::Submit([instance, clearVal]()
+		Renderer::Submit([instance, clearVal, depth, stencil]()
 		{
-			DX11Context::GetContextFromApplication()->GetContext()->ClearRenderTargetView(instance->m_RenderTarget.Get(), glm::value_ptr(clearVal));
+			if ((uint32_t)instance->m_Format & 0x30u)
+				DX11Context::GetContextFromApplication()->GetContext()->ClearDepthStencilView(instance->m_DepthStencil.Get(), (uint32_t)instance->m_Format & 0x10u ?
+					D3D11_CLEAR_DEPTH : D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
+			else
+				DX11Context::GetContextFromApplication()->GetContext()->ClearRenderTargetView(instance->m_RenderTarget.Get(), glm::value_ptr(clearVal));
 		});
 	}
 }

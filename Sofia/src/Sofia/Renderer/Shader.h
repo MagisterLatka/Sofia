@@ -29,13 +29,13 @@ namespace Sofia {
 		SOF_CORE ShaderLibrary() = default;
 		SOF_CORE ~ShaderLibrary() = default;
 
-		SOF_CORE void Add(const Ref<Shader>& shader);
-		SOF_CORE void Add(const std::string& name, const Ref<Shader>& shader);
-		SOF_CORE void Load(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
-		SOF_CORE void Load(const std::filesystem::path& path);
-		SOF_CORE void Load(const std::string& name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
-		SOF_CORE void Load(const std::string& name, const std::filesystem::path& path);
-		SOF_CORE void Load(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource);
+		SOF_CORE Ref<Shader> Add(const Ref<Shader>& shader);
+		SOF_CORE Ref<Shader> Add(const std::string& name, const Ref<Shader>& shader);
+		SOF_CORE Ref<Shader> Load(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
+		SOF_CORE Ref<Shader> Load(const std::filesystem::path& path);
+		SOF_CORE Ref<Shader> Load(const std::string& name, const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
+		SOF_CORE Ref<Shader> Load(const std::string& name, const std::filesystem::path& path);
+		SOF_CORE Ref<Shader> Load(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource);
 
 		SOF_CORE const Ref<Shader>& Get(const std::string& name) const;
 	private:

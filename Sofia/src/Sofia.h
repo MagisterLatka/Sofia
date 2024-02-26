@@ -9,7 +9,8 @@
 #include <Sofia/Events/MouseEvents.h>
 
 #include <Sofia/Renderer/Renderer.h>
+#include <Sofia/Renderer/Renderer2D.h>
 #include <Sofia/Renderer/RenderCommand.h>
 #include <Sofia/Renderer/InputLayout.h>
 #include <Sofia/Renderer/Shader.h>
-#include <Sofia/Renderer/RenderTarget.h>
+#include <Sofia/Renderer/RenderPass.h>

@@ -11,31 +11,58 @@ namespace Sofia {
 	{
 		switch (format)
 		{
-		case Sofia::TextureFormat::R8:		return DXGI_FORMAT_R8_UNORM;
-		case Sofia::TextureFormat::R32F:	return DXGI_FORMAT_R32_FLOAT;
-		case Sofia::TextureFormat::RGB8:	return DXGI_FORMAT_R8G8B8A8_UNORM;
-		case Sofia::TextureFormat::RGB32F:	return DXGI_FORMAT_R32G32B32_FLOAT;
-		case Sofia::TextureFormat::RGBA8:	return DXGI_FORMAT_R8G8B8A8_UNORM;
-		case Sofia::TextureFormat::RGBA32F:	return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case TextureFormat::R8:			return DXGI_FORMAT_R8_UNORM;
+		case TextureFormat::R32F:		return DXGI_FORMAT_R32_FLOAT;
+		case TextureFormat::RGB8:		return DXGI_FORMAT_R8G8B8A8_UNORM;
+		case TextureFormat::RGB32F:		return DXGI_FORMAT_R32G32B32_FLOAT;
+		case TextureFormat::RGBA8:		return DXGI_FORMAT_R8G8B8A8_UNORM;
+		case TextureFormat::RGBA_SRGB:	return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		case TextureFormat::RGBA32F:	return DXGI_FORMAT_R32G32B32A32_FLOAT;
 		}
 		SOF_CORE_THROW_INFO("Unknown texture format");
 		return DXGI_FORMAT_R8G8B8A8_UINT;
 	}
+	static D3D11_FILTER GetSampling(TextureSampling sampling)
+	{
+		switch (sampling)
+		{
+		case TextureSampling::Point:				return D3D11_FILTER_MIN_MAG_MIP_POINT;
+		case TextureSampling::MinPointMagLinear:	return D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+		case TextureSampling::MinLinearMagPoint:	return D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+		case TextureSampling::Linear:				return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		case TextureSampling::Anisotropic:			return D3D11_FILTER_ANISOTROPIC;
+		}
+		SOF_CORE_THROW_INFO("Unknown texture sampling");
+		return D3D11_FILTER_MIN_MAG_MIP_POINT;
+	}
+	static D3D11_TEXTURE_ADDRESS_MODE GetWrap(TextureWrap wrap)
+	{
+		switch (wrap)
+		{
+		case TextureWrap::Repeat:	return D3D11_TEXTURE_ADDRESS_WRAP;
+		case TextureWrap::Clamp:	return D3D11_TEXTURE_ADDRESS_CLAMP;
+		case TextureWrap::Mirror:	return D3D11_TEXTURE_ADDRESS_MIRROR;
+		case TextureWrap::Border:	return D3D11_TEXTURE_ADDRESS_BORDER;
+		}
+		SOF_CORE_THROW_INFO("Unknown texture wrap");
+		return D3D11_TEXTURE_ADDRESS_WRAP;
+	}
 	DX11Texture2D::DX11Texture2D(const Texture2DProps& props)
 		: m_Props(props)
 	{
-		SOF_CORE_ASSERT(props.Width > 0u && props.Height > 0u, "Render target expect non-zero width and height");
+		if (props.Filepath.empty())
+			SOF_CORE_ASSERT(props.Width > 0u && props.Height > 0u, "Texture expects non-zero width and height");
 		SOF_CORE_ASSERT((uint32_t)props.Format > 0 && (uint32_t)props.Format <= (uint32_t)TextureFormat::Last, "Unknown texture format");
 		Init();
 	}
 	DX11Texture2D::DX11Texture2D(uint32_t width, uint32_t height, void* data, TextureFormat format)
 	{
-		SOF_CORE_ASSERT(width > 0u && height > 0u, "Render target expect non-zero width and height");
+		SOF_CORE_ASSERT(width > 0u && height > 0u, "Texture expects non-zero width and height");
 		SOF_CORE_ASSERT((uint32_t)format > 0 && (uint32_t)format <= (uint32_t)TextureFormat::Last, "Unknown texture format");
 		m_Props.Width = width;
 		m_Props.Height = height;
 		m_Props.Format = format;
-		m_Buffer = Buffer(data, width * height * GetBPP(format));
+		m_Buffer = Buffer::Copy(data, width * height * GetBPP(format), Buffer::Allocator::Malloc);
 		Init();
 	}
 	void DX11Texture2D::Init()
@@ -98,7 +125,25 @@ namespace Sofia {
 			if (instance->m_Props.GenerateMipMaps)
 				DX11Context::GetContextFromApplication()->GetContext()->GenerateMips(instance->m_View.Get());
 
-			if (instance->m_Buffer.Data) stbi_image_free(instance->m_Buffer.Data);
+			if (instance->m_Buffer.Data && !instance->m_Props.Filepath.empty())
+				stbi_image_free(instance->m_Buffer.Data);
+
+			D3D11_SAMPLER_DESC samplerDesc;
+			samplerDesc.Filter = GetSampling(instance->m_Props.Sampling);
+			samplerDesc.AddressU = GetWrap(instance->m_Props.Wrap);
+			samplerDesc.AddressV = GetWrap(instance->m_Props.Wrap);
+			samplerDesc.AddressW = GetWrap(instance->m_Props.Wrap);
+			samplerDesc.MipLODBias = 0.0f;
+			samplerDesc.MaxAnisotropy = glm::clamp(instance->m_Props.MaxAnisotropy, 1u, 16u);
+			samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+			samplerDesc.BorderColor[0] = glm::clamp(instance->m_Props.BorderColor.r, 0.0f, 1.0f);
+			samplerDesc.BorderColor[1] = glm::clamp(instance->m_Props.BorderColor.g, 0.0f, 1.0f);
+			samplerDesc.BorderColor[2] = glm::clamp(instance->m_Props.BorderColor.b, 0.0f, 1.0f);
+			samplerDesc.BorderColor[3] = glm::clamp(instance->m_Props.BorderColor.a, 0.0f, 1.0f);
+			samplerDesc.MinLOD = 0.0f;
+			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+			SOF_DX_GRAPHICS_CALL_INFO(device->CreateSamplerState(&samplerDesc, &instance->m_Sampler));
 		});
 	}
 
@@ -108,6 +153,7 @@ namespace Sofia {
 		Renderer::Submit([instance, slot]()
 		{
 			DX11Context::GetContextFromApplication()->GetContext()->PSSetShaderResources(slot, 1, instance->m_View.GetAddressOf());
+			DX11Context::GetContextFromApplication()->GetContext()->PSSetSamplers(slot, 1u, instance->m_Sampler.GetAddressOf());
 		});
 	}
 }

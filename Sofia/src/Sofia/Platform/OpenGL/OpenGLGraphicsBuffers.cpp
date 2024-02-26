@@ -217,7 +217,7 @@ namespace Sofia {
 		});
 	}
 
-	void OpenGLConstantBuffer::SetData(uint32_t* data, uint32_t size)
+	void OpenGLConstantBuffer::SetData(void* data, uint32_t size)
 	{
 		SOF_CORE_ASSERT(size == m_Size, "Only updating whole constant buffer is possible");
 		m_Data = std::move(Buffer::Copy(data, size));

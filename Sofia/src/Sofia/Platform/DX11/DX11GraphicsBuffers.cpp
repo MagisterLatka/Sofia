@@ -53,7 +53,8 @@ namespace Sofia {
 			bufferDesc.Usage = GetUsage(instance->m_Usage);
 			D3D11_SUBRESOURCE_DATA data = { 0 };
 			data.pSysMem = instance->m_Data.Data;
-			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+				&instance->m_Buffer));
 		});
 	}
 
@@ -143,7 +144,8 @@ namespace Sofia {
 			bufferDesc.Usage = GetUsage(instance->m_Usage);
 			D3D11_SUBRESOURCE_DATA data = { 0 };
 			data.pSysMem = instance->m_Data.Data;
-			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+				&instance->m_Buffer));
 		});
 	}
 
@@ -239,11 +241,12 @@ namespace Sofia {
 			bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 			D3D11_SUBRESOURCE_DATA data = { 0 };
 			data.pSysMem = instance->m_Data.Data;
-			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, &data, &instance->m_Buffer));
+			SOF_DX_GRAPHICS_CALL_INFO(DX11Context::GetContextFromApplication()->GetDevice()->CreateBuffer(&bufferDesc, instance->m_Data.Data ? &data : nullptr,
+				&instance->m_Buffer));
 		});
 	}
 
-	void DX11ConstantBuffer::SetData(uint32_t* data, uint32_t size)
+	void DX11ConstantBuffer::SetData(void* data, uint32_t size)
 	{
 		SOF_CORE_ASSERT(size == m_Size, "Only updating whole constant buffer is possible");
 		m_Data = std::move(Buffer::Copy(data, size));

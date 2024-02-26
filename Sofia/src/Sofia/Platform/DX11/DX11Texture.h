@@ -22,6 +22,7 @@ namespace Sofia {
 		SOF_CORE void Init();
 	private:
 		ComPtr<ID3D11ShaderResourceView> m_View;
+		ComPtr<ID3D11SamplerState> m_Sampler;
 		Texture2DProps m_Props;
 
 		Sofia::Buffer m_Buffer;

@@ -271,7 +271,7 @@ namespace Sofia {
 	public:
 		SOF_CORE virtual ~ConstantBuffer() = default;
 
-		SOF_CORE virtual void SetData(uint32_t* data, uint32_t size) = 0;
+		SOF_CORE virtual void SetData(void* data, uint32_t size) = 0;
 		SOF_CORE virtual void SetData(const Buffer& buffer) = 0;
 		SOF_CORE virtual void SetData(Buffer&& buffer) = 0;
 		SOF_CORE virtual void SetData(const UniformBufferBase& buffer) = 0;

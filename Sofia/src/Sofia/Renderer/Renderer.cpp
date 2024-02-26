@@ -3,6 +3,7 @@
 
 #include "Sofia/Renderer/RendererAPI.h"
 #include "Sofia/Renderer/RenderCommand.h"
+#include "Sofia/Renderer/Renderer2D.h"
 
 namespace Sofia {
 
@@ -16,12 +17,14 @@ namespace Sofia {
 	void Renderer::Init()
 	{
 		s_Data.commandQueue = new RenderCommandQueue;
-		s_Data.shaderLibrary = new ShaderLibrary;
 		RenderCommand::Init();
+		s_Data.shaderLibrary = new ShaderLibrary;
+		Renderer2D::Init();
 		s_Data.commandQueue->Execute();
 	}
 	void Renderer::Shutdown()
 	{
+		Renderer2D::Shutdown();
 		delete s_Data.shaderLibrary;
 		RenderCommand::Shutdown();
 		s_Data.commandQueue->Execute();

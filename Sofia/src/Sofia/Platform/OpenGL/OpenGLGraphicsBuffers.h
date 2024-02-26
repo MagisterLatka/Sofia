@@ -66,7 +66,7 @@ namespace Sofia {
 		SOF_CORE OpenGLConstantBuffer(BufferShaderBinding binding, const UniformBufferBase& buffer);
 		SOF_CORE virtual ~OpenGLConstantBuffer();
 
-		SOF_CORE virtual void SetData(uint32_t* data, uint32_t size) override;
+		SOF_CORE virtual void SetData(void* data, uint32_t size) override;
 		SOF_CORE virtual void SetData(const Buffer& buffer) override;
 		SOF_CORE virtual void SetData(Buffer&& buffer) override;
 		SOF_CORE virtual void SetData(const UniformBufferBase& buffer) override;

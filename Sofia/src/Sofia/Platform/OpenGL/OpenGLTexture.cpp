@@ -16,6 +16,7 @@ namespace Sofia {
 		case TextureFormat::RGB8:		return GL_RGB8;
 		case TextureFormat::RGB32F:		return GL_RGB32F;
 		case TextureFormat::RGBA8:		return GL_RGBA8;
+		case TextureFormat::RGBA_SRGB:	return GL_SRGB8;
 		case TextureFormat::RGBA32F:	return GL_RGBA32F;
 		}
 		SOF_CORE_THROW_INFO("Unknown texture format");
@@ -25,14 +26,15 @@ namespace Sofia {
 	{
 		switch (format)
 		{
-		case Sofia::TextureFormat::R8:
-		case Sofia::TextureFormat::R32F:
+		case TextureFormat::R8:
+		case TextureFormat::R32F:
 			return GL_RED;
-		case Sofia::TextureFormat::RGB8:
-		case Sofia::TextureFormat::RGB32F:
+		case TextureFormat::RGB8:
+		case TextureFormat::RGB32F:
 			return GL_RGB;
-		case Sofia::TextureFormat::RGBA8:
-		case Sofia::TextureFormat::RGBA32F:
+		case TextureFormat::RGBA8:
+		case TextureFormat::RGBA_SRGB:
+		case TextureFormat::RGBA32F:
 			return GL_RGBA;
 		}
 		SOF_CORE_THROW_INFO("Unknown texture format");
@@ -42,33 +44,46 @@ namespace Sofia {
 	{
 		switch (format)
 		{
-		case Sofia::TextureFormat::R8:
-		case Sofia::TextureFormat::RGB8:
-		case Sofia::TextureFormat::RGBA8:
+		case TextureFormat::R8:
+		case TextureFormat::RGB8:
+		case TextureFormat::RGBA8:
 			return GL_UNSIGNED_BYTE;
-		case Sofia::TextureFormat::R32F:
-		case Sofia::TextureFormat::RGB32F:
-		case Sofia::TextureFormat::RGBA32F:
+		case TextureFormat::R32F:
+		case TextureFormat::RGB32F:
+		case TextureFormat::RGBA32F:
 			return GL_FLOAT;
 		}
 		SOF_CORE_THROW_INFO("Unknown texture format");
 		return 0;
 	}
+	static GLenum OpenGLTextureGetWrap(TextureWrap wrap)
+	{
+		switch (wrap)
+		{
+		case Sofia::TextureWrap::Repeat:	return GL_REPEAT;
+		case Sofia::TextureWrap::Clamp:		return GL_CLAMP_TO_EDGE;
+		case Sofia::TextureWrap::Mirror:	return GL_MIRRORED_REPEAT;
+		case Sofia::TextureWrap::Border:	return GL_CLAMP_TO_BORDER;
+		}
+		SOF_CORE_THROW_INFO("Unknown texture wrap");
+		return 0;
+	}
 	OpenGLTexture2D::OpenGLTexture2D(const Texture2DProps& props)
 		: m_Props(props)
 	{
-		SOF_CORE_ASSERT(props.Width > 0u && props.Height > 0u, "Render target expect non-zero width and height");
+		if (props.Filepath.empty())
+			SOF_CORE_ASSERT(props.Width > 0u && props.Height > 0u, "Texture expects non-zero width and height");
 		SOF_CORE_ASSERT((uint32_t)props.Format > 0 && (uint32_t)props.Format <= (uint32_t)TextureFormat::Last, "Unknown texture format");
 		Init();
 	}
 	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, void* data, TextureFormat format)
 	{
-		SOF_CORE_ASSERT(width > 0u && height > 0u, "Render target expect non-zero width and height");
+		SOF_CORE_ASSERT(width > 0u && height > 0u, "Texture expects non-zero width and height");
 		SOF_CORE_ASSERT((uint32_t)format > 0 && (uint32_t)format <= (uint32_t)TextureFormat::Last, "Unknown texture format");
 		m_Props.Width = width;
 		m_Props.Height = height;
 		m_Props.Format = format;
-		m_Buffer = Buffer(data, width * height * GetBPP(format));
+		m_Buffer = Buffer::Copy(data, width * height * GetBPP(format), Buffer::Allocator::Malloc);
 		Init();
 	}
 	void OpenGLTexture2D::Init()
@@ -107,10 +122,34 @@ namespace Sofia {
 			glTextureSubImage2D(instance->m_ID, 0, 0, 0, instance->m_Props.Width, instance->m_Props.Height, OpenGLTextureFormat(instance->m_Props.Format),
 				OpenGLTextureDataType(instance->m_Props.Format), instance->m_Buffer.Data);
 
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+			glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_S, OpenGLTextureGetWrap(instance->m_Props.Wrap));
+			glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_T, OpenGLTextureGetWrap(instance->m_Props.Wrap));
+			switch (instance->m_Props.Sampling)
+			{
+			case TextureSampling::Point:
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+				break;
+			case TextureSampling::MinPointMagLinear:
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
+				break;
+			case TextureSampling::MinLinearMagPoint:
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+				break;
+			case TextureSampling::Linear:
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+				break;
+			case TextureSampling::Anisotropic:
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, levels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+				float maxi = 0.0f;
+				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxi);
+				glTextureParameterf(instance->m_ID, GL_TEXTURE_MAX_ANISOTROPY, glm::clamp((float)instance->m_Props.MaxAnisotropy, 1.0f, maxi));
+				break;
+			}
 
 			glGenerateTextureMipmap(instance->m_ID);
 
