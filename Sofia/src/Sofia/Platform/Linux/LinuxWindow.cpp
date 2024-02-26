@@ -94,6 +94,8 @@ namespace Sofia {
 		m_Data.title = props.Title;
 		m_Data.width = props.Width;
 		m_Data.height = props.Height;
+		m_Data.titlebar = props.HasTitleBar;
+		m_Data.maximized = props.Maximized;
 		m_Data.eventCallback = SOF_BIND_EVENT_FN(LinuxWindow::DefaultEventCallback);
 
 		int success = glfwInit();
@@ -205,6 +207,44 @@ namespace Sofia {
 						data.mouse.OnRightPressed(0, 0);
 					MouseButtonPressedEvent e(static_cast<MouseCode>(button));
 					data.eventCallback(e);
+
+					if (!data.titlebar && button == GLFW_MOUSE_BUTTON_LEFT)
+					{
+						int titlebarHitTest = 0;
+						glm::ivec2 mousePos = data.mouse.GetPos();
+						if (data.titlebarHitTest)
+							data.titlebarHitTest(mousePos.x, mousePos.y, titlebarHitTest);
+
+						if (titlebarHitTest)
+							glfwDragWindow(window);
+
+						if (!data.maximized)
+						{
+							static int borderThickness = 4;
+							enum { left = 0x1, top = 0x2, right = 0x4, bottom = 0x8 };
+							int hit = 0;
+							if (mousePos.x <= borderThickness) hit |= left;
+							if (mousePos.x >= data.width - borderThickness) hit |= right;
+							if (mousePos.y <= borderThickness) hit |= top;
+							if (mousePos.y >= data.height - borderThickness) hit |= bottom;
+
+							int border = -1;
+							if (hit & top && hit & left)			border = GLFW_WINDOW_LEFT_TOP;
+							else if (hit & top && hit & right)		border = GLFW_WINDOW_RIGHT_TOP;
+							else if (hit & bottom && hit & left)	border = GLFW_WINDOW_LEFT_BOTTOM;
+							else if (hit & bottom && hit & right)	border = GLFW_WINDOW_RIGHT_BOTTOM;
+							else if (hit & left)					border = GLFW_WINDOW_LEFT;
+							else if (hit & top)						border = GLFW_WINDOW_TOP;
+							else if (hit & right)					border = GLFW_WINDOW_RIGHT;
+							else if (hit & bottom)					border = GLFW_WINDOW_BOTTOM;
+
+							if (border != -1)
+							{
+								glfwResizeWindow(window, border);
+								break;
+							}
+						}
+					}
 					break;
 				}
 				case GLFW_RELEASE:
