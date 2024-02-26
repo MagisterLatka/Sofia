@@ -213,7 +213,7 @@ namespace Sofia {
 		Renderer::Submit([instance]() mutable
 		{
 			glCreateBuffers(1, &instance->m_ID);
-			glNamedBufferData(instance->m_ID, instance->m_Size, instance->m_Data.Data, GL_STATIC_DRAW);
+			glNamedBufferStorage(instance->m_ID, instance->m_Size, instance->m_Data.Data, GL_DYNAMIC_STORAGE_BIT);
 		});
 	}
 
