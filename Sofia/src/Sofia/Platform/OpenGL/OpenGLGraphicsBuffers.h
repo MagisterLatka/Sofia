@@ -11,11 +11,13 @@ namespace Sofia {
 		SOF_CORE OpenGLVertexBuffer(const BufferLayout& layout, void* data, uint32_t size, BufferUsage usage);
 		SOF_CORE OpenGLVertexBuffer(const BufferLayout& layout, const Buffer& buffer, BufferUsage usage);
 		SOF_CORE OpenGLVertexBuffer(const BufferLayout& layout, Buffer&& buffer, BufferUsage usage);
+		SOF_CORE OpenGLVertexBuffer(const BufferLayout& layout, void* data, uint32_t size);
 		SOF_CORE virtual ~OpenGLVertexBuffer();
 
 		SOF_CORE virtual void SetData(void* data, uint32_t size, uint32_t offset = 0u) override;
 		SOF_CORE virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
 		SOF_CORE virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
+		SOF_CORE virtual void SetData() override;
 
 		SOF_CORE virtual const BufferLayout& GetLayout() const noexcept override { return m_Layout; }
 

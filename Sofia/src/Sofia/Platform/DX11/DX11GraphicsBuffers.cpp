@@ -37,6 +37,11 @@ namespace Sofia {
 	{
 		Create();
 	}
+	DX11VertexBuffer::DX11VertexBuffer(const BufferLayout& layout, void* data, uint32_t size)
+		: m_Size(size), m_Data(data, size, false), m_Usage(BufferUsage::Dynamic), m_Layout(layout)
+	{
+		Create();
+	}
 	void DX11VertexBuffer::Create()
 	{
 		Ref<DX11VertexBuffer> instance = this;
@@ -81,6 +86,11 @@ namespace Sofia {
 		SOF_CORE_ASSERT(buffer.Size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = buffer;
 		Update(offset);
+	}
+	SOF_CORE void DX11VertexBuffer::SetData()
+	{
+		SOF_CORE_ASSERT(m_Usage == BufferUsage::Dynamic, "This function is reserved for dynamic buffers");
+		Update(0);
 	}
 	void DX11VertexBuffer::Update(uint32_t offset)
 	{

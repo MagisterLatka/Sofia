@@ -33,6 +33,11 @@ namespace Sofia {
 	{
 		Create();
 	}
+	OpenGLVertexBuffer::OpenGLVertexBuffer(const BufferLayout& layout, void* data, uint32_t size)
+		: m_Size(size), m_Data(data, size, false), m_Usage(BufferUsage::Dynamic), m_Layout(layout)
+	{
+		Create();
+	}
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
 		glDeleteBuffers(1, &m_ID);
@@ -70,6 +75,11 @@ namespace Sofia {
 		SOF_CORE_ASSERT(buffer.Size + offset <= m_Size, "Vertex buffer overflow");
 		m_Data = buffer;
 		Update(offset);
+	}
+	SOF_CORE void OpenGLVertexBuffer::SetData()
+	{
+		SOF_CORE_ASSERT(m_Usage == BufferUsage::Dynamic, "This function is reserved for dynamic buffers");
+		Update(0);
 	}
 	void OpenGLVertexBuffer::Update(uint32_t offset)
 	{

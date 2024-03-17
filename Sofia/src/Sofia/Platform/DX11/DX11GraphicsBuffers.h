@@ -12,11 +12,13 @@ namespace Sofia {
 		SOF_CORE DX11VertexBuffer(const BufferLayout& layout, void* data, uint32_t size, BufferUsage usage);
 		SOF_CORE DX11VertexBuffer(const BufferLayout& layout, const Buffer& buffer, BufferUsage usage);
 		SOF_CORE DX11VertexBuffer(const BufferLayout& layout, Buffer&& buffer, BufferUsage usage);
+		SOF_CORE DX11VertexBuffer(const BufferLayout& layout, void* data, uint32_t size);
 		SOF_CORE virtual ~DX11VertexBuffer() = default;
 
 		SOF_CORE virtual void SetData(void* data, uint32_t size, uint32_t offset = 0u) override;
 		SOF_CORE virtual void SetData(const Buffer& buffer, uint32_t offset = 0u) override;
 		SOF_CORE virtual void SetData(Buffer&& buffer, uint32_t offset = 0u) override;
+		SOF_CORE virtual void SetData() override;
 
 		SOF_CORE virtual const BufferLayout& GetLayout() const noexcept override { return m_Layout; }
 

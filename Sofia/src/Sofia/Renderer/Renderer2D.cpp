@@ -249,7 +249,7 @@ namespace Sofia {
 			{ "TID", BufferLayoutElementDataType::Int },
 			{ "TillingFactor", BufferLayoutElementDataType::Float }
 		};
-		Ref<VertexBuffer> quadVBO = VertexBuffer::Create(layout, nullptr, c_MaxQuads * 4 * sizeof(VertexData), BufferUsage::Dynamic);
+		Ref<VertexBuffer> quadVBO = VertexBuffer::Create(layout, s_Data.quadVertexData, c_QuadBufferSize);
 		Ref<IndexBuffer> quadIBO = IndexBuffer::Create(indices, c_MaxQuads * 6 * sizeof(uint32_t));
 		s_Data.quadInputLayout = InputLayout::Create({ quadVBO }, s_Data.shader, quadIBO);
 		delete[] indices;
@@ -326,7 +326,7 @@ namespace Sofia {
 		if (s_Data.quadCount == 0u)
 			return;
 
-		s_Data.quadInputLayout->GetVertexBuffer()->SetData(s_Data.quadVertexData, c_QuadBufferSize);
+		s_Data.quadInputLayout->GetVertexBuffer()->SetData();
 		s_Data.shader->Bind();
 		s_Data.viewProj->Bind(0);
 
