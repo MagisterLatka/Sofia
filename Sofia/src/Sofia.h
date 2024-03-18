@@ -14,3 +14,6 @@
 #include <Sofia/Renderer/InputLayout.h>
 #include <Sofia/Renderer/Shader.h>
 #include <Sofia/Renderer/RenderPass.h>
+
+#include <Sofia/Scene/Scene.h>
+#include <Sofia/Scene/Entity.h>

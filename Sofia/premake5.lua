@@ -34,7 +34,8 @@ project "Sofia"
 		"%{IncludeDirs.glfw}",
 		"%{IncludeDirs.glad}",
 		"%{IncludeDirs.imgui}",
-		"%{IncludeDirs.stb_image}"
+		"%{IncludeDirs.stb_image}",
+		"%{IncludeDirs.entt}"
 	}
 
 	links

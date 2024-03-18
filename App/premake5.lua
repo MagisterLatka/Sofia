@@ -29,7 +29,8 @@ project "App"
 		"%{wks.location}/Sofia/vendor",
 		"%{IncludeDirs.spdlog}",
 		"%{IncludeDirs.glm}",
-		"%{IncludeDirs.imgui}"
+		"%{IncludeDirs.imgui}",
+		"%{IncludeDirs.entt}"
 	}
 
 	links

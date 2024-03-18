@@ -14,6 +14,7 @@ namespace Sofia {
 		SOF_CORE virtual void DrawIndexed(Topology topology, uint32_t indicesCount) override;
 	private:
 		SOF_CORE int GetTopology(Topology topology);
+		SOF_CORE void InitShaders();
 	};
 }
 	

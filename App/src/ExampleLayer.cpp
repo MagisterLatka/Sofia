@@ -27,6 +27,11 @@ void ExampleLayer::OnAttach()
 	float aspectRatio = (float)window->GetWidth() / (float)window->GetHeight();
 	Sofia::Renderer2D::SetViewProjectionMatrix(glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f));
 
+	m_Scene = Ref<Sofia::Scene>::Create("App scene");
+
+	m_Quad = m_Scene->CreateEntity("Textured quad");
+	m_Quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
+
 	ImGui::SetCurrentContext(Sofia::Application::Get().GetImGuiLayer()->GetContext());
 }
 void ExampleLayer::OnDetach()
@@ -47,16 +52,16 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 
 	m_RenderPass->Bind();
 	m_RenderPass->Clear();
+	Sofia::Renderer2D::ResetStats();
 
 	static float time = 0.0f;
 	time += (float)ts;
 	time = glm::mod(time, glm::two_pi<float>());
-	Sofia::Renderer2D::SubmitQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, time, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture);
-	Sofia::Renderer2D::Draw();
+	m_Quad.GetTransformComponent().Orientation.z = time;
+	m_Scene->OnUpdate(ts);
 
 	Sofia::Application::Get().GetWindow()->BindToRender();
 	Sofia::Application::Get().GetWindow()->Clear();
-	Sofia::Renderer::Render();
 }
 void ExampleLayer::OnUIRender()
 {
@@ -65,6 +70,8 @@ void ExampleLayer::OnUIRender()
 	ImGui::Begin("Settings");
 
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
+	ImGui::Text("Draw calls: %d", Sofia::Renderer2D::GetStats().DrawCalls);
+	ImGui::Text("Quad count: %d", Sofia::Renderer2D::GetStats().QuadCount);
 
 	ImGui::End();
 	

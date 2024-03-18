@@ -17,8 +17,9 @@ namespace Sofia {
 	void Renderer::Init()
 	{
 		s_Data.commandQueue = new RenderCommandQueue;
-		RenderCommand::Init();
 		s_Data.shaderLibrary = new ShaderLibrary;
+		RenderCommand::Init();
+		s_Data.commandQueue->Execute();
 		Renderer2D::Init();
 		s_Data.commandQueue->Execute();
 	}
