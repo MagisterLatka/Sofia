@@ -225,6 +225,9 @@ namespace Sofia {
 	}
 	void Application::DrawTitleBar(float& outTitlebarHeight)
 	{
+		if (m_Window->GetWidth() < 300.0f || m_Window->GetHeight() < 64.0f)
+			return;
+
 		constexpr float titlebarHeight = 58.0f;
 		const bool isMaximized = m_Window->IsMaximized();
 		float titlebarVerticalOffset = isMaximized ? -6.0f : 0.0f;
