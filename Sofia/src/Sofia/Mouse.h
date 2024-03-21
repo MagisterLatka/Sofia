@@ -48,17 +48,17 @@ namespace Sofia {
 		SOF_CORE bool IsEmpty() const noexcept { return m_Buffer.empty(); }
 		SOF_CORE void Flush() noexcept;
 	private:
-		SOF_CORE void OnMouseMove(int x, int y) noexcept;
-		SOF_CORE void OnMouseLeave() noexcept;
-		SOF_CORE void OnMouseEnter() noexcept;
-		SOF_CORE void OnLeftPressed(int x, int y) noexcept;
-		SOF_CORE void OnLeftReleased(int x, int y) noexcept;
-		SOF_CORE void OnRightPressed(int x, int y) noexcept;
-		SOF_CORE void OnRightReleased(int x, int y) noexcept;
-		SOF_CORE void OnWheelUp(int x, int y) noexcept;
-		SOF_CORE void OnWheelDown(int x, int y) noexcept;
-		SOF_CORE void TrimBuffer() noexcept;
-		SOF_CORE void OnWheelDelta(int x, int y, int delta) noexcept;
+		void OnMouseMove(int x, int y) noexcept;
+		void OnMouseLeave() noexcept;
+		void OnMouseEnter() noexcept;
+		void OnLeftPressed(int x, int y) noexcept;
+		void OnLeftReleased(int x, int y) noexcept;
+		void OnRightPressed(int x, int y) noexcept;
+		void OnRightReleased(int x, int y) noexcept;
+		void OnWheelUp(int x, int y) noexcept;
+		void OnWheelDown(int x, int y) noexcept;
+		void TrimBuffer() noexcept;
+		void OnWheelDelta(int x, int y, int delta) noexcept;
 	private:
 		static constexpr uint32_t c_BufferSize = 16u;
 		glm::ivec2 m_Pos;

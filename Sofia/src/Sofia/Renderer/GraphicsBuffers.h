@@ -131,9 +131,9 @@ namespace Sofia {
 		SOF_CORE static Ref<VertexBuffer> Create(const BufferLayout& layout, const Buffer& buffer, BufferUsage usage);
 		SOF_CORE static Ref<VertexBuffer> Create(const BufferLayout& layout, Buffer&& buffer, BufferUsage usage);
 	protected:
-		SOF_CORE virtual void SetData() = 0;
+		virtual void SetData() = 0;
 
-		SOF_CORE static Ref<VertexBuffer> Create(const BufferLayout& layout, void* data, uint32_t size);
+		static Ref<VertexBuffer> Create(const BufferLayout& layout, void* data, uint32_t size);
 	};
 	class IndexBuffer : public RefCounted
 	{

@@ -28,7 +28,7 @@ namespace Sofia {
 		SOF_CORE static Stats GetStats() noexcept;
 		SOF_CORE static void ResetStats() noexcept;
 	private:
-		SOF_CORE static void Init();
-		SOF_CORE static void Shutdown();
+		static void Init();
+		static void Shutdown();
 	};
 }

@@ -21,8 +21,8 @@ namespace Sofia {
 
 		SOF_CORE virtual void AddReloadedCallback(const ShaderReloadedCallback& callback) noexcept override;
 	private:
-		SOF_CORE void PreProcess();
-		SOF_CORE void Compile();
+		void PreProcess();
+		void Compile();
 	private:
 		uint32_t m_ID;
 		std::filesystem::path m_VPath, m_FPath;

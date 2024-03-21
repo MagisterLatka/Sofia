@@ -10,7 +10,7 @@ namespace Sofia {
 	{
 		Create();
 	}
-	SOF_CORE void OpenGLRenderPass::Create()
+	void OpenGLRenderPass::Create()
 	{
 		Ref<OpenGLRenderPass> instance = this;
 		Renderer::Submit([instance]() mutable

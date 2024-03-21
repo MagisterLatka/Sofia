@@ -16,7 +16,7 @@ namespace Sofia {
 
 		SOF_CORE virtual void Bind() const noexcept override;
 	private:
-		SOF_CORE void Create();
+		void Create();
 	private:
 		uint32_t m_ID;
 		std::vector<Ref<OpenGLVertexBuffer>> m_VertexBuffers;

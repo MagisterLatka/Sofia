@@ -11,8 +11,8 @@ namespace Sofia {
 		SOF_CORE static void Draw(RendererAPI::Topology topology, uint32_t verticesCount);
 		SOF_CORE static void DrawIndexed(RendererAPI::Topology topology, uint32_t indicesCount);
 	private:
-		SOF_CORE static void Init();
-		SOF_CORE static void Shutdown();
+		static void Init();
+		static void Shutdown();
 	private:
 		SOF_CORE static Scope<RendererAPI> s_API;
 	};

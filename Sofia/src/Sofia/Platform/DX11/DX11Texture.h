@@ -19,7 +19,7 @@ namespace Sofia {
 		SOF_CORE virtual uint32_t GetHeight() const noexcept override { return m_Props.Height; }
 		SOF_CORE virtual void* GetRawPointer() const noexcept override { return m_View.Get(); }
 	private:
-		SOF_CORE void Init();
+		void Init();
 	private:
 		ComPtr<ID3D11ShaderResourceView> m_View;
 		ComPtr<ID3D11SamplerState> m_Sampler;

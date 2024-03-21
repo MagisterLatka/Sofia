@@ -11,19 +11,18 @@ namespace Sofia {
 		friend class LinuxWindow;
 	public:
 		SOF_CORE virtual ~GraphicsContext() = default;
-
 	protected:
-		SOF_CORE virtual void Init() = 0;
-		SOF_CORE virtual void Shutdown() = 0;
-		SOF_CORE virtual void InitForWindow(void* window) = 0;
-		SOF_CORE virtual void ShutdownForWindow(void* window) = 0;
+		virtual void Init() = 0;
+		virtual void Shutdown() = 0;
+		virtual void InitForWindow(void* window) = 0;
+		virtual void ShutdownForWindow(void* window) = 0;
 
-		SOF_CORE virtual void SwapBuffers(void* window) = 0;
-		SOF_CORE virtual void RecreateSwapChain(void* window) = 0;
-		SOF_CORE virtual void BindWindow(void* window) = 0;
-		SOF_CORE virtual void BindToRender(void* window) = 0;
-		SOF_CORE virtual void Clear(void* window, const glm::vec4& color) = 0;
+		virtual void SwapBuffers(void* window) = 0;
+		virtual void RecreateSwapChain(void* window) = 0;
+		virtual void BindWindow(void* window) = 0;
+		virtual void BindToRender(void* window) = 0;
+		virtual void Clear(void* window, const glm::vec4& color) = 0;
 
-		SOF_CORE static Ref<GraphicsContext> Create();
+		static Ref<GraphicsContext> Create();
 	};
 }

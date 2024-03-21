@@ -52,17 +52,17 @@ namespace Sofia {
 
 		SOF_CORE static Application& Get() noexcept { return *s_Application; }
 	private:
-		SOF_CORE void Init();
-		SOF_CORE void Shutdown();
+		void Init();
+		void Shutdown();
 		SOF_CORE int Run();
 
-		SOF_CORE void OnEvent(Event& e);
-		SOF_CORE bool OnWindowClose(WindowCloseEvent& e) noexcept;
-		SOF_CORE bool OnWindowResize(WindowResizeEvent& e) noexcept;
+		void OnEvent(Event& e);
+		bool OnWindowClose(WindowCloseEvent& e) noexcept;
+		bool OnWindowResize(WindowResizeEvent& e) noexcept;
 
-		SOF_CORE void ImGuiRender();
-		SOF_CORE void DrawTitleBar(float& titlebarHeight);
-		SOF_CORE void DrawMenuBarUI();
+		void ImGuiRender();
+		void DrawTitleBar(float& titlebarHeight);
+		void DrawMenuBarUI();
 	private:
 		ApplicationSpecifications m_Specs;
 

@@ -20,7 +20,8 @@ private:
 
 	Ref<Sofia::Scene> m_Scene;
 	Sofia::Entity m_Quad;
+	Sofia::Entity m_Camera;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
-	glm::vec2 m_ViewportSize = { -1.0f, -1.0f }, m_ViewportPos;
+	glm::ivec2 m_ViewportSize = { -1.0f, -1.0f }, m_ViewportPos;
 };

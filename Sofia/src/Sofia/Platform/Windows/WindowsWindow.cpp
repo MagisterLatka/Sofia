@@ -405,7 +405,7 @@ namespace Sofia {
 			const POINTS points = MAKEPOINTS(lParam);
 			const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
 			m_Mouse.OnWheelDelta(points.x, points.y, delta);
-			MouseScrolledEvent e(0, (float)delta);
+			MouseScrolledEvent e(0, (float)delta / (float)WHEEL_DELTA);
 			m_Data.eventCallback(e);
 			break;
 		}
@@ -431,6 +431,7 @@ namespace Sofia {
 			delete[] paths;
 
 			DragFinish(drop);
+			break;
 		}
 
 		case WM_NCCALCSIZE:

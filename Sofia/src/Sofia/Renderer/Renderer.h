@@ -25,8 +25,8 @@ namespace Sofia {
 
 		SOF_CORE static ShaderLibrary& GetShaderLibrary() noexcept;
 	private:
-		SOF_CORE static void Init();
-		SOF_CORE static void Shutdown();
-		SOF_CORE static RenderCommandQueue& GetRenderCommandQueue() noexcept;
+		static void Init();
+		static void Shutdown();
+		static RenderCommandQueue& GetRenderCommandQueue() noexcept;
 	};
 }

@@ -102,7 +102,21 @@ namespace Sofia {
 
 	void Renderer2D::SetViewProjectionMatrix(const glm::mat4& viewProjMat)
 	{
-		s_Data.viewProj->SetData((void*)glm::value_ptr(viewProjMat), sizeof(glm::mat4));
+		switch (RendererAPI::GetAPI())
+		{
+		case RendererAPI::API::None:
+			SOF_CORE_THROW_INFO("None API is not supported");
+			break;
+		case RendererAPI::API::OpenGL:
+		case RendererAPI::API::Vulkan:
+			s_Data.viewProj->SetData((void*)glm::value_ptr(viewProjMat), sizeof(glm::mat4));
+			break;
+		case RendererAPI::API::DX11:
+		case RendererAPI::API::DX12:
+			glm::mat4 transposed = glm::transpose(viewProjMat);
+			s_Data.viewProj->SetData((void*)glm::value_ptr(transposed), sizeof(glm::mat4));
+			break;
+		}
 	}
 	void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor)
 	{

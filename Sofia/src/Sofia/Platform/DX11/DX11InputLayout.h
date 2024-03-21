@@ -18,7 +18,7 @@ namespace Sofia {
 
 		SOF_CORE virtual void Bind() const noexcept override;
 	private:
-		SOF_CORE void Create();
+		void Create();
 	private:
 		ComPtr<ID3D11InputLayout> m_InputLayout;
 		std::vector<Ref<DX11VertexBuffer>> m_VertexBuffers;

@@ -49,12 +49,12 @@ namespace Sofia {
 		SOF_CORE void DisableAutorepeat() noexcept { m_Autorepeat = false; }
 		SOF_CORE bool IsAutorepeatEnabled() const noexcept { return m_Autorepeat; }
 	private:
-		SOF_CORE void OnKeyPressed(unsigned char keycode) noexcept;
-		SOF_CORE void OnKeyReleased(unsigned char keycode) noexcept;
-		SOF_CORE void OnChar(char character) noexcept;
-		SOF_CORE void ClearState() noexcept;
+		void OnKeyPressed(unsigned char keycode) noexcept;
+		void OnKeyReleased(unsigned char keycode) noexcept;
+		void OnChar(char character) noexcept;
+		void ClearState() noexcept;
 		template<typename T>
-		SOF_CORE static void TrimBuffer(std::queue<T>& buffer) noexcept;
+		static void TrimBuffer(std::queue<T>& buffer) noexcept;
 	private:
 		static constexpr uint32_t c_NKeys = 256u;
 		static constexpr uint32_t c_BufferSize = 16u;

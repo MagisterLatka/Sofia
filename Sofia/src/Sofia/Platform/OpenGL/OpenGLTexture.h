@@ -18,7 +18,7 @@ namespace Sofia {
 		SOF_CORE virtual uint32_t GetHeight() const noexcept override { return m_Props.Height; }
 		SOF_CORE virtual void* GetRawPointer() const noexcept override { return (void*)(uint64_t)m_ID; }
 	private:
-		SOF_CORE void Init();
+		void Init();
 	private:
 		uint32_t m_ID;
 		Texture2DProps m_Props;

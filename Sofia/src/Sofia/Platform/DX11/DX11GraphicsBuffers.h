@@ -24,8 +24,8 @@ namespace Sofia {
 
 		SOF_CORE virtual uint32_t GetSize() const noexcept override { return m_Size; }
 	private:
-		SOF_CORE void Create();
-		SOF_CORE void Update(uint32_t offset);
+		void Create();
+		void Update(uint32_t offset);
 	private:
 		ComPtr<ID3D11Buffer> m_Buffer;
 		uint32_t m_Size = 0u;
@@ -51,8 +51,8 @@ namespace Sofia {
 		SOF_CORE virtual uint32_t GetSize() const noexcept override { return m_Size; }
 		SOF_CORE virtual uint32_t GetIndicesCount() const noexcept override { return m_Size / sizeof(uint32_t); }
 	private:
-		SOF_CORE void Create();
-		SOF_CORE void Update(uint32_t offset);
+		void Create();
+		void Update(uint32_t offset);
 	private:
 		ComPtr<ID3D11Buffer> m_Buffer;
 		uint32_t m_Size = 0u;
@@ -78,8 +78,8 @@ namespace Sofia {
 
 		SOF_CORE virtual uint32_t GetSize() const noexcept override { return m_Size; }
 	private:
-		SOF_CORE void Create();
-		SOF_CORE void Update();
+		void Create();
+		void Update();
 	private:
 		ComPtr<ID3D11Buffer> m_Buffer;
 		uint32_t m_Size = 0u;

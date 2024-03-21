@@ -24,8 +24,8 @@ namespace Sofia {
 
 		SOF_CORE ComPtr<ID3DBlob> GetVertexSource() const noexcept { return m_VSource; }
 	private:
-		SOF_CORE void PreProcess();
-		SOF_CORE void CompileFromSource();
+		void PreProcess();
+		void CompileFromSource();
 	private:
 		ComPtr<ID3D11VertexShader> m_VShader;
 		ComPtr<ID3D11PixelShader> m_FShader;

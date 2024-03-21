@@ -32,9 +32,9 @@ namespace Sofia {
 			SOF_CORE static const char* GetName() noexcept { return "Sofia Game Engine Window Class"; }
 			SOF_CORE static HINSTANCE GetInstance() noexcept { return s_WindowClass.m_Instance; }
 		private:
-			SOF_CORE WindowClass() noexcept;
+			WindowClass() noexcept;
 			WindowClass(const WindowClass&) = delete;
-			SOF_CORE ~WindowClass();
+			~WindowClass();
 
 			WindowClass& operator=(const WindowClass&) = delete;
 		private:
@@ -80,17 +80,17 @@ namespace Sofia {
 		SOF_CORE virtual Keyboard& GetKeyboard() noexcept { return m_Keyboard; };
 		SOF_CORE virtual Mouse& GetMouse() noexcept { return m_Mouse; }
 	private:
-		SOF_CORE void Init(const WindowProps& props);
-		SOF_CORE void Shutdown();
+		void Init(const WindowProps& props);
+		void Shutdown();
 
-		SOF_CORE static HICON CreateIcon(const uint8_t* pixels, int x, int y);
+		static HICON CreateIcon(const uint8_t* pixels, int x, int y);
 
-		SOF_CORE static LRESULT CALLBACK HandleMsgSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-		SOF_CORE static LRESULT CALLBACK HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
-		SOF_CORE LRESULT HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
-		SOF_CORE void HandleImGuiInput(bool handle = true) noexcept { m_HandleImGuiInput = handle; }
+		static LRESULT CALLBACK HandleMsgSetup(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+		static LRESULT CALLBACK HandleMsgThunk(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
+		LRESULT HandleMsg(HWND windowHandle, UINT msg, WPARAM wParam, LPARAM lParam);
+		void HandleImGuiInput(bool handle = true) noexcept { m_HandleImGuiInput = handle; }
 
-		SOF_CORE void DefaultEventCallback(Event& e) {}
+		void DefaultEventCallback(Event& e) {}
 	private:
 		struct WindowData
 		{

@@ -23,9 +23,9 @@ namespace Sofia {
 
 		SOF_CORE virtual uint32_t GetSize() const noexcept override { return m_Size; }
 	private:
-		SOF_CORE void Create();
-		SOF_CORE void Update(uint32_t offset);
-		SOF_CORE void Bind() const;
+		void Create();
+		void Update(uint32_t offset);
+		void Bind() const;
 	private:
 		uint32_t m_ID = 0u, m_Size = 0u;
 		Buffer m_Data;
@@ -50,9 +50,9 @@ namespace Sofia {
 		SOF_CORE virtual uint32_t GetSize() const noexcept override { return m_Size; }
 		SOF_CORE virtual uint32_t GetIndicesCount() const noexcept override { return m_Size / sizeof(uint32_t); }
 	private:
-		SOF_CORE void Create();
-		SOF_CORE void Update(uint32_t offset);
-		SOF_CORE void Bind() const;
+		void Create();
+		void Update(uint32_t offset);
+		void Bind() const;
 	private:
 		uint32_t m_ID = 0u, m_Size = 0u;
 		Buffer m_Data;
@@ -77,8 +77,8 @@ namespace Sofia {
 
 		SOF_CORE virtual uint32_t GetSize() const noexcept override { return m_Size; }
 	private:
-		SOF_CORE void Create();
-		SOF_CORE void Update();
+		void Create();
+		void Update();
 	private:
 		uint32_t m_ID = 0u, m_Size = 0u;
 		Buffer m_Data;

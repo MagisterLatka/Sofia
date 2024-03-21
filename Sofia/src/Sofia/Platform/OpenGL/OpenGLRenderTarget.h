@@ -15,8 +15,11 @@ namespace Sofia {
 
 		SOF_CORE virtual void BindTexture(uint32_t slot = 0u) const noexcept override;
 		SOF_CORE virtual void* GetRawTexturePointer() const noexcept override { return (void*)(uint64_t)m_ID; }
+
+		SOF_CORE virtual uint32_t GetWidth() const noexcept override { return m_Width; };
+		SOF_CORE virtual uint32_t GetHeight() const noexcept override { return m_Height; };
 	private:
-		SOF_CORE virtual void Clear(const glm::vec4& clearVal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), float depth = 0.0f, uint8_t stencil = 0u) noexcept override {}
+		virtual void Clear(const glm::vec4& clearVal = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), float depth = 0.0f, uint8_t stencil = 0u) noexcept override {}
 	private:
 		uint32_t m_ID = 0, m_Width = 0, m_Height = 0;
 		RenderTargetFormat m_Format;

@@ -49,10 +49,10 @@ namespace Sofia {
 		SOF_CORE virtual Keyboard& GetKeyboard() noexcept { return m_Data.keyboard; };
 		SOF_CORE virtual Mouse& GetMouse() noexcept { return m_Data.mouse; }
 	private:
-		SOF_CORE void Init(const WindowProps& props);
-		SOF_CORE void Shutdown();
+		void Init(const WindowProps& props);
+		void Shutdown();
 
-		SOF_CORE void DefaultEventCallback(Event& e) {}
+		void DefaultEventCallback(Event& e) {}
 	private:
 		struct WindowData
 		{

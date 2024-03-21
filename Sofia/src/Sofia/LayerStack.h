@@ -26,8 +26,8 @@ namespace Sofia {
 		SOF_CORE std::vector<Layer*>::const_reverse_iterator rbegin() const noexcept { return m_Layers.rbegin(); }
 		SOF_CORE std::vector<Layer*>::const_reverse_iterator rend() const noexcept { return m_Layers.rend(); }
 	private:
-		SOF_CORE void Init();
-		SOF_CORE void Shutdown();
+		void Init();
+		void Shutdown();
 	private:
 		std::vector<Layer*> m_Layers;
 		uint32_t m_LayerInsertIndex = 0u;

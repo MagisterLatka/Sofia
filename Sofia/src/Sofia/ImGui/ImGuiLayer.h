@@ -24,7 +24,7 @@ namespace Sofia {
 		
 		SOF_CORE void BlockEvents(bool block) { m_BlockEvents = block; }
 	private:
-		SOF_CORE void Init();
+		void Init();
 	private:
 		ImGuiContext* m_Context = nullptr;
 		bool m_BlockEvents = true;

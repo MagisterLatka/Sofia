@@ -28,7 +28,7 @@ namespace Sofia {
 		SOF_CORE virtual void Draw(Topology topology, uint32_t verticesCount) = 0;
 		SOF_CORE virtual void DrawIndexed(Topology topology, uint32_t indicesCount) = 0;
 	private:
-		SOF_CORE static Scope<RendererAPI> Create();
+		static Scope<RendererAPI> Create();
 	private:
 		SOF_CORE static API s_API;
 	};
