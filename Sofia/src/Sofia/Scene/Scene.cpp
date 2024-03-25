@@ -119,16 +119,16 @@ namespace Sofia {
 	}
 
 	template<>
-	__declspec(dllexport) void Scene::OnComponentAdd<TagComponent>(Entity entity, TagComponent& component) {}
+	SOF_CORE void Scene::OnComponentAdd<TagComponent>(Entity entity, TagComponent& component) {}
 	template<>
-	__declspec(dllexport) void Scene::OnComponentAdd<TransformComponent>(Entity entity, TransformComponent& component) {}
+	SOF_CORE void Scene::OnComponentAdd<TransformComponent>(Entity entity, TransformComponent& component) {}
 	template<>
-	__declspec(dllexport) void Scene::OnComponentAdd<SpriteComponent>(Entity entity, SpriteComponent& component) {}
+	SOF_CORE void Scene::OnComponentAdd<SpriteComponent>(Entity entity, SpriteComponent& component) {}
 	template<>
-	__declspec(dllexport) void Scene::OnComponentAdd<CameraComponent>(Entity entity, CameraComponent& component)
+	SOF_CORE void Scene::OnComponentAdd<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		component.Camera->SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 	}
 	template<>
-	__declspec(dllexport) void Scene::OnComponentAdd<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
+	SOF_CORE void Scene::OnComponentAdd<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 }
