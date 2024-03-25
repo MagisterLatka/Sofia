@@ -21,6 +21,7 @@ namespace Sofia {
 
 	class OrthographicCamera : public Camera
 	{
+		friend class SceneHierarchyPanel;
 	public:
 		SOF_CORE OrthographicCamera() = default;
 		SOF_CORE OrthographicCamera(const glm::mat4& projectionMatrix) noexcept

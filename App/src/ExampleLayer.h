@@ -21,7 +21,8 @@ private:
 	Ref<Sofia::Scene> m_Scene;
 	Sofia::Entity m_Quad;
 	Sofia::Entity m_Camera;
+	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
-	glm::ivec2 m_ViewportSize = { -1.0f, -1.0f }, m_ViewportPos;
+	glm::ivec2 m_ViewportSize = { -1.0f, -1.0f }, m_ViewportPos = { 0.0f, 0.0f };
 };

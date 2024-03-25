@@ -7,6 +7,14 @@
 
 namespace Sofia {
 
+	static uint32_t s_SceneCounter = 0u;
+	Scene::Scene(const std::string& name)
+		: m_Name(name), m_ID(++s_SceneCounter)
+	{
+		m_SceneEntity = m_Registry.create();
+		m_Registry.emplace<SceneComponent>(m_SceneEntity, m_ID);
+		m_Registry.emplace<TagComponent>(m_SceneEntity, "SceneEntity");
+	}
 	Scene::~Scene()
 	{
 		m_Registry.clear();

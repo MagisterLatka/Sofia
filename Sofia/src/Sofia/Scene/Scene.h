@@ -13,9 +13,14 @@ namespace Sofia {
 	class Scene : public RefCounted
 	{
 		friend class Entity;
+		friend class SceneHierarchyPanel;
+
+		struct SceneComponent
+		{
+			uint32_t SceneID;
+		};
 	public:
-		SOF_CORE Scene(const std::string& name = "Scene") noexcept
-			: m_Name(name) {}
+		SOF_CORE Scene(const std::string& name = "Scene");
 		SOF_CORE ~Scene();
 
 		SOF_CORE Entity CreateEntity(const std::string& name = {});
@@ -33,8 +38,10 @@ namespace Sofia {
 		void OnComponentAdd(Entity entity, T& component);
 	private:
 		std::string m_Name;
+		uint32_t m_ID = -1;
 
 		entt::registry m_Registry;
+		entt::entity m_SceneEntity = entt::null;
 		entt::entity m_Camera = entt::null;
 
 		glm::uvec2 m_ViewportSize = { 0u, 0u };

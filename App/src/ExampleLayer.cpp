@@ -81,16 +81,22 @@ void ExampleLayer::OnAttach()
 	m_Scene = Ref<Sofia::Scene>::Create("App scene");
 	m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
 	m_Camera = m_Scene->SetCameraEntity();
+	m_Camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>()->SetSize(2.0f);
 	m_Camera.AddComponent<Sofia::NativeScriptComponent>().Bind<CameraController>();
 
 	m_Quad = m_Scene->CreateEntity("Textured quad");
 	m_Quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
+	m_SceneHierarchyPanel = CreateScope<Sofia::SceneHierarchyPanel>(m_Scene);
+
 	ImGui::SetCurrentContext(Sofia::Application::Get().GetImGuiLayer()->GetContext());
 }
 void ExampleLayer::OnDetach()
 {
-
+	m_SceneHierarchyPanel.reset();
+	m_Scene.Reset();
+	m_RenderPass.Reset();
+	m_Texture.Reset();
 }
 
 void ExampleLayer::OnUpdate(Sofia::Timestep ts)
@@ -157,6 +163,8 @@ void ExampleLayer::OnUIRender()
 
 	ImGui::End();
 	ImGui::PopStyleVar();
+
+	m_SceneHierarchyPanel->OnUIRender();
 }
 
 void ExampleLayer::OnEvent(Sofia::Event& e)
