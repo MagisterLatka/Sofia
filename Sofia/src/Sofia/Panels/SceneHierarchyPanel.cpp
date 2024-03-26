@@ -22,7 +22,7 @@ namespace Sofia {
 
 		static char buffer[256];
 		memset(buffer, 0, sizeof(buffer));
-		strcpy_s(buffer, m_Scene->m_Name.c_str());
+		std::strncpy(buffer, m_Scene->m_Name.c_str(), sizeof(buffer) - 1);
 		if (ImGui::InputText("Scene name###Tag", buffer, sizeof(buffer)))
 			m_Scene->m_Name = buffer;
 
@@ -125,7 +125,7 @@ namespace Sofia {
 
 			static char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, sizeof(buffer), tag.c_str());
+			std::strncpy(buffer, tag.c_str(), sizeof(buffer) - 1);
 			if (ImGui::InputText("###Tag", buffer, sizeof(buffer)))
 				tag = buffer;
 		}
