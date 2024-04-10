@@ -13,14 +13,17 @@ public:
 	virtual void OnUIRender() override;
 	virtual void OnEvent(Sofia::Event& e) override;
 private:
+	bool OnKeyPressed(Sofia::KeyPressedEvent& e);
 	bool OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e);
+
+	void NewScene();
+	void OpenScene();
+	void SaveScene();
 private:
 	Ref<Sofia::RenderPass> m_RenderPass;
 	Ref<Sofia::Texture2D> m_Texture;
 
 	Ref<Sofia::Scene> m_Scene;
-	Sofia::Entity m_Quad;
-	Sofia::Entity m_Camera;
 	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;

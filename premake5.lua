@@ -21,6 +21,7 @@ group "Dep"
 	include "Sofia/vendor/glfw"
 	include "Sofia/vendor/glad"
 	include "Sofia/vendor/ImGui"
+	include "Sofia/vendor/yaml-cpp"
 group ""
 
 group "Core"

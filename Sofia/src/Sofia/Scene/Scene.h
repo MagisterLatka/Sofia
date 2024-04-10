@@ -14,6 +14,7 @@ namespace Sofia {
 	{
 		friend class Entity;
 		friend class SceneHierarchyPanel;
+		friend class SceneSerializer;
 
 		struct SceneComponent
 		{

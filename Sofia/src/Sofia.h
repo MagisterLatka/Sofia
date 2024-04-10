@@ -18,5 +18,8 @@
 #include <Sofia/Scene/Scene.h>
 #include <Sofia/Scene/Entity.h>
 #include <Sofia/Scene/ScriptableEntity.h>
+#include <Sofia/Scene/SceneSerializer.h>
 
 #include <Sofia/Panels/SceneHierarchyPanel.h>
+
+#include <Sofia/Utils/FileProcessing.h>

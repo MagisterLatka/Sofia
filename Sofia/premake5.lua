@@ -35,14 +35,16 @@ project "Sofia"
 		"%{IncludeDirs.glad}",
 		"%{IncludeDirs.imgui}",
 		"%{IncludeDirs.stb_image}",
-		"%{IncludeDirs.entt}"
+		"%{IncludeDirs.entt}",
+		"%{IncludeDirs.yaml}"
 	}
 
 	links
 	{
 		"GLFW",
 		"GLAD",
-		"ImGui"
+		"ImGui",
+		"yaml-cpp"
 	}	
 
 	filter "system:windows"

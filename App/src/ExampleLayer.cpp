@@ -80,12 +80,11 @@ void ExampleLayer::OnAttach()
 
 	m_Scene = Ref<Sofia::Scene>::Create("App scene");
 	m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-	m_Camera = m_Scene->SetCameraEntity();
-	m_Camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>()->SetSize(2.0f);
-	m_Camera.AddComponent<Sofia::NativeScriptComponent>().Bind<CameraController>();
+	auto camera = m_Scene->SetCameraEntity();
+	camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>()->SetSize(2.0f);
+	camera.AddComponent<Sofia::NativeScriptComponent>().Bind<CameraController>();
 
-	m_Quad = m_Scene->CreateEntity("Textured quad");
-	m_Quad.AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
+	m_Scene->CreateEntity("Textured quad").AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
 	m_SceneHierarchyPanel = CreateScope<Sofia::SceneHierarchyPanel>(m_Scene);
 
@@ -113,11 +112,6 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	m_RenderPass->Clear();
 	Sofia::Renderer2D::ResetStats();
 
-	static float time = 0.0f;
-	time += (float)ts;
-	time = glm::mod(time, glm::two_pi<float>());
-	m_Quad.GetTransformComponent().Orientation.z = time;
-
 	m_Scene->OnUpdate(ts);
 
 	Sofia::Application::Get().GetWindow()->BindToRender();
@@ -132,10 +126,6 @@ void ExampleLayer::OnUIRender()
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
 	ImGui::Text("Draw calls: %d", Sofia::Renderer2D::GetStats().DrawCalls);
 	ImGui::Text("Quad count: %d", Sofia::Renderer2D::GetStats().QuadCount);
-	auto camera = m_Camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>();
-	float cameraSize = camera->GetSize();
-	if (ImGui::DragFloat("Camera size", &cameraSize, 0.025f, 0.1f, 10.0f))
-		camera->SetSize(cameraSize);
 
 	ImGui::End();
 	
@@ -171,10 +161,63 @@ void ExampleLayer::OnEvent(Sofia::Event& e)
 {
 	Sofia::Dispatcher dispatcher(e);
 	dispatcher.Dispatch<Sofia::MouseButtonPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
+	dispatcher.Dispatch<Sofia::KeyPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
 
 	m_Scene->OnEvent(e);
+}
+bool ExampleLayer::OnKeyPressed(Sofia::KeyPressedEvent& e)
+{
+	bool shift = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftShift) || Sofia::Input::IsKeyPressed(Sofia::KeyCode::RightShift);
+	bool control = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftControl) || Sofia::Input::IsKeyPressed(Sofia::KeyCode::RightControl);
+
+	switch (e.GetKeyCode())
+	{
+	case Sofia::KeyCode::N:
+		if (control)
+			NewScene();
+		break;
+	case Sofia::KeyCode::O:
+		if (control)
+			OpenScene();
+		break;
+	case Sofia::KeyCode::S:
+		if (control && shift)
+			SaveScene();
+		break;
+	}
+
+	return false;
 }
 bool ExampleLayer::OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e)
 {
 	return false;
+}
+
+void ExampleLayer::NewScene()
+{
+	m_Scene = Ref<Sofia::Scene>::Create();
+	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel->SetScene(m_Scene);
+}
+void ExampleLayer::OpenScene()
+{
+	std::filesystem::path filepath = Sofia::FileProcessing::ChooseFileToOpenFrom(L"Saba scene (*.scene)\0*.scene\0");
+	if (filepath.empty())
+		return;
+
+	m_Scene = Ref<Sofia::Scene>::Create();
+	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel->SetScene(m_Scene);
+
+	Sofia::SceneSerializer serializer(m_Scene);
+	serializer.Deserialize(filepath);
+}
+void ExampleLayer::SaveScene()
+{
+	std::filesystem::path filepath = Sofia::FileProcessing::ChooseFileToSaveTo(L"Saba scene (*.scene)\0*.scene\0");
+	if (filepath.empty())
+		return;
+
+	Sofia::SceneSerializer serializer(m_Scene);
+	serializer.Serialize(filepath);
 }

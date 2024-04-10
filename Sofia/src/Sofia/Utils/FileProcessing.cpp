@@ -39,4 +39,27 @@ namespace Sofia {
 		in.close();
 		return result;
 	}
+
+#if defined(SOF_PLATFORM_WINDOWS)
+	extern std::filesystem::path WindowsOpen(const wchar_t* filter);
+	extern std::filesystem::path WindowsSave(const wchar_t* filter);
+
+	std::filesystem::path FileProcessing::ChooseFileToOpenFrom(const wchar_t* filter)
+	{
+		return WindowsOpen(filter);
+	}
+	std::filesystem::path FileProcessing::ChooseFileToSaveTo(const wchar_t* filter)
+	{
+		return WindowsSave(filter);
+	}
+#else
+	std::filesystem::path FileProcessing::ChooseFileToOpenFrom(const wchar_t* filter) //TODO
+	{
+		return filter;
+	}
+	std::filesystem::path FileProcessing::ChooseFileToSaveTo(const wchar_t* filter)
+	{
+		return filter;
+	}
+#endif
 }

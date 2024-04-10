@@ -8,3 +8,6 @@
 	path = Sofia/vendor/ImGui
 	url = https://github.com/MagisterLatka/imgui.git
 	branch = docking
+[submodule "Sofia/vendor/yaml-cpp"]
+	path = Sofia/vendor/yaml-cpp
+	url = https://github.com/MagisterLatka/yaml-cpp
