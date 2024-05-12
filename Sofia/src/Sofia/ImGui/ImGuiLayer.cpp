@@ -14,9 +14,9 @@
 
 #	include <Sofia/Platform/Linux/LinuxWindow.h>
 #endif
-
 #include <backends/imgui_impl_opengl3.h>
 //#include <backends/imgui_impl_vulkan.h>
+#include "Sofia/ImGui/ImGuizmo.h"
 
 #include "Sofia/Application.h"
 
@@ -128,6 +128,7 @@ namespace Sofia {
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DX11 and DX12 are not supported on non-windows systems"); break;
 #endif
 		}
+		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
 	}
 	void ImGuiLayer::OnDetach()
 	{
@@ -201,6 +202,7 @@ namespace Sofia {
 #endif
 		}
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 	void ImGuiLayer::End()
 	{

@@ -12,7 +12,9 @@ namespace Sofia {
 	}
 	void SceneHierarchyPanel::SetSelected(Entity entity) noexcept
 	{
-		if (entity.GetScene() == m_Scene.Raw())
+		if (!entity)
+			m_Selected = {};
+		else if (entity.GetScene() == m_Scene.Raw())
 			m_Selected = entity;
 	}
 

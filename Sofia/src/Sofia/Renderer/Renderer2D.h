@@ -17,11 +17,11 @@ namespace Sofia {
 		SOF_CORE static void SetViewProjectionMatrix(const glm::mat4& viewProjMat);
 
 		SOF_CORE static void SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation = 0.0f, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
-			const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f);
+			const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f, uint32_t entityID = -1);
 		SOF_CORE static void SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float rotation = 0.0f, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f },
-			const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f);
+			const Ref<Texture2D>& texture = {}, float tillingFactor = 1.0f, uint32_t entityID = -1);
 		SOF_CORE static void SubmitQuad(const glm::mat4& transform, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f }, const Ref<Texture2D>& texture = {},
-			float tillingFactor = 1.0f);
+			float tillingFactor = 1.0f, uint32_t entityID = -1);
 
 		SOF_CORE static void DrawQuads();
 

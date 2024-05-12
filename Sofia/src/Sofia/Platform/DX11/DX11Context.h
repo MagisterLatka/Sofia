@@ -3,7 +3,7 @@
 #include "Sofia/Renderer/GraphicsContext.h"
 #include "Sofia/Platform/DX11/dxgiInfoManager.h"
 #include "Sofia/Application.h"
-#include <d3d11.h>
+#include <d3d11_4.h>
 
 namespace Sofia {
 
@@ -43,13 +43,13 @@ namespace Sofia {
 		SOF_CORE virtual void BindToRender(void* window) override;
 		SOF_CORE virtual void Clear(void* window, const glm::vec4& color) override;
 
-		SOF_CORE ComPtr<ID3D11Device> GetDevice() { SOF_CORE_ASSERT(m_Device, "No DX11Device created"); return m_Device; }
-		SOF_CORE ComPtr<ID3D11DeviceContext> GetContext() { SOF_CORE_ASSERT(m_Context, "No DX11Device created"); return m_Context; }
+		SOF_CORE ComPtr<ID3D11Device5> GetDevice() { SOF_CORE_ASSERT(m_Device, "No DX11Device created"); return m_Device; }
+		SOF_CORE ComPtr<ID3D11DeviceContext4> GetContext() { SOF_CORE_ASSERT(m_Context, "No DX11Device created"); return m_Context; }
 
 		SOF_CORE static Ref<DX11Context> GetContextFromApplication() noexcept { return Application::Get().GetGraphicsContext().As<DX11Context>(); }
 	private:
-		ComPtr<ID3D11Device> m_Device;
-		ComPtr<ID3D11DeviceContext> m_Context;
+		ComPtr<ID3D11Device5> m_Device;
+		ComPtr<ID3D11DeviceContext4> m_Context;
 
 		std::unordered_map<HWND, std::pair<ComPtr<IDXGISwapChain>, ComPtr<ID3D11RenderTargetView>>> m_WindowData;
 	};

@@ -10,15 +10,15 @@
 
 namespace Sofia {
 
-	Ref<RenderTarget> RenderTarget::Create(uint32_t width, uint32_t height, RenderTargetFormat format)
+	Ref<RenderTarget> RenderTarget::Create(uint32_t width, uint32_t height, RenderTargetFormat format, const glm::vec4& clearVal)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 		case RendererAPI::API::None:	SOF_CORE_THROW_INFO("None API is not supported"); return nullptr;
-		case RendererAPI::API::OpenGL:	return Ref<OpenGLRenderTarget>::Create(width, height, format);
+		case RendererAPI::API::OpenGL:	return Ref<OpenGLRenderTarget>::Create(width, height, format, clearVal);
 		case RendererAPI::API::Vulkan:	SOF_CORE_THROW_INFO("Vulkan is not supported yet"); return nullptr;
 #if defined(SOF_PLATFORM_WINDOWS)
-		case RendererAPI::API::DX11:	return Ref<DX11RenderTarget>::Create(width, height, format);
+		case RendererAPI::API::DX11:	return Ref<DX11RenderTarget>::Create(width, height, format, clearVal);
 		case RendererAPI::API::DX12:	SOF_CORE_THROW_INFO("DirectX 12 is not supported yet"); return nullptr;
 #else
 		case RendererAPI::API::DX11:

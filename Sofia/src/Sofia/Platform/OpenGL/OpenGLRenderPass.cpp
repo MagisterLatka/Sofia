@@ -67,20 +67,20 @@ namespace Sofia {
 			glViewport(0, 0, instance->m_Width, instance->m_Height);
 		});
 	}
-	void OpenGLRenderPass::Clear(const glm::vec4& clearVal, float depth, uint8_t stencil) noexcept
+	void OpenGLRenderPass::Clear() noexcept
 	{
 		Ref<OpenGLRenderPass> instance = this;
-		Renderer::Submit([instance, clearVal, depth, stencil]()
+		Renderer::Submit([instance]()
 		{
 			for (uint32_t i = 0; i < 8; ++i)
 			{
-				if (instance->m_RenderTargets[i])
-				{
-					glClearNamedFramebufferfv(instance->m_ID, GL_COLOR, 0, glm::value_ptr(clearVal));
-				}
+				if (auto target = instance->m_RenderTargets[i]; target)
+					glClearNamedFramebufferfv(instance->m_ID, GL_COLOR, i, glm::value_ptr(target->m_ClearValue));
 			}
 			if (instance->m_DepthStencilTarget)
 			{
+				float depth = instance->m_DepthStencilTarget->m_DepthClearValue;
+				uint8_t stencil = instance->m_DepthStencilTarget->m_StencilClearValue;
 				if (instance->m_DepthStencilTarget->m_Format == RenderTargetFormat::Depth32F)
 					glClearNamedFramebufferfv(instance->m_ID, GL_DEPTH, 0, &depth);
 				else

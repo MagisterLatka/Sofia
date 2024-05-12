@@ -9,6 +9,7 @@ Sofia::Application* Sofia::CreateApplication()
 	ApplicationSpecifications spec;
 	spec.WindowIconPath = L"assets/Icon.png";
 	spec.CustomTitleBar = true;
+	//spec.GraphicsAPI = Sofia::RendererAPI::API::OpenGL; //mouse picking for opengl not working
 	Application* app = new Application(spec);
 	ExampleLayer* layer = (ExampleLayer*)app->PushLayer(new ExampleLayer);
 	app->SetMenuBarCallbackFunc([app]()

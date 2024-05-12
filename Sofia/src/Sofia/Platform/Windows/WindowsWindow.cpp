@@ -495,10 +495,11 @@ namespace Sofia {
 		}
 		case WM_MOVE:
 		{
-			int xpos = LOWORD(lParam);
-			int ypos = HIWORD(lParam);
+			int xpos = (int)(short)LOWORD(lParam);
+			int ypos = (int)(short)HIWORD(lParam);
 			m_Data.pos = { xpos, ypos };
 			WindowMovedEvent e(xpos, ypos);
+			m_Data.eventCallback(e);
 			return 0;
 		}
 

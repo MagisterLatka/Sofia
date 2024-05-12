@@ -45,15 +45,15 @@ namespace Sofia {
 		});
 	}
 
-	void DX11RenderPass::Clear(const glm::vec4& clearVal, float depth, uint8_t stencil) noexcept
+	void DX11RenderPass::Clear() noexcept
 	{
 		for (uint32_t i = 0; i < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
 		{
 			if (m_RenderTargets[i])
-				m_RenderTargets[i]->Clear(clearVal);
+				m_RenderTargets[i]->Clear();
 		}
 		if (m_DepthStencilTarget)
-			m_DepthStencilTarget->Clear(glm::vec4(0.0f), depth, stencil);
+			m_DepthStencilTarget->Clear();
 	}
 
 	void DX11RenderPass::Resize(uint32_t width, uint32_t height)

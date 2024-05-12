@@ -80,6 +80,7 @@ namespace Sofia {
 			layout(location = 2) in vec2 i_UV;
 			layout(location = 3) in int i_TID;
 			layout(location = 4) in float i_TillingFactor;
+			layout(location = 5) in ivec4 i_ID;
 
 			layout(std140, binding = 0) uniform RendererData
 			{
@@ -91,6 +92,7 @@ namespace Sofia {
 				vec2 uv;
 				flat int tid;
 				flat float tillingFactor;
+				flat uint id;
 			} vs_out;
 
 			void main()
@@ -100,6 +102,7 @@ namespace Sofia {
 				vs_out.uv = i_UV;
 				vs_out.tid = i_TID;
 				vs_out.tillingFactor = i_TillingFactor;
+				vs_out.id = i_ID.x;
 			}
 		)";
 
@@ -107,12 +110,14 @@ namespace Sofia {
 			#version 460 core
 
 			layout(location = 0) out vec4 o_Color;
+			layout(location = 1) out uint o_ID;
 
 			in Data {
 				vec4 color;
 				vec2 uv;
 				flat int tid;
 				flat float tillingFactor;
+				flat uint id;
 			} fs_in;
 
 			layout(binding = 0) uniform sampler2D u_Tex0;
@@ -156,6 +161,7 @@ namespace Sofia {
 			void main()
 			{
 				o_Color = fs_in.color * GetDataFromTexture(fs_in.tid, fs_in.uv, fs_in.tillingFactor);
+				o_ID = fs_in.id;
 			}
 		)";
 		Renderer::GetShaderLibrary().Load("2D", vertex2D, fragment2D);

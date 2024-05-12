@@ -27,6 +27,6 @@ namespace Sofia {
 	private:
 		static void Init();
 		static void Shutdown();
-		static RenderCommandQueue& GetRenderCommandQueue() noexcept;
+		SOF_CORE static RenderCommandQueue& GetRenderCommandQueue() noexcept;
 	};
 }

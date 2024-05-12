@@ -100,7 +100,7 @@ namespace Sofia {
 			for (auto entity : group)
 			{
 				auto [tc, sc] = group.get<TransformComponent, SpriteComponent>(entity);
-				Renderer2D::SubmitQuad(tc, sc.Color, sc.Texture, sc.TillingFactor);
+				Renderer2D::SubmitQuad(tc, sc.Color, sc.Texture, sc.TillingFactor, (uint32_t)entity);
 			}
 			Renderer2D::DrawQuads();
 		}

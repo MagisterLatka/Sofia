@@ -21,8 +21,13 @@ namespace Sofia {
 #endif
 
 		HRESULT hr;
+		ComPtr<ID3D11Device> device;
+		ComPtr<ID3D11DeviceContext> context;
 		SOF_DX_GRAPHICS_CALL_INFO(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, deviceCreateFlags, nullptr, 0, D3D11_SDK_VERSION,
-			&m_Device, nullptr, &m_Context));
+			&device, nullptr, &context));
+
+		device.As<ID3D11Device5>(&m_Device);
+		context.As<ID3D11DeviceContext4>(&m_Context);
 
 		ComPtr<ID3D11Debug> debug;
 		hr = m_Device.As(&debug);

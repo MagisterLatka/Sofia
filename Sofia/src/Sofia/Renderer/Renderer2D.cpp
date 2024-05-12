@@ -14,6 +14,8 @@ namespace Sofia {
 		glm::vec2 uv;
 		int tid;
 		float tillingFactor;
+		uint32_t id;
+		glm::ivec3 padding;
 	};
 
 	static constexpr uint32_t c_MaxQuads = 10000u;
@@ -80,7 +82,8 @@ namespace Sofia {
 			{ "Color", BufferLayoutElementDataType::Float4 },
 			{ "UV", BufferLayoutElementDataType::Float2 },
 			{ "TID", BufferLayoutElementDataType::Int },
-			{ "TillingFactor", BufferLayoutElementDataType::Float }
+			{ "TillingFactor", BufferLayoutElementDataType::Float },
+			{ "EntityID", BufferLayoutElementDataType::UInt4 }
 		};
 		Ref<VertexBuffer> quadVBO = VertexBuffer::Create(layout, s_Data.quadVertexData, c_QuadBufferSize);
 		Ref<IndexBuffer> quadIBO = IndexBuffer::Create(indices, c_MaxQuads * 6 * sizeof(uint32_t));
@@ -118,11 +121,11 @@ namespace Sofia {
 			break;
 		}
 	}
-	void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor)
+	void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor, uint32_t entityID)
 	{
-		SubmitQuad(glm::vec3(pos, 0.0f), size, rotation, color, texture, tillingFactor);
+		SubmitQuad(glm::vec3(pos, 0.0f), size, rotation, color, texture, tillingFactor, entityID);
 	}
-	void Renderer2D::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor)
+	void Renderer2D::SubmitQuad(const glm::vec3& pos, const glm::vec2& size, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor, uint32_t entityID)
 	{
 		if (s_Data.quadCount >= c_MaxQuads)
 			DrawQuads();
@@ -162,13 +165,14 @@ namespace Sofia {
 			s_Data.quadInsert->color = color;
 			s_Data.quadInsert->tid = tid;
 			s_Data.quadInsert->tillingFactor = tillingFactor;
+			s_Data.quadInsert->id = entityID;
 			++s_Data.quadInsert;
 		}
 
 		++s_Data.quadCount;
 		++s_Data.stats.QuadCount;
 	}
-	void Renderer2D::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor)
+	void Renderer2D::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor, uint32_t entityID)
 	{
 		if (s_Data.quadCount >= c_MaxQuads)
 			DrawQuads();
@@ -207,6 +211,7 @@ namespace Sofia {
 			s_Data.quadInsert->color = color;
 			s_Data.quadInsert->tid = tid;
 			s_Data.quadInsert->tillingFactor = tillingFactor;
+			s_Data.quadInsert->id = entityID;
 			++s_Data.quadInsert;
 		}
 
