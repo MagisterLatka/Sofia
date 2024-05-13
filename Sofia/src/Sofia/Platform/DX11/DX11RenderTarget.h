@@ -14,7 +14,7 @@ namespace Sofia {
 
 		SOF_CORE virtual void Resize(uint32_t width, uint32_t height, bool forceResize = false) override;
 
-		SOF_CORE virtual void BindTexture(uint32_t slot = 0u) const noexcept override;
+		SOF_CORE virtual void BindTexture(uint32_t slot = 0u) const override;
 		SOF_CORE virtual void* GetRawTexturePointer() const noexcept override { return m_View.Get(); }
 		SOF_CORE virtual void ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) override;
 

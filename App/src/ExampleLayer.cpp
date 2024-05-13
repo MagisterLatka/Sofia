@@ -74,7 +74,7 @@ void ExampleLayer::OnAttach()
 	m_RenderPass = Sofia::RenderPass::Create();
 	m_RenderPass->SetRenderTarget(0u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
 	m_RenderPass->SetRenderTarget(1u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::R32_UINT));
-	//m_RenderPass->SetDepthStencilTarget(Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::Depth32F));
+	m_RenderPass->SetDepthStencilTarget(Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::Depth32F));
 
 	Sofia::Texture2DProps textureProps;
 	textureProps.Filepath = L"assets/textures/checkerboard.png";

@@ -80,7 +80,7 @@ namespace Sofia {
 			layout(location = 2) in vec2 i_UV;
 			layout(location = 3) in int i_TID;
 			layout(location = 4) in float i_TillingFactor;
-			layout(location = 5) in ivec4 i_ID;
+			layout(location = 5) in uvec4 i_ID;
 
 			layout(std140, binding = 0) uniform RendererData
 			{

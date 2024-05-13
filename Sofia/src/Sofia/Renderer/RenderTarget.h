@@ -21,7 +21,7 @@ namespace Sofia {
 
 		SOF_CORE virtual void Resize(uint32_t width, uint32_t height, bool forceResize = false) = 0;
 
-		SOF_CORE virtual void BindTexture(uint32_t slot = 0u) const noexcept = 0;
+		SOF_CORE virtual void BindTexture(uint32_t slot = 0u) const = 0;
 		SOF_CORE virtual void* GetRawTexturePointer() const noexcept = 0;
 		SOF_CORE virtual void ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord) = 0;
 

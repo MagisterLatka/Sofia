@@ -49,22 +49,33 @@ namespace Sofia {
 		Ref<OpenGLRenderTarget> instance = this;
 		Renderer::Submit([instance]() mutable
 		{
-			if (instance->m_ID)
+			if ((uint32_t)instance->m_Format & 0x30)
 			{
-				glDeleteTextures(1, &instance->m_ID);
-			}
+				if (instance->m_ID)
+					glDeleteRenderbuffers(1, &instance->m_ID);
 
-			glCreateTextures(GL_TEXTURE_2D, 1, &instance->m_ID);
-			glTextureStorage2D(instance->m_ID, 1u, GetFormat(instance->m_Format), instance->m_Width, instance->m_Height);
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glCreateRenderbuffers(1, &instance->m_ID);
+				glNamedRenderbufferStorage(instance->m_ID, instance->m_Format == RenderTargetFormat::Depth24Stencil8 ? GL_DEPTH24_STENCIL8 : GL_DEPTH_COMPONENT32F,
+					instance->m_Width, instance->m_Height);
+			}
+			else
+			{
+				if (instance->m_ID)
+					glDeleteTextures(1, &instance->m_ID);
+
+				glCreateTextures(GL_TEXTURE_2D, 1, &instance->m_ID);
+				glTextureStorage2D(instance->m_ID, 1u, GetFormat(instance->m_Format), instance->m_Width, instance->m_Height);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			}
 		});
 	}
 
-	void OpenGLRenderTarget::BindTexture(uint32_t slot) const noexcept
+	void OpenGLRenderTarget::BindTexture(uint32_t slot) const
 	{
+		SOF_CORE_ASSERT(!((uint32_t)m_Format & 0x30u), "Cannot bind depth or depth stencil format");
 		Ref<const OpenGLRenderTarget> instance = this;
 		Renderer::Submit([instance, slot]()
 		{
@@ -74,6 +85,7 @@ namespace Sofia {
 
 	void OpenGLRenderTarget::ReadPixel(void* data, uint32_t xCoord, uint32_t yCoord)
 	{
+		SOF_CORE_ASSERT(!((uint32_t)m_Format & 0x30u), "Cannot read from depth or depth stencil format");
 		Ref<OpenGLRenderTarget> instance = this;
 		Renderer::Submit([instance, data, xCoord, yCoord]()
 		{

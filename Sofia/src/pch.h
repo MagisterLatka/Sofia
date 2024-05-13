@@ -22,7 +22,10 @@
 #include <queue>
 #include <map>
 
+#pragma warning(push)
+#pragma warning(disable : 4996)
 #include <Sofia/Log.h>
+#pragma warning(pop)
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>

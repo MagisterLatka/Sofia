@@ -58,11 +58,14 @@ namespace Sofia {
 			if (instance->m_DepthStencilTarget)
 			{
 				if (instance->m_DepthStencilTarget->m_Format == RenderTargetFormat::Depth32F)
-					glNamedFramebufferTexture(instance->m_ID, GL_DEPTH_ATTACHMENT, instance->m_DepthStencilTarget->m_ID, 0);
+					glNamedFramebufferRenderbuffer(instance->m_ID, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, instance->m_DepthStencilTarget->m_ID);
 				else
-					glNamedFramebufferTexture(instance->m_ID, GL_DEPTH_STENCIL_ATTACHMENT, instance->m_DepthStencilTarget->m_ID, 0);
+					glNamedFramebufferRenderbuffer(instance->m_ID, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, instance->m_DepthStencilTarget->m_ID);
 			}
 
+			static GLenum buffers[8] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+										GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
+			glNamedFramebufferDrawBuffers(instance->m_ID, 8u, buffers);
 			glBindFramebuffer(GL_FRAMEBUFFER, instance->m_ID);
 			glViewport(0, 0, instance->m_Width, instance->m_Height);
 		});
@@ -75,7 +78,16 @@ namespace Sofia {
 			for (uint32_t i = 0; i < 8; ++i)
 			{
 				if (auto target = instance->m_RenderTargets[i]; target)
-					glClearNamedFramebufferfv(instance->m_ID, GL_COLOR, i, glm::value_ptr(target->m_ClearValue));
+				{
+					if (target->m_Format == RenderTargetFormat::R32_UINT || target->m_Format == RenderTargetFormat::RG32_UINT || target->m_Format == RenderTargetFormat::RGB32_UINT ||
+						target->m_Format == RenderTargetFormat::RGBA32_UINT)
+					{
+						glm::uvec4 clear = target->m_ClearValue;
+						glClearNamedFramebufferuiv(instance->m_ID, GL_COLOR, i, glm::value_ptr(clear));
+					}
+					else
+						glClearNamedFramebufferfv(instance->m_ID, GL_COLOR, i, glm::value_ptr(target->m_ClearValue));
+				}
 			}
 			if (instance->m_DepthStencilTarget)
 			{

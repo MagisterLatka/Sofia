@@ -125,7 +125,7 @@ namespace Sofia {
 		});
 	}
 
-	void DX11RenderTarget::BindTexture(uint32_t slot) const noexcept
+	void DX11RenderTarget::BindTexture(uint32_t slot) const
 	{
 		Ref<const DX11RenderTarget> instance = this;
 		Renderer::Submit([instance, slot]()
