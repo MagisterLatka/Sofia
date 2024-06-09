@@ -51,8 +51,9 @@ namespace Sofia {
 		m_LayerStack->PushOverlay(m_ImGuiLayer);
 
 		//call OnAttach() on layers in LayerStack
-		m_LayerStack->Init(); 
-		
+		m_LayerStack->Init();
+		m_ImGuiInitFunc(m_ImGuiLayer->GetContext());
+
 		uint32_t width, height;
 		void* data = nullptr;
 		if (m_Specs.TitlebarIconData)

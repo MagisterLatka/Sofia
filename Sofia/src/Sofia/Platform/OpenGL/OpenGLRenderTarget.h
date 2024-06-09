@@ -24,7 +24,7 @@ namespace Sofia {
 		virtual void SetDepthStencilClearValue(float depth, uint8_t stencil) noexcept override { m_DepthClearValue = depth; m_StencilClearValue = stencil; };
 		virtual void Clear() noexcept override {}
 	private:
-		uint32_t m_ID = 0, m_Width = 0, m_Height = 0;
+		uint32_t m_ID = 0, m_ReadBuffer = 0, m_Width = 0, m_Height = 0;
 		RenderTargetFormat m_Format;
 		glm::vec4 m_ClearValue;
 		float m_DepthClearValue = 1.0f;

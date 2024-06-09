@@ -33,6 +33,7 @@ namespace Sofia {
 	{
 		friend int ::main(int, char**, char**);
 	public:
+		using ImGuiInitFunc = std::function<void(ImGuiContext*)>;
 		using MenuBarCallbackFunc = std::function<void()>;
 
 		SOF_CORE Application(const ApplicationSpecifications& applicationSpecifications = ApplicationSpecifications());
@@ -46,13 +47,14 @@ namespace Sofia {
 		SOF_CORE Ref<GraphicsContext> GetGraphicsContext() const noexcept { return m_GraphicsContext; }
 		SOF_CORE Ref<Window> GetWindow() const noexcept { return m_Window; }
 		SOF_CORE ImGuiLayer* GetImGuiLayer() noexcept { return m_ImGuiLayer; }
-		void SetMenuBarCallbackFunc(const MenuBarCallbackFunc& callback) noexcept { m_MenuBarCallback = callback; }
+		SOF_CORE void SetImGuiInitFunc(const ImGuiInitFunc& func) noexcept { m_ImGuiInitFunc = func; }
+		SOF_CORE void SetMenuBarCallbackFunc(const MenuBarCallbackFunc& callback) noexcept { m_MenuBarCallback = callback; }
 
 		SOF_CORE const ApplicationSpecifications& GetApplicationSpecifications() const noexcept { return m_Specs; }
 
 		SOF_CORE static Application& Get() noexcept { return *s_Application; }
 	private:
-		void Init();
+		SOF_CORE void Init();
 		void Shutdown();
 		SOF_CORE int Run();
 
@@ -71,6 +73,7 @@ namespace Sofia {
 
 		Scope<LayerStack> m_LayerStack;
 		ImGuiLayer* m_ImGuiLayer;
+		ImGuiInitFunc m_ImGuiInitFunc;
 		MenuBarCallbackFunc m_MenuBarCallback;
 		bool m_TitleBarHovered = false;
 		Ref<Texture2D> m_TitlebarIcon;

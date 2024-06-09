@@ -65,10 +65,13 @@ namespace Sofia {
 
 				glCreateTextures(GL_TEXTURE_2D, 1, &instance->m_ID);
 				glTextureStorage2D(instance->m_ID, 1u, GetFormat(instance->m_Format), instance->m_Width, instance->m_Height);
-				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTextureParameteri(instance->m_ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 				glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 				glTextureParameteri(instance->m_ID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+				glCreateTextures(GL_TEXTURE_2D, 1, &instance->m_ReadBuffer);
+				glTextureStorage2D(instance->m_ReadBuffer, 1u, GetFormat(instance->m_Format), 1u, 1u);
 			}
 		});
 	}
@@ -89,6 +92,8 @@ namespace Sofia {
 		Ref<OpenGLRenderTarget> instance = this;
 		Renderer::Submit([instance, data, xCoord, yCoord]()
 		{
+			glCopyImageSubData(instance->m_ID, GL_TEXTURE_2D, 0u, xCoord, yCoord, 0u, instance->m_ReadBuffer, GL_TEXTURE_2D, 0u, 0u, 0u, 0u, 1u, 1u, 1u);
+
 			GLenum format = 0, type = 0;
 			switch (instance->m_Format)
 			{
@@ -146,7 +151,7 @@ namespace Sofia {
 				type = GL_FLOAT;
 				break;
 			}
-			glGetTextureSubImage(instance->m_ID, 0, xCoord, yCoord, 0, 1, 1, 1, format, type, sizeof(glm::vec4), data);
+			glGetTextureImage(instance->m_ReadBuffer, 0u, format, type, sizeof(glm::vec4), data);
 		});
 	}
 }

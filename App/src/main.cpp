@@ -12,6 +12,10 @@ Sofia::Application* Sofia::CreateApplication()
 	//spec.GraphicsAPI = Sofia::RendererAPI::API::OpenGL;
 	Application* app = new Application(spec);
 	ExampleLayer* layer = (ExampleLayer*)app->PushLayer(new ExampleLayer);
+	app->SetImGuiInitFunc([](ImGuiContext* context) //temp, idk if will stay
+	{
+		ImGui::SetCurrentContext(context);
+	});
 	app->SetMenuBarCallbackFunc([app]()
 	{
 		if (ImGui::BeginMenu("File"))

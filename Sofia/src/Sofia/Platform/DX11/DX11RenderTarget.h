@@ -25,7 +25,7 @@ namespace Sofia {
 		virtual void SetDepthStencilClearValue(float depth, uint8_t stencil) noexcept override { m_DepthClearValue = depth; m_StencilClearValue = stencil; };
 		virtual void Clear() noexcept override;
 	private:
-		ComPtr<ID3D11Texture2D> m_Texture;
+		ComPtr<ID3D11Texture2D> m_Texture, m_ReadBuffer;
 		ComPtr<ID3D11RenderTargetView> m_RenderTarget;
 		ComPtr<ID3D11DepthStencilView> m_DepthStencil;
 		ComPtr<ID3D11ShaderResourceView> m_View;

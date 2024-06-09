@@ -63,6 +63,12 @@ project "Sofia"
 			"opengl32.lib"
 		}
 		
+		removefiles
+		{
+			"src/Sofia/Platform/Linux/**.cpp",
+			"src/Sofia/Platform/Linux/**.h"
+		}
+		
 	filter "system:linux"
 		pic "On"
 		

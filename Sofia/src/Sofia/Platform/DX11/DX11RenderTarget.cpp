@@ -90,7 +90,6 @@ namespace Sofia {
 			textureDesc.Format = GetFormat(instance->m_Format);
 			textureDesc.SampleDesc.Count = 1u;
 			textureDesc.Usage = D3D11_USAGE_DEFAULT;
-			if (!((uint32_t)instance->m_Format & 0x30u)) textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 			textureDesc.BindFlags = (uint32_t)instance->m_Format & 0x30u ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
 			SOF_DX_GRAPHICS_CALL_INFO(device->CreateTexture2D(&textureDesc, nullptr, &instance->m_Texture));
@@ -122,6 +121,11 @@ namespace Sofia {
 
 				SOF_DX_GRAPHICS_CALL_INFO(device->CreateShaderResourceView(instance->m_Texture.Get(), &shaderResourceDesc, &instance->m_View));
 			}
+
+			textureDesc.Usage = D3D11_USAGE_STAGING;
+			textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			textureDesc.BindFlags = 0u;
+			SOF_DX_GRAPHICS_CALL_INFO(device->CreateTexture2D(&textureDesc, nullptr, &instance->m_ReadBuffer));
 		});
 	}
 
@@ -142,7 +146,6 @@ namespace Sofia {
 			auto context = DX11Context::GetContextFromApplication()->GetContext();
 			auto device = DX11Context::GetContextFromApplication()->GetDevice();
 			HRESULT hr;
-			SOF_DX_GRAPHICS_CALL_INFO(context->Map(instance->m_Texture.Get(), 0u, D3D11_MAP_READ, 0u, nullptr));
 			D3D11_BOX box;
 			box.left = xCoord;
 			box.right = xCoord + 1u;
@@ -150,8 +153,11 @@ namespace Sofia {
 			box.bottom = yCoord + 1u;
 			box.back = 1u;
 			box.front = 0u;
-			device->ReadFromSubresource(data, sizeof(glm::vec4), 0u, instance->m_Texture.Get(), 0u, &box);
-			context->Unmap(instance->m_Texture.Get(), 0u);
+			context->CopySubresourceRegion1(instance->m_ReadBuffer.Get(), 0u, 0u, 0u, 0u, instance->m_Texture.Get(), 0u, &box, D3D11_COPY_DISCARD);
+			D3D11_MAPPED_SUBRESOURCE map;
+			SOF_DX_GRAPHICS_CALL_INFO(context->Map(instance->m_ReadBuffer.Get(), 0u, D3D11_MAP_READ, 0u, &map));
+			memcpy(data, map.pData, sizeof(glm::vec4));
+			context->Unmap(instance->m_ReadBuffer.Get(), 0u);
 		});
 	}
 

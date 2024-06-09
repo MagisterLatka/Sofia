@@ -90,8 +90,6 @@ void ExampleLayer::OnAttach()
 	m_Scene->CreateEntity("Textured quad").AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
 	m_SceneHierarchyPanel = CreateScope<Sofia::SceneHierarchyPanel>(m_Scene);
-
-	ImGui::SetCurrentContext(Sofia::Application::Get().GetImGuiLayer()->GetContext()); //TODO: fix if possible
 }
 void ExampleLayer::OnDetach()
 {
