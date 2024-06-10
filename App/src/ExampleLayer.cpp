@@ -90,9 +90,11 @@ void ExampleLayer::OnAttach()
 	m_Scene->CreateEntity("Textured quad").AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
 
 	m_SceneHierarchyPanel = CreateScope<Sofia::SceneHierarchyPanel>(m_Scene);
+	m_ContentBrowserPanel = CreateScope<Sofia::ContentBrowserPanel>();
 }
 void ExampleLayer::OnDetach()
 {
+	m_ContentBrowserPanel.reset();
 	m_SceneHierarchyPanel.reset();
 	m_Scene.Reset();
 	m_RenderPass.Reset();
@@ -169,6 +171,16 @@ void ExampleLayer::OnUIRender()
 		uv0 = { 0, 1 }, uv1 = { 1, 0 };
 	ImGui::Image(m_RenderPass->GetRenderTarget()->GetRawTexturePointer(), viewportSize, uv0, uv1);
 
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+		{
+			const wchar_t* path = (const wchar_t*)payload->Data;
+			OpenScene(Sofia::g_AssetsPath / path);
+		}
+		ImGui::EndDragDropTarget();
+	}
+
 	if (Sofia::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GizmoType != -1 && selected)
 	{
 		const bool snap = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftControl);
@@ -203,6 +215,7 @@ void ExampleLayer::OnUIRender()
 	ImGui::PopStyleVar();
 
 	m_SceneHierarchyPanel->OnUIRender();
+	m_ContentBrowserPanel->OnUIRender();
 }
 
 void ExampleLayer::OnEvent(Sofia::Event& e)
@@ -274,13 +287,19 @@ void ExampleLayer::OpenScene()
 	std::filesystem::path filepath = Sofia::FileProcessing::ChooseFileToOpenFrom(L"Saba scene (*.scene)\0*.scene\0");
 	if (filepath.empty())
 		return;
+	OpenScene(filepath);
+}
+void ExampleLayer::OpenScene(const std::filesystem::path& path)
+{
+	if (!std::filesystem::exists(path) || path.extension() != L".scene")
+		return;
 
 	m_Scene = Ref<Sofia::Scene>::Create();
 	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 	m_SceneHierarchyPanel->SetScene(m_Scene);
 
 	Sofia::SceneSerializer serializer(m_Scene);
-	serializer.Deserialize(filepath);
+	serializer.Deserialize(path);
 }
 void ExampleLayer::SaveScene()
 {

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <Sofia/Panels/SceneHierarchyPanel.h>
+#include <Sofia/Panels/ContentBrowserPanel.h>
+
 class ExampleLayer : public Sofia::Layer
 {
 	friend Sofia::Application* Sofia::CreateApplication();
@@ -18,6 +21,7 @@ private:
 
 	void NewScene();
 	void OpenScene();
+	void OpenScene(const std::filesystem::path& path);
 	void SaveScene();
 private:
 	Ref<Sofia::RenderPass> m_RenderPass;
@@ -26,6 +30,7 @@ private:
 	Ref<Sofia::Scene> m_Scene;
 	Sofia::Entity m_Camera; //TEMP, breaks on loading different scene;
 	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
+	Scope<Sofia::ContentBrowserPanel> m_ContentBrowserPanel;
 	Sofia::Entity m_HoveredEntity;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;

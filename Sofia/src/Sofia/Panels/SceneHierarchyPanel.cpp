@@ -2,6 +2,7 @@
 #include "SceneHierarchyPanel.h"
 
 #include "Sofia/ImGui/ImGui.h"
+#include "Sofia/Panels/ContentBrowserPanel.h"
 
 namespace Sofia {
 
@@ -174,6 +175,20 @@ namespace Sofia {
 		DrawComponent<SpriteComponent>(m_Scene, "Sprite component", entity, [](SpriteComponent& component, Ref<Scene> scene)
 		{
 			Sofia::UI::ColorEdit4("Color", component.Color, columnWidth);
+
+			ImGui::Button("Texture", ImVec2(ImGui::GetColumnWidth(), 0.0f));
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					const wchar_t* path = (const wchar_t*)payload->Data;
+					Texture2DProps props;
+					props.Filepath = g_AssetsPath / path;
+					component.Texture = Texture2D::Create(props);
+				}
+				ImGui::EndDragDropTarget();
+			}
+
 			Sofia::UI::DragFloat("Tilling factor", component.TillingFactor, 1.0f, 0.01f, 10.0f, 0.01f, columnWidth);
 		});
 		DrawComponent<CameraComponent>(m_Scene, "Camera component", entity, [](CameraComponent& component, Ref<Scene> scene)
