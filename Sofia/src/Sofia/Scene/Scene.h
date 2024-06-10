@@ -4,6 +4,7 @@
 #include "Sofia/Timestep.h"
 #include "Sofia/Renderer/Camera.h"
 #include "Sofia/Events/Event.h"
+#include "Sofia/UUID.h"
 
 #include <entt.hpp>
 
@@ -25,6 +26,7 @@ namespace Sofia {
 		SOF_CORE ~Scene();
 
 		SOF_CORE Entity CreateEntity(const std::string& name = {});
+		SOF_CORE Entity CreateEntityWithID(UUID id, const std::string& name = {});
 		SOF_CORE void DestroyEntity(Entity entity);
 
 		SOF_CORE Entity SetCameraEntity(); //creates new camera entity

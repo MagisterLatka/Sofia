@@ -141,7 +141,7 @@ namespace Sofia {
 
 		if (ImGui::BeginPopup("add"))
 		{
-			if (!entity.HasComponent<CameraComponent>())
+			if (!entity.HasComponent<CameraComponent>() && !entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CircleComponent>())
 			{
 				if (ImGui::MenuItem("Camera"))
 				{
@@ -149,11 +149,19 @@ namespace Sofia {
 					ImGui::CloseCurrentPopup();
 				}
 			}
-			if (!entity.HasComponent<SpriteComponent>())
+			if (!entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CameraComponent>() && !entity.HasComponent<CircleComponent>())
 			{
 				if (ImGui::MenuItem("Sprite"))
 				{
 					entity.AddComponent<SpriteComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+			}
+			if (!entity.HasComponent<CircleComponent>() && !entity.HasComponent<SpriteComponent>() && !entity.HasComponent<CameraComponent>())
+			{
+				if (ImGui::MenuItem("Circle"))
+				{
+					entity.AddComponent<CircleComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 			}
@@ -190,6 +198,12 @@ namespace Sofia {
 			}
 
 			Sofia::UI::DragFloat("Tilling factor", component.TillingFactor, 1.0f, 0.01f, 10.0f, 0.01f, columnWidth);
+		});
+		DrawComponent<CircleComponent>(m_Scene, "Circle component", entity, [](CircleComponent& component, Ref<Scene> scene)
+		{
+			Sofia::UI::ColorEdit4("Color", component.Color, columnWidth);
+			Sofia::UI::DragFloat("Thickness", component.Thickness, 1.0f, 0.01f, 1.0f, 0.01f, columnWidth);
+			Sofia::UI::DragFloat("Fade", component.Fade, 0.005f, 0.001f, 0.1f, 0.001f, columnWidth);
 		});
 		DrawComponent<CameraComponent>(m_Scene, "Camera component", entity, [](CameraComponent& component, Ref<Scene> scene)
 		{

@@ -7,7 +7,7 @@
 
 namespace Sofia {
 
-	struct VertexData
+	struct QuadVertexData
 	{
 		glm::vec4 pos;
 		glm::vec4 color;
@@ -17,21 +17,38 @@ namespace Sofia {
 		uint32_t id;
 		glm::ivec3 padding;
 	};
+	struct CircleVertexData
+	{
+		glm::vec4 pos;
+		glm::vec4 color;
+		float thickness;
+		float fade;
+		uint32_t id;
+		uint32_t padding;
+	};
 
 	static constexpr uint32_t c_MaxQuads = 10000u;
-	static constexpr uint32_t c_QuadBufferSize = c_MaxQuads * 4 * sizeof(VertexData);
+	static constexpr uint32_t c_QuadBufferSize = c_MaxQuads * 4 * sizeof(QuadVertexData);
+	static constexpr uint32_t c_MaxCircles = 10000u;
+	static constexpr uint32_t c_CircleBufferSize = c_MaxCircles * 4 * sizeof(CircleVertexData);
 	static constexpr uint32_t c_MaxTextures = 16u;
 
 	struct Renderer2DData
 	{
-		VertexData* quadVertexData = nullptr;
-		VertexData* quadInsert = nullptr;
+		QuadVertexData* quadVertexData = nullptr;
+		QuadVertexData* quadInsert = nullptr;
 		uint32_t quadCount = 0u;
 		Ref<InputLayout> quadInputLayout;
 		std::array<Ref<Texture2D>, c_MaxTextures> quadTextures;
 		uint32_t quadTextureIndex = 1u;
+		Ref<Shader> quadShader;
 
-		Ref<Shader> shader;
+		CircleVertexData* circleVertexData = nullptr;
+		CircleVertexData* circleInsert = nullptr;
+		uint32_t circleCount = 0u;
+		Ref<InputLayout> circleInputLayout;
+		Ref<Shader> circleShader;
+
 		Ref<ConstantBuffer> viewProj;
 
 		Renderer2D::Stats stats;
@@ -40,7 +57,7 @@ namespace Sofia {
 
 	void Renderer2D::Init()
 	{
-		s_Data.quadVertexData = new VertexData[c_MaxQuads * 4];
+		s_Data.quadVertexData = new QuadVertexData[c_MaxQuads * 4];
 		s_Data.quadInsert = s_Data.quadVertexData;
 
 		constexpr glm::vec2 uv[4] = {
@@ -72,12 +89,12 @@ namespace Sofia {
 			index += 4;
 		}
 
-		s_Data.shader = Renderer::GetShaderLibrary().Get("2D");
+		s_Data.quadShader = Renderer::GetShaderLibrary().Get("quadShader");
 		UniformBuffer<sizeof(glm::mat4), 1> uniformBuffer;
 		uniformBuffer.Push("u_ViewProjMat", glm::mat4(1.0f));
 		s_Data.viewProj = ConstantBuffer::Create(BufferShaderBinding::Vertex, uniformBuffer);
 
-		BufferLayout layout = {
+		BufferLayout quadLayout = {
 			{ "Position", BufferLayoutElementDataType::Float4 },
 			{ "Color", BufferLayoutElementDataType::Float4 },
 			{ "UV", BufferLayoutElementDataType::Float2 },
@@ -85,13 +102,30 @@ namespace Sofia {
 			{ "TillingFactor", BufferLayoutElementDataType::Float },
 			{ "EntityID", BufferLayoutElementDataType::UInt4 }
 		};
-		Ref<VertexBuffer> quadVBO = VertexBuffer::Create(layout, s_Data.quadVertexData, c_QuadBufferSize);
+		Ref<VertexBuffer> quadVBO = VertexBuffer::Create(quadLayout, s_Data.quadVertexData, c_QuadBufferSize);
 		Ref<IndexBuffer> quadIBO = IndexBuffer::Create(indices, c_MaxQuads * 6 * sizeof(uint32_t));
-		s_Data.quadInputLayout = InputLayout::Create({ quadVBO }, s_Data.shader, quadIBO);
-		delete[] indices;
+		s_Data.quadInputLayout = InputLayout::Create({ quadVBO }, s_Data.quadShader, quadIBO);
 
 		uint32_t texData = 0xffffffffu;
 		s_Data.quadTextures[0] = Texture2D::Create(1u, 1u, &texData);
+
+
+
+		s_Data.circleVertexData = new CircleVertexData[c_MaxCircles * 4];
+		s_Data.circleInsert = s_Data.circleVertexData;
+
+		s_Data.circleShader = Renderer::GetShaderLibrary().Get("circleShader");
+		BufferLayout circleLayout = {
+			{ "Position", BufferLayoutElementDataType::Float4 },
+			{ "Color", BufferLayoutElementDataType::Float4 },
+			{ "Thickness", BufferLayoutElementDataType::Float },
+			{ "Fade", BufferLayoutElementDataType::Float },
+			{ "EntityID", BufferLayoutElementDataType::UInt2 }
+		};
+		Ref<VertexBuffer> circleVBO = VertexBuffer::Create(circleLayout, nullptr, c_CircleBufferSize, BufferUsage::Dynamic);
+		Ref<IndexBuffer> circleIBO = IndexBuffer::Create(indices, c_MaxQuads * 6 * sizeof(uint32_t));
+		s_Data.circleInputLayout = InputLayout::Create({ circleVBO }, s_Data.circleShader, circleIBO);
+		delete[] indices;
 	}
 	void Renderer2D::Shutdown()
 	{
@@ -99,8 +133,12 @@ namespace Sofia {
 			s_Data.quadTextures[i].Reset();
 		s_Data.quadInputLayout.Reset();
 		s_Data.viewProj.Reset();
-		s_Data.shader.Reset();
+		s_Data.quadShader.Reset();
 		delete[] s_Data.quadVertexData;
+
+		s_Data.circleInputLayout.Reset();
+		s_Data.circleShader.Reset();
+		delete[] s_Data.circleVertexData;
 	}
 
 	void Renderer2D::SetViewProjectionMatrix(const glm::mat4& viewProjMat)
@@ -120,6 +158,11 @@ namespace Sofia {
 			s_Data.viewProj->SetData((void*)glm::value_ptr(transposed), sizeof(glm::mat4));
 			break;
 		}
+	}
+	void Renderer2D::Draw()
+	{
+		DrawQuads();
+		DrawCircles();
 	}
 	void Renderer2D::SubmitQuad(const glm::vec2& pos, const glm::vec2& size, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tillingFactor, uint32_t entityID)
 	{
@@ -224,7 +267,7 @@ namespace Sofia {
 			return;
 
 		s_Data.quadInputLayout->GetVertexBuffer()->SetData();
-		s_Data.shader->Bind();
+		s_Data.quadShader->Bind();
 		s_Data.viewProj->Bind(0);
 
 		for (uint32_t i = 0; i < s_Data.quadTextureIndex; ++i)
@@ -242,6 +285,71 @@ namespace Sofia {
 		s_Data.quadTextureIndex = 1u;
 	}
 
+	void Renderer2D::SubmitCircle(const glm::mat4& transform, const glm::vec4& color, float thickness, float fade, uint32_t entityID)
+	{
+		if (s_Data.circleCount >= c_MaxQuads)
+			DrawCircles();
+
+		static constexpr glm::vec4 position[4] = {
+			{ -0.5f,  0.5f, 0.0f, 1.0f },
+			{  0.5f,  0.5f, 0.0f, 1.0f },
+			{  0.5f, -0.5f, 0.0f, 1.0f },
+			{ -0.5f, -0.5f, 0.0f, 1.0f }
+		};
+		for (int i = 0; i < 4; ++i)
+		{
+			s_Data.circleInsert->pos = transform * position[i];
+			s_Data.circleInsert->color = color;
+			s_Data.circleInsert->thickness = thickness;
+			s_Data.circleInsert->fade = fade;
+			s_Data.circleInsert->id = entityID;
+			++s_Data.circleInsert;
+		}
+		++s_Data.circleCount;
+		++s_Data.stats.CircleCount;
+	}
+	void Renderer2D::SubmitCircle(const glm::vec2& pos, float radius, const glm::vec4& color, float thickness, float fade, uint32_t entityID)
+	{
+		SubmitCircle(glm::vec3(pos, 0.0f), radius, color, thickness, fade, entityID);
+	}
+	void Renderer2D::SubmitCircle(const glm::vec3& pos, float radius, const glm::vec4& color, float thickness, float fade, uint32_t entityID)
+	{
+		if (s_Data.circleCount >= c_MaxQuads)
+			DrawCircles();
+
+		static constexpr glm::vec3 position[4] = {
+			{ -0.5f,  0.5f, 0.0f },
+			{  0.5f,  0.5f, 0.0f },
+			{  0.5f, -0.5f, 0.0f },
+			{ -0.5f, -0.5f, 0.0f }
+		};
+		for (int i = 0; i < 4; ++i)
+		{
+			s_Data.circleInsert->pos = glm::vec4(position[i] * radius + pos, 1.0f);
+			s_Data.circleInsert->color = color;
+			s_Data.circleInsert->thickness = thickness;
+			s_Data.circleInsert->fade = fade;
+			s_Data.circleInsert->id = entityID;
+			++s_Data.circleInsert;
+		}
+		++s_Data.circleCount;
+		++s_Data.stats.CircleCount;
+	}
+	void Renderer2D::DrawCircles()
+	{
+		if (s_Data.circleCount == 0u)
+			return;
+
+		s_Data.circleInputLayout->GetVertexBuffer()->SetData(s_Data.circleVertexData, c_CircleBufferSize);
+		s_Data.circleShader->Bind();
+		s_Data.viewProj->Bind();
+		s_Data.circleInputLayout->Bind();
+		RenderCommand::DrawIndexed(RendererAPI::Topology::Triangles, s_Data.circleCount * 6u);
+		++s_Data.stats.DrawCalls;
+		s_Data.circleInsert = s_Data.circleVertexData;
+		s_Data.circleCount = 0u;
+	}
+
 	Renderer2D::Stats Renderer2D::GetStats() noexcept
 	{
 		return s_Data.stats;
@@ -249,6 +357,7 @@ namespace Sofia {
 	void Renderer2D::ResetStats() noexcept
 	{
 		s_Data.stats.QuadCount = 0u;
+		s_Data.stats.CircleCount = 0u;
 		s_Data.stats.DrawCalls = 0u;
 	}
 }

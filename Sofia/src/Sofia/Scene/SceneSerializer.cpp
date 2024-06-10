@@ -78,8 +78,10 @@ namespace Sofia {
 
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
+		SOF_CORE_ASSERT(entity.HasComponent<IDComponent>());
+
 		out << YAML::BeginMap; // Entity
-		out << YAML::Key << "Entity" << YAML::Value << (uint32_t)entity; //TODO: UUID
+		out << YAML::Key << "Entity" << YAML::Value << entity.GetID();
 
 		if (entity.HasComponent<TagComponent>())
 		{
@@ -135,6 +137,18 @@ namespace Sofia {
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
+		if (entity.HasComponent<CircleComponent>())
+		{
+			out << YAML::Key << "Circle component";
+			out << YAML::BeginMap; // CircleComponent
+
+			auto& cc = entity.GetComponent<CircleComponent>();
+			out << YAML::Key << "Color" << YAML::Value << cc.Color;
+			out << YAML::Key << "Thickness" << YAML::Value << cc.Thickness;
+			out << YAML::Key << "Fade" << YAML::Value << cc.Fade;
+
+			out << YAML::EndMap; //CircleComponent
+		}
 
 		out << YAML::EndMap; // Entity
 	}
@@ -144,7 +158,7 @@ namespace Sofia {
 		out << YAML::BeginMap;
 		out << YAML::Key << "Scene" << YAML::Value << m_Scene->m_Name;
 		out << YAML::Key << "Scene ID" << YAML::Value << m_Scene->m_ID;
-		out << YAML::Key << "Scene camera" << YAML::Value << (uint32_t)m_Scene->m_Camera;
+		out << YAML::Key << "Scene camera" << YAML::Value << Entity(m_Scene->m_Camera, m_Scene.Raw()).GetID();
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		m_Scene->m_Registry.view<entt::entity>().each([&](entt::entity id)
 		{
@@ -173,15 +187,14 @@ namespace Sofia {
 		SOF_CORE_TRACE("Deserializing scene '{0}'", sceneName);
 		m_Scene->m_Name = sceneName;
 		m_Scene->m_ID = data["Scene ID"].as<uint32_t>();
-		uint32_t sceneCamera = data["Scene camera"].as<uint32_t>();
+		uint64_t sceneCamera = data["Scene camera"].as<uint64_t>();
 
 		auto entities = data["Entities"];
 		if (entities)
 		{
 			for (auto entity : entities)
 			{
-				uint32_t id = entity["Entity"].as<uint32_t>();
-				//uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
+				uint64_t id = entity["Entity"].as<uint64_t>();
 
 				std::string name;
 				auto tagComponent = entity["Tag component"];
@@ -190,7 +203,7 @@ namespace Sofia {
 
 				SOF_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", id, name);
 
-				Entity deserializedEntity = m_Scene->CreateEntity(name);
+				Entity deserializedEntity = m_Scene->CreateEntityWithID(id, name);
 
 				auto transformComponent = entity["Transform component"];
 				if (transformComponent)
@@ -223,6 +236,15 @@ namespace Sofia {
 					auto& src = deserializedEntity.AddComponent<SpriteComponent>();
 					src.Color = spriteComponent["Color"].as<glm::vec4>();
 					src.TillingFactor = spriteComponent["Tilling factor"].as<float>();
+				}
+
+				auto circleComponent = entity["Circle component"];
+				if (circleComponent)
+				{
+					auto& cc = deserializedEntity.AddComponent<CircleComponent>();
+					cc.Color = circleComponent["Color"].as<glm::vec4>();
+					cc.Thickness = circleComponent["Thickness"].as<float>();
+					cc.Fade = circleComponent["Fade"].as<float>();
 				}
 
 				if (id == sceneCamera)

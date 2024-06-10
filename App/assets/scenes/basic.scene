@@ -1,18 +1,29 @@
 Scene: App scene
 Scene ID: 1
-Scene camera: 1
+Scene camera: 14019099056325137614
 Entities:
-  - Entity: 2
+  - Entity: 15129491102393980174
+    Tag component:
+      Tag: Circle
+    Transform component:
+      Position: [0, 0, 0.300000012]
+      Orientation: [0, 0, 0]
+      Size: [1, 1, 1]
+    Circle component:
+      Color: [1, 0.501960814, 0, 1]
+      Thickness: 0.200000003
+      Fade: 0.0790000036
+  - Entity: 15945198887782261743
     Tag component:
       Tag: Textured quad
     Transform component:
       Position: [0, 0, 0]
-      Orientation: [0, 0, 0.112317502]
+      Orientation: [0, 0, 0]
       Size: [1, 1, 1]
     Sprite component:
       Color: [1, 1, 1, 1]
       Tilling factor: 1
-  - Entity: 1
+  - Entity: 14019099056325137614
     Tag component:
       Tag: Camera
     Transform component:
@@ -22,6 +33,6 @@ Entities:
     Camera component:
       Type: Orthographic
       Size: 2
-      Aspect ratio: 1.43380618
+      Aspect ratio: 2.25323486
       Near clip: -1
       Far clip: 1

@@ -16,10 +16,17 @@ Sofia::Application* Sofia::CreateApplication()
 	{
 		ImGui::SetCurrentContext(context);
 	});
-	app->SetMenuBarCallbackFunc([app]()
+	app->SetMenuBarCallbackFunc([app, layer]()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+			if (ImGui::MenuItem("New", "Ctrl+N"))
+				layer->NewScene();
+			if (ImGui::MenuItem("Save As", "Ctrl+Shift+S"))
+				layer->SaveScene();
+			if (ImGui::MenuItem("Open", "Ctrl+O"))
+				layer->OpenScene();
+
 			if (ImGui::MenuItem("Close"))
 				app->Close();
 

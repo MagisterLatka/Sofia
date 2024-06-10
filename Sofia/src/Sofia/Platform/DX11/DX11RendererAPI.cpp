@@ -30,42 +30,42 @@ namespace Sofia {
 	}
 	void DX11RendererAPI::InitShaders()
 	{
-		std::string vertex2D = R"(
+		std::string vertexQuad = R"(
 			struct VSOut
 			{
+				float4 pos : SV_Position;
 				float4 color : Color;
 				float2 uv : UV;
-				int tid : TID;
+				nointerpolation int tid : TID;
 				float tillingFactor : TillingFactor;
-				float4 pos : SV_Position;
-				uint id : ID;
+				nointerpolation uint id : ID;
 			};
 			cbuffer ConstBuf
 			{
-				matrix<float, 4, 4> u_ViewProjMat;
+				uniform matrix<float, 4, 4> u_ViewProjMat;
 			}
 			VSOut main(float4 pos : Position, float4 color : Color, float2 uv : UV, int tid : TID, float tillingFactor : TillingFactor, uint id : EntityID)
 			{
 				VSOut output;
+				output.pos = mul(pos, u_ViewProjMat);
 				output.color = color;
 				output.uv = uv;
 				output.tid = tid;
 				output.tillingFactor = tillingFactor;
-				output.pos = mul(pos, u_ViewProjMat);
 				output.id = id;
 				return output;
 			}
 		)";
 
-		std::string fragment2D = R"(
+		std::string fragmentQuad = R"(
 			struct FSIn
 			{
+				float4 pos : SV_Position;
 				float4 color : Color;
 				float2 uv : UV;
-				int tid : TID;
+				nointerpolation int tid : TID;
 				float tillingFactor : TillingFactor;
-				float4 pos : SV_Position;
-				uint id : ID;
+				nointerpolation uint id : ID;
 			};
 			struct FSOut
 			{
@@ -102,7 +102,69 @@ namespace Sofia {
 				return output;
 			}
 		)";
-		Renderer::GetShaderLibrary().Load("2D", vertex2D, fragment2D);
+		Renderer::GetShaderLibrary().Load("quadShader", vertexQuad, fragmentQuad);
+
+		std::string vertexCircle = R"(
+			struct VSOut
+			{
+				float4 pos : SV_Position;
+				float4 localPos : LocalPos;
+				float4 color : Color;
+				nointerpolation float thickness : Thickness;
+				nointerpolation float fade : Fade;
+				nointerpolation uint id : ID;
+			};
+			cbuffer ConstBuf
+			{
+				uniform matrix<float, 4, 4> u_ViewProjMat;
+			}
+			static const float4 localPos[4] = {
+				{ -1.0f,  1.0f, 0.0f, 0.0f },
+				{  1.0f,  1.0f, 0.0f, 0.0f },
+				{  1.0f, -1.0f, 0.0f, 0.0f },
+				{ -1.0f, -1.0f, 0.0f, 0.0f }
+			};
+			VSOut main(float4 pos : Position, float4 color : Color, float thickness : Thickness, float fade : Fade, uint id : EntityID, uint vid : SV_VertexID)
+			{
+				VSOut output;
+				output.pos = mul(pos, u_ViewProjMat);
+				output.localPos = localPos[vid % 4];
+				output.color = color;
+				output.thickness = thickness;
+				output.fade = fade;
+				output.id = id;
+				return output;
+			}
+		)";
+		std::string fragmentCircle = R"(
+			struct FSIn
+			{
+				float4 pos : SV_Position;
+				float4 localPos : LocalPos;
+				float4 color : Color;
+				nointerpolation float thickness : Thickness;
+				nointerpolation float fade : Fade;
+				nointerpolation uint id : ID;
+			};
+			struct FSOut
+			{
+				float4 color : SV_Target0;
+				uint id : SV_Target1;
+			};
+			FSOut main(FSIn input)
+			{
+				const float distance = 1.0f - length(input.localPos);
+				float alpha = smoothstep(0.0f, input.fade, distance) * smoothstep(input.thickness + input.fade, input.thickness, distance);
+				if (alpha == 0.0f)
+					discard;
+				FSOut output;
+				output.color = input.color;
+				output.color.a *= alpha;
+				output.id = input.id;
+				return output;
+			}
+		)";
+		Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
 	}
 	void DX11RendererAPI::SetTopology(ComPtr<ID3D11DeviceContext> context, Topology topology)
 	{

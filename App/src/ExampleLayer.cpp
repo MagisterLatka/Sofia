@@ -142,6 +142,7 @@ void ExampleLayer::OnUIRender()
 	ImGui::Text("Frame time: %.3fms (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
 	ImGui::Text("Draw calls: %d", Sofia::Renderer2D::GetStats().DrawCalls);
 	ImGui::Text("Quad count: %d", Sofia::Renderer2D::GetStats().QuadCount);
+	ImGui::Text("Circle count: %d", Sofia::Renderer2D::GetStats().CircleCount);
 	std::string name = "None";
 	if (m_HoveredEntity)
 		name = m_HoveredEntity.GetComponent<Sofia::TagComponent>().Tag;

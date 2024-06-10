@@ -22,14 +22,15 @@ namespace Sofia {
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		return CreateEntityWithID(UUID(), name);
+	}
+	Entity Scene::CreateEntityWithID(UUID id, const std::string& name)
+	{
 		auto entity = Entity(m_Registry.create(), this);
-
-		if (!name.empty())
-			entity.AddComponent<TagComponent>(name);
-		else
-			entity.AddComponent<TagComponent>("Entity");
-
+		entity.AddComponent<IDComponent>(id);
 		entity.AddComponent<TransformComponent>(glm::mat4(1.0f));
+		auto& tag = entity.AddComponent<TagComponent>().Tag;
+		tag = name.empty() ? "Entity" : name;
 
 		return entity;
 	}
@@ -103,6 +104,14 @@ namespace Sofia {
 				Renderer2D::SubmitQuad(tc, sc.Color, sc.Texture, sc.TillingFactor, (uint32_t)entity);
 			}
 			Renderer2D::DrawQuads();
+
+			auto group1 = m_Registry.group<CircleComponent>(entt::get<TransformComponent>);
+			for (auto entity : group1)
+			{
+				auto [tc, cc] = group1.get<TransformComponent, CircleComponent>(entity);
+				Renderer2D::SubmitCircle(tc, cc.Color, cc.Thickness, cc.Fade, (uint32_t)entity);
+			}
+			Renderer2D::DrawCircles();
 		}
 	}
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
@@ -127,11 +136,15 @@ namespace Sofia {
 	}
 
 	template<>
+	SOF_CORE void Scene::OnComponentAdd<IDComponent>(Entity entity, IDComponent& component) {}
+	template<>
 	SOF_CORE void Scene::OnComponentAdd<TagComponent>(Entity entity, TagComponent& component) {}
 	template<>
 	SOF_CORE void Scene::OnComponentAdd<TransformComponent>(Entity entity, TransformComponent& component) {}
 	template<>
 	SOF_CORE void Scene::OnComponentAdd<SpriteComponent>(Entity entity, SpriteComponent& component) {}
+	template<>
+	SOF_CORE void Scene::OnComponentAdd<CircleComponent>(Entity entity, CircleComponent& component) {}
 	template<>
 	SOF_CORE void Scene::OnComponentAdd<CameraComponent>(Entity entity, CameraComponent& component)
 	{

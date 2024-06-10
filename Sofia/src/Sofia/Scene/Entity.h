@@ -43,6 +43,8 @@ namespace Sofia {
 
 		SOF_CORE const Scene* GetScene() const noexcept { return m_Scene; }
 
+		SOF_CORE UUID GetID() const noexcept { return m_Scene->m_Registry.get<IDComponent>(m_Handle).ID; }
+
 		SOF_CORE glm::mat4& GetTransform() { return m_Scene->m_Registry.get<TransformComponent>(m_Handle); }
 		SOF_CORE const glm::mat4& GetTransform() const { return m_Scene->m_Registry.get<TransformComponent>(m_Handle); }
 
