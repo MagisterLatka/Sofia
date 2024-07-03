@@ -204,7 +204,7 @@ namespace Sofia {
 		glm::mat3 rotate = glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f));
 		for (int i = 0; i < 4; ++i)
 		{
-			s_Data.quadInsert->pos = glm::vec4(rotation != 0.0f ? rotate * (position[i] * glm::vec3(size, 1.0f)) + pos : position[i] * glm::vec3(size, 1.0f) + pos, 1.0f);
+			s_Data.quadInsert->pos = glm::vec4(rotation == 0.0f ? position[i] * glm::vec3(size, 1.0f) + pos : rotate * (position[i] * glm::vec3(size, 1.0f)) + pos, 1.0f);
 			s_Data.quadInsert->color = color;
 			s_Data.quadInsert->tid = tid;
 			s_Data.quadInsert->tillingFactor = tillingFactor;

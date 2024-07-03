@@ -144,6 +144,8 @@ namespace Sofia {
 			samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 			SOF_DX_GRAPHICS_CALL_INFO(device->CreateSamplerState(&samplerDesc, &instance->m_Sampler));
+
+			instance->m_Loaded = true;
 		});
 	}
 

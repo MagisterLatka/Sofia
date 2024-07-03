@@ -38,6 +38,21 @@ namespace Sofia {
 	{
 		m_Registry.destroy(entity.m_Handle);
 	}
+	template<typename T>
+	static void CopyComponent(Entity src, Entity dst)
+	{
+		if (src.HasComponent<T>())
+			dst.AddReplaceComponent<T>(src.GetComponent<T>());
+	}
+	void Scene::DuplicateEntity(Entity entity)
+	{
+		Entity e = CreateEntity(entity.GetComponent<TagComponent>().Tag);
+		CopyComponent<TransformComponent>(entity, e);
+		CopyComponent<SpriteComponent>(entity, e);
+		CopyComponent<CircleComponent>(entity, e);
+		CopyComponent<CameraComponent>(entity, e);
+		CopyComponent<NativeScriptComponent>(entity, e);
+	}
 
 	Entity Scene::SetCameraEntity()
 	{
@@ -72,8 +87,37 @@ namespace Sofia {
 			nsc.Instance->OnEvent(e);
 		});
 	}
-	void Scene::OnUpdate(Timestep ts)
+	void Scene::OnUpdateEditor(Timestep ts, const EditorCamera& camera)
 	{
+		//update transforms
+		m_Registry.view<TransformComponent>().each([](entt::entity entity, TransformComponent& tc)
+		{
+			tc.Orientation = glm::mod(tc.Orientation, glm::two_pi<float>());
+			glm::quat rotation = glm::quat(tc.Orientation);
+			tc.Transform = glm::translate(glm::mat4(1.0f), tc.Position) * glm::scale(glm::toMat4(rotation), tc.Size);
+		});
+
+		//render 2D
+		Renderer2D::SetViewProjectionMatrix(camera.GetProjectionViewMatrix());
+		auto group = m_Registry.group<SpriteComponent>(entt::get<TransformComponent>);
+		for (auto entity : group)
+		{
+			auto [tc, sc] = group.get<TransformComponent, SpriteComponent>(entity);
+			Renderer2D::SubmitQuad(tc, sc.Color, sc.Texture, sc.TillingFactor, (uint32_t)entity);
+		}
+		Renderer2D::DrawQuads();
+
+		auto group1 = m_Registry.group<CircleComponent>(entt::get<TransformComponent>);
+		for (auto entity : group1)
+		{
+			auto [tc, cc] = group1.get<TransformComponent, CircleComponent>(entity);
+			Renderer2D::SubmitCircle(tc, cc.Color, cc.Thickness, cc.Fade, (uint32_t)entity);
+		}
+		Renderer2D::DrawCircles();
+	}
+	void Scene::OnUpdateRuntime(Timestep ts)
+	{
+		//native scripts
 		m_Registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
 		{
 			if (!nsc.Instance)
@@ -84,6 +128,8 @@ namespace Sofia {
 			}
 			nsc.Instance->OnUpdate(ts);
 		});
+
+		//update transforms
 		m_Registry.view<TransformComponent>().each([](entt::entity entity, TransformComponent& tc)
 		{
 			tc.Orientation = glm::mod(tc.Orientation, glm::two_pi<float>());
@@ -91,6 +137,7 @@ namespace Sofia {
 			tc.Transform = glm::translate(glm::mat4(1.0f), tc.Position) * glm::scale(glm::toMat4(rotation), tc.Size);
 		});
 
+		//render 2D
 		if (m_Camera != entt::null)
 		{
 			auto camera = m_Registry.get<CameraComponent>(m_Camera).Camera;
@@ -133,6 +180,45 @@ namespace Sofia {
 			if (cc.Camera)
 				cc.Camera->SetViewportSize(width, height);
 		});
+	}
+
+	template<typename T>
+	static void CopyComponent(entt::registry& src, entt::registry& dst, const std::unordered_map<UUID, entt::entity>& entities)
+	{
+		auto view = src.view<T>();
+		for (auto e : view)
+		{
+			UUID uuid = src.get<IDComponent>(e).ID;
+			SOF_CORE_ASSERT(entities.find(uuid) != entities.end());
+			entt::entity id = entities.at(uuid);
+			T& component = src.get<T>(e);
+			dst.emplace_or_replace<T>(id, component);
+		}
+	}
+	Ref<Scene> Scene::Copy(Ref<Scene> scene)
+	{
+		Ref<Scene> newScene = Ref<Scene>::Create(scene->m_Name);
+		newScene->m_ViewportSize = scene->m_ViewportSize;
+
+		std::unordered_map<UUID, entt::entity> entities;
+		auto view = scene->m_Registry.view<IDComponent>();
+		for (auto e = view.rbegin(); e != view.rend(); ++e)
+		{
+			UUID uuid = scene->m_Registry.get<IDComponent>(*e).ID;
+			const std::string& name = scene->m_Registry.get<TagComponent>(*e).Tag;
+			Entity entity = newScene->CreateEntityWithID(uuid, name);
+			entities[uuid] = entity;
+		}
+
+		CopyComponent<TransformComponent>(scene->m_Registry, newScene->m_Registry, entities);
+		CopyComponent<SpriteComponent>(scene->m_Registry, newScene->m_Registry, entities);
+		CopyComponent<CircleComponent>(scene->m_Registry, newScene->m_Registry, entities);
+		CopyComponent<CameraComponent>(scene->m_Registry, newScene->m_Registry, entities);
+		CopyComponent<NativeScriptComponent>(scene->m_Registry, newScene->m_Registry, entities);
+
+		newScene->m_Camera = entities.at(scene->m_Registry.get<IDComponent>(scene->m_Camera).ID);
+
+		return newScene;
 	}
 
 	template<>

@@ -23,27 +23,30 @@ namespace Sofia {
 	{
 		ImGui::Begin("Scene hierarchy");
 
-		static char buffer[256];
-		memset(buffer, 0, sizeof(buffer));
-		std::strncpy(buffer, m_Scene->m_Name.c_str(), sizeof(buffer) - 1);
-		if (ImGui::InputText("Scene name###Tag", buffer, sizeof(buffer)))
-			m_Scene->m_Name = buffer;
-
-		m_Scene->m_Registry.view<entt::entity>().each([&](entt::entity id)
+		if (m_Scene)
 		{
-			Entity entity(id, m_Scene.Raw());
-			DrawEntityNode(entity);
-		});
+			static char buffer[256];
+			memset(buffer, 0, sizeof(buffer));
+			std::strncpy(buffer, m_Scene->m_Name.c_str(), sizeof(buffer) - 1);
+			if (ImGui::InputText("Scene name###Tag", buffer, sizeof(buffer)))
+				m_Scene->m_Name = buffer;
 
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_Selected = {};
+			m_Scene->m_Registry.view<entt::entity>().each([&](entt::entity id)
+			{
+				Entity entity(id, m_Scene.Raw());
+				DrawEntityNode(entity);
+			});
 
-		if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverExistingPopup))
-		{
-			if (ImGui::MenuItem("Create entity"))
-				m_Selected = m_Scene->CreateEntity();
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+				m_Selected = {};
 
-			ImGui::EndPopup();
+			if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverExistingPopup))
+			{
+				if (ImGui::MenuItem("Create entity"))
+					m_Selected = m_Scene->CreateEntity();
+
+				ImGui::EndPopup();
+			}
 		}
 
 		ImGui::End();
@@ -192,7 +195,11 @@ namespace Sofia {
 					const wchar_t* path = (const wchar_t*)payload->Data;
 					Texture2DProps props;
 					props.Filepath = g_AssetsPath / path;
-					component.Texture = Texture2D::Create(props);
+					Ref<Texture2D> texture = Texture2D::Create(props);
+					if (texture->IsLoaded())
+						component.Texture = texture;
+					else
+						SOF_CORE_WARN("Loading texture {0} failed", props.Filepath.string());
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -203,7 +210,7 @@ namespace Sofia {
 		{
 			Sofia::UI::ColorEdit4("Color", component.Color, columnWidth);
 			Sofia::UI::DragFloat("Thickness", component.Thickness, 1.0f, 0.01f, 1.0f, 0.01f, columnWidth);
-			Sofia::UI::DragFloat("Fade", component.Fade, 0.005f, 0.001f, 0.1f, 0.001f, columnWidth);
+			Sofia::UI::DragFloat("Fade", component.Fade, 0.005f, 0.001f, 1.0f, 0.001f, columnWidth);
 		});
 		DrawComponent<CameraComponent>(m_Scene, "Camera component", entity, [](CameraComponent& component, Ref<Scene> scene)
 		{
@@ -215,6 +222,7 @@ namespace Sofia {
 				auto camera = component.Camera.As<OrthographicCamera>();
 
 				bool changed = false;
+				changed |= Sofia::UI::DragFloat("Aspect ratio", camera->m_AspectRatio, 16.0f / 9.0f, 0.01f, 5.0f, 0.01f, columnWidth);
 				changed |= Sofia::UI::DragFloat("Size", camera->m_Size, 1.0f, 0.5f, 20.0f, 0.1f, columnWidth);
 				changed |= Sofia::UI::DragFloat("Near clip", camera->m_NearClip, -1.0f, -10.0f, -1.0f, 0.1f, columnWidth);
 				changed |= Sofia::UI::DragFloat("Far clip", camera->m_FarClip, 1.0f, 1.0f, 10.0f, 0.1f, columnWidth);

@@ -8,6 +8,71 @@
 
 namespace Sofia {
 
+	static GLenum GetComparisonFunc(RendererAPI::ComparisonFunc func)
+	{
+		switch (func)
+		{
+		case Sofia::RendererAPI::ComparisonFunc::Never:				return GL_NEVER;
+		case Sofia::RendererAPI::ComparisonFunc::Less:				return GL_LESS;
+		case Sofia::RendererAPI::ComparisonFunc::Equal:				return GL_EQUAL;
+		case Sofia::RendererAPI::ComparisonFunc::LessOrEqual:		return GL_LEQUAL;
+		case Sofia::RendererAPI::ComparisonFunc::Greater:			return GL_GREATER;
+		case Sofia::RendererAPI::ComparisonFunc::GreaterOrEqual:	return GL_GEQUAL;
+		case Sofia::RendererAPI::ComparisonFunc::NotEqual:			return GL_NOTEQUAL;
+		case Sofia::RendererAPI::ComparisonFunc::Always:			return GL_ALWAYS;
+		}
+		SOF_CORE_THROW_INFO("Invalid comparison function");
+		return GL_LESS;
+	}
+	static GLenum GetStencilOp(RendererAPI::StencilOperation op)
+	{
+		switch (op)
+		{
+		case Sofia::RendererAPI::StencilOperation::Keep:			return GL_KEEP;
+		case Sofia::RendererAPI::StencilOperation::Zero:			return GL_ZERO;
+		case Sofia::RendererAPI::StencilOperation::Replace:			return GL_REPLACE;
+		case Sofia::RendererAPI::StencilOperation::Increment:		return GL_INCR;
+		case Sofia::RendererAPI::StencilOperation::IncrementClamp:	return GL_INCR_WRAP;
+		case Sofia::RendererAPI::StencilOperation::Decrement:		return GL_DECR;
+		case Sofia::RendererAPI::StencilOperation::DecrementClamp:	return GL_DECR_WRAP;
+		case Sofia::RendererAPI::StencilOperation::Invert:			return GL_INVERT;
+		}
+		SOF_CORE_THROW_INFO("Invalid stencil operation");
+		return GL_KEEP;
+	}
+	static GLenum GetBlendOption(RendererAPI::BlendOption op)
+	{
+		switch (op)
+		{
+		case Sofia::RendererAPI::BlendOption::Zero:						return GL_ZERO;
+		case Sofia::RendererAPI::BlendOption::One:						return GL_ONE;
+		case Sofia::RendererAPI::BlendOption::SourceColor:				return GL_SRC_COLOR;
+		case Sofia::RendererAPI::BlendOption::SourceColorInvert:		return GL_ONE_MINUS_SRC_COLOR;
+		case Sofia::RendererAPI::BlendOption::SourceAlpha:				return GL_SRC_ALPHA;
+		case Sofia::RendererAPI::BlendOption::SourceAlphaInvert:		return GL_ONE_MINUS_SRC_ALPHA;
+		case Sofia::RendererAPI::BlendOption::DestinationColor:			return GL_DST_COLOR;
+		case Sofia::RendererAPI::BlendOption::DestinationColorInvert:	return GL_ONE_MINUS_DST_COLOR;
+		case Sofia::RendererAPI::BlendOption::DestinationAlpha:			return GL_DST_ALPHA;
+		case Sofia::RendererAPI::BlendOption::DestinationAlphaInvert:	return GL_ONE_MINUS_DST_ALPHA;
+		case Sofia::RendererAPI::BlendOption::BlendFactor:				return GL_CONSTANT_COLOR;
+		case Sofia::RendererAPI::BlendOption::BlendFactorInvert:		return GL_ONE_MINUS_CONSTANT_COLOR;
+		}
+		SOF_CORE_THROW_INFO("Invalid blend option");
+		return GL_ONE;
+	}
+	static GLenum GetBlendOp(RendererAPI::BlendOperation op)
+	{
+		switch (op)
+		{
+		case Sofia::RendererAPI::BlendOperation::Add:				return GL_FUNC_ADD;
+		case Sofia::RendererAPI::BlendOperation::Subtract:			return GL_FUNC_SUBTRACT;
+		case Sofia::RendererAPI::BlendOperation::ReverseSubtract:	return GL_FUNC_REVERSE_SUBTRACT;
+		case Sofia::RendererAPI::BlendOperation::Min:				return GL_MIN;
+		case Sofia::RendererAPI::BlendOperation::Max:				return GL_MAX;
+		}
+		SOF_CORE_THROW_INFO("Invalid blend operation");
+		return GL_FUNC_ADD;
+	}
 	static void OpenGLMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
 		const char* Source;
@@ -231,5 +296,84 @@ namespace Sofia {
 			}
 		)";
 		Renderer::GetShaderLibrary().Load("circleShader", vertexCircle, fragmentCircle);
+	}
+
+	void OpenGLRendererAPI::SetDepthTestOptions(bool enable, bool writeMask, ComparisonFunc compFunc)
+	{
+		if (enable)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+		glDepthMask(writeMask);
+		glDepthFunc(GetComparisonFunc(compFunc));
+	}
+	void OpenGLRendererAPI::SetStencilTestOptions(bool enable, uint8_t writeMask, uint8_t readMask, ComparisonFunc frontFaceFunc, ComparisonFunc backFaceFunc, uint32_t stencilRefVal)
+	{
+		if (enable)
+			glEnable(GL_STENCIL_TEST);
+		else
+			glDisable(GL_STENCIL_TEST);
+		glStencilMask(writeMask);
+		glStencilFuncSeparate(GL_FRONT, GetComparisonFunc(frontFaceFunc), stencilRefVal, readMask);
+		glStencilFuncSeparate(GL_BACK, GetComparisonFunc(backFaceFunc), stencilRefVal, readMask);
+	}
+	void OpenGLRendererAPI::SetFrontFaceStencilOperations(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass)
+	{
+		glStencilOpSeparate(GL_FRONT, GetStencilOp(stencilFail), GetStencilOp(depthFail), GetStencilOp(pass));
+	}
+	void OpenGLRendererAPI::SetBackFaceStencilOperations(StencilOperation stencilFail, StencilOperation depthFail, StencilOperation pass)
+	{
+		glStencilOpSeparate(GL_BACK, GetStencilOp(stencilFail), GetStencilOp(depthFail), GetStencilOp(pass));
+	}
+	void OpenGLRendererAPI::SetRasterizerOptions(TriangleFillMode fillMode, TriangleCullMode cullMode, bool isFrontFaceCounterClockwise)
+	{
+		GLenum fill = 0;
+		switch (fillMode)
+		{
+		case Sofia::RendererAPI::TriangleFillMode::Full:
+			fill = GL_FILL;
+			break;
+		case Sofia::RendererAPI::TriangleFillMode::Wireframe:
+			fill = GL_LINE;
+			break;
+		default:
+			SOF_CORE_THROW_INFO("Invalid triangle fill mode");
+			break;
+		}
+		glPolygonMode(GL_FRONT_AND_BACK, fill);
+
+		switch (cullMode)
+		{
+		case Sofia::RendererAPI::TriangleCullMode::DrawAll:
+			glDisable(GL_CULL_FACE);
+			break;
+		case Sofia::RendererAPI::TriangleCullMode::DrawFrontFace:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			break;
+		case Sofia::RendererAPI::TriangleCullMode::DrawBackFace:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
+			break;
+		default:
+			SOF_CORE_THROW_INFO("Invalid triangle cull mode");
+			break;
+		}
+
+		if (isFrontFaceCounterClockwise)
+			glFrontFace(GL_CCW);
+		else
+			glFrontFace(GL_CW);
+	}
+	void OpenGLRendererAPI::SetBlendOptions(uint32_t i, bool enable, BlendOption sourceBlend, BlendOption destinationBlend, BlendOperation operation, BlendOption sourceAlphaBlend, BlendOption destinationAlphaBlend, BlendOperation alphaOperation, uint8_t writeMask, glm::vec4 blendFactor)
+	{
+		if (enable)
+			glEnablei(GL_BLEND, i);
+		else
+			glDisablei(GL_BLEND, i);
+
+		glBlendFuncSeparatei(i, GetBlendOption(sourceBlend), GetBlendOption(destinationBlend), GetBlendOption(sourceAlphaBlend), GetBlendOption(destinationAlphaBlend));
+		glBlendEquationSeparatei(i, GetBlendOp(operation), GetBlendOp(alphaOperation));
+		glBlendColor(blendFactor.r, blendFactor.g, blendFactor.b, blendFactor.a);
 	}
 }

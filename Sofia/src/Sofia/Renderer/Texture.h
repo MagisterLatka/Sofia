@@ -44,6 +44,8 @@ namespace Sofia {
 		SOF_CORE virtual uint32_t GetHeight() const noexcept = 0;
 		SOF_CORE virtual void* GetRawPointer() const noexcept = 0;
 
+		SOF_CORE virtual bool IsLoaded() const noexcept = 0;
+
 		SOF_CORE static Ref<Texture2D> Create(const Texture2DProps& props);
 		SOF_CORE static Ref<Texture2D> Create(uint32_t width, uint32_t height, void* data = nullptr, TextureFormat format = TextureFormat::RGBA8);
 

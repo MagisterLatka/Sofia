@@ -22,8 +22,10 @@ Sofia::Application* Sofia::CreateApplication()
 		{
 			if (ImGui::MenuItem("New", "Ctrl+N"))
 				layer->NewScene();
-			if (ImGui::MenuItem("Save As", "Ctrl+Shift+S"))
+			if (ImGui::MenuItem("Save", "Ctrl+S"))
 				layer->SaveScene();
+			if (ImGui::MenuItem("Save As", "Ctrl+Shift+S"))
+				layer->SaveSceneAs();
 			if (ImGui::MenuItem("Open", "Ctrl+O"))
 				layer->OpenScene();
 

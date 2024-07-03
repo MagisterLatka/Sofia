@@ -11,6 +11,46 @@
 namespace YAML {
 
 	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& value)
+		{
+			Node node;
+			node.push_back(value.x);
+			node.push_back(value.y);
+			return node;
+		}
+		static bool decode(const Node& node, glm::vec2& value)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			value.x = node[0].as<float>();
+			value.y = node[1].as<float>();
+			return true;
+		}
+	};
+	template<>
+	struct convert<glm::uvec2>
+	{
+		static Node encode(const glm::uvec2& value)
+		{
+			Node node;
+			node.push_back(value.x);
+			node.push_back(value.y);
+			return node;
+		}
+		static bool decode(const Node& node, glm::uvec2& value)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			value.x = node[0].as<uint32_t>();
+			value.y = node[1].as<uint32_t>();
+			return true;
+		}
+	};
+	template<>
 	struct convert<glm::vec3>
 	{
 		static Node encode(const glm::vec3& value)
@@ -63,6 +103,18 @@ namespace YAML {
 }
 namespace Sofia {
 
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& value)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << value.x << value.y << YAML::EndSeq;
+		return out;
+	}
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::uvec2& value)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << value.x << value.y << YAML::EndSeq;
+		return out;
+	}
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& value)
 	{
 		out << YAML::Flow;
@@ -130,10 +182,27 @@ namespace Sofia {
 			out << YAML::Key << "Sprite component";
 			out << YAML::BeginMap; // SpriteRendererComponent
 
-			auto& src = entity.GetComponent<SpriteComponent>();
-			out << YAML::Key << "Color" << YAML::Value << src.Color;
-			//TODO texture
-			out << YAML::Key << "Tilling factor" << YAML::Value << src.TillingFactor;
+			auto& sc = entity.GetComponent<SpriteComponent>();
+			out << YAML::Key << "Color" << YAML::Value << sc.Color;
+			if (sc.Texture)
+			{
+				out << YAML::Key << "Texture";
+				out << YAML::BeginMap; //Texture
+
+				auto& props = sc.Texture->GetProps();
+				std::string path = props.Filepath.empty() ? std::string() : props.Filepath.string();
+				out << YAML::Key << "Path" << YAML::Value << path;
+				out << YAML::Key << "Size" << YAML::Value << glm::uvec2(props.Width, props.Height); //TODO: do it in asset manager
+				out << YAML::Key << "Format" << YAML::Value << (int)props.Format;
+				out << YAML::Key << "GenerateMips" << YAML::Value << props.GenerateMipMaps;
+				out << YAML::Key << "Sampling" << YAML::Value << (int)props.Sampling;
+				out << YAML::Key << "MaxAnisotropy" << YAML::Value << props.MaxAnisotropy;
+				out << YAML::Key << "Wrap" << YAML::Value << (int)props.Wrap;
+				out << YAML::Key << "BorderColor" << YAML::Value << props.BorderColor;
+
+				out << YAML::EndMap; //Texture
+			}
+			out << YAML::Key << "Tilling factor" << YAML::Value << sc.TillingFactor;
 
 			out << YAML::EndMap; // SpriteRendererComponent
 		}
@@ -205,8 +274,7 @@ namespace Sofia {
 
 				Entity deserializedEntity = m_Scene->CreateEntityWithID(id, name);
 
-				auto transformComponent = entity["Transform component"];
-				if (transformComponent)
+				if (auto transformComponent = entity["Transform component"])
 				{
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
 					tc.Position = transformComponent["Position"].as<glm::vec3>();
@@ -214,8 +282,7 @@ namespace Sofia {
 					tc.Size = transformComponent["Size"].as<glm::vec3>();
 				}
 
-				auto cameraComponent = entity["Camera component"];
-				if (cameraComponent)
+				if (auto cameraComponent = entity["Camera component"])
 				{
 					std::string cameraType = cameraComponent["Type"].as<std::string>();
 					if (cameraType == "Orthographic")
@@ -230,16 +297,29 @@ namespace Sofia {
 					}
 				}
 
-				auto spriteComponent = entity["Sprite component"];
-				if (spriteComponent)
+				if (auto spriteComponent = entity["Sprite component"])
 				{
-					auto& src = deserializedEntity.AddComponent<SpriteComponent>();
-					src.Color = spriteComponent["Color"].as<glm::vec4>();
-					src.TillingFactor = spriteComponent["Tilling factor"].as<float>();
+					auto& sc = deserializedEntity.AddComponent<SpriteComponent>();
+					sc.Color = spriteComponent["Color"].as<glm::vec4>();
+					if (auto texture = spriteComponent["Texture"])
+					{
+						Texture2DProps props;
+						props.Filepath = texture["Path"].as<std::string>();
+						glm::uvec2 size = texture["Size"].as<glm::uvec2>();
+						props.Width = size.x;
+						props.Height = size.y;
+						props.Format = (TextureFormat)texture["Format"].as<int>();
+						props.GenerateMipMaps = texture["GenerateMips"].as<bool>();
+						props.Sampling = (TextureSampling)texture["Sampling"].as<int>();
+						props.MaxAnisotropy = texture["MaxAnisotropy"].as<int>();
+						props.Wrap = (TextureWrap)texture["Wrap"].as<int>();
+						props.BorderColor = texture["BorderColor"].as<glm::vec4>();
+						sc.Texture = Texture2D::Create(props);
+					}
+					sc.TillingFactor = spriteComponent["Tilling factor"].as<float>();
 				}
 
-				auto circleComponent = entity["Circle component"];
-				if (circleComponent)
+				if (auto circleComponent = entity["Circle component"])
 				{
 					auto& cc = deserializedEntity.AddComponent<CircleComponent>();
 					cc.Color = circleComponent["Color"].as<glm::vec4>();

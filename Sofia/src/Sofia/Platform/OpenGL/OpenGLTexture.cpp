@@ -153,6 +153,7 @@ namespace Sofia {
 
 			glGenerateTextureMipmap(instance->m_ID);
 
+			instance->m_Loaded = true;
 		});
 	}
 	OpenGLTexture2D::~OpenGLTexture2D()

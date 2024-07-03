@@ -1,5 +1,5 @@
 Scene: App scene
-Scene ID: 1
+Scene ID: 3
 Scene camera: 14019099056325137614
 Entities:
   - Entity: 15129491102393980174
@@ -22,6 +22,15 @@ Entities:
       Size: [1, 1, 1]
     Sprite component:
       Color: [1, 1, 1, 1]
+      Texture:
+        Path: assets\textures\checkerboard.png
+        Size: [64, 64]
+        Format: 5
+        GenerateMips: false
+        Sampling: 1
+        MaxAnisotropy: 1
+        Wrap: 2
+        BorderColor: [0, 0, 0, 1]
       Tilling factor: 1
   - Entity: 14019099056325137614
     Tag component:
@@ -33,6 +42,6 @@ Entities:
     Camera component:
       Type: Orthographic
       Size: 2
-      Aspect ratio: 2.25323486
+      Aspect ratio: 2.50308013
       Near clip: -1
       Far clip: 1

@@ -17,11 +17,14 @@ namespace Sofia {
 		SOF_CORE virtual uint32_t GetWidth() const noexcept override { return m_Props.Width; }
 		SOF_CORE virtual uint32_t GetHeight() const noexcept override { return m_Props.Height; }
 		SOF_CORE virtual void* GetRawPointer() const noexcept override { return (void*)(uint64_t)m_ID; }
+
+		SOF_CORE virtual bool IsLoaded() const noexcept override { return m_Loaded; }
 	private:
 		void Init();
 	private:
 		uint32_t m_ID;
 		Texture2DProps m_Props;
+		bool m_Loaded;
 
 		Sofia::Buffer m_Buffer;
 	};

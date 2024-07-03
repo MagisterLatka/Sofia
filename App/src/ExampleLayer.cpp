@@ -75,30 +75,41 @@ void ExampleLayer::OnAttach()
 	m_RenderPass->SetRenderTarget(0u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight()));
 	m_RenderPass->SetRenderTarget(1u, Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::R32_UINT));
 	m_RenderPass->SetDepthStencilTarget(Sofia::RenderTarget::Create(window->GetWidth(), window->GetHeight(), Sofia::RenderTargetFormat::Depth32F));
+	Sofia::RenderCommand::SetBlendOptions(0u, true, Sofia::RendererAPI::BlendOption::SourceAlpha, Sofia::RendererAPI::BlendOption::SourceAlphaInvert,
+		Sofia::RendererAPI::BlendOperation::Add, Sofia::RendererAPI::BlendOption::SourceAlpha, Sofia::RendererAPI::BlendOption::SourceAlphaInvert);
+	Sofia::RenderCommand::SetBlendOptions(1u, false);
 
 	Sofia::Texture2DProps textureProps;
-	textureProps.Filepath = L"assets/textures/checkerboard.png";
+	textureProps.Filepath = L"assets/textures/PlayButton.png";
 	textureProps.Sampling = Sofia::TextureSampling::Point;
-	m_Texture = Sofia::Texture2D::Create(textureProps);
+	m_PlayButton = Sofia::Texture2D::Create(textureProps);
+	textureProps.Filepath = L"assets/textures/StopButton.png";
+	m_StopButton = Sofia::Texture2D::Create(textureProps);
 
-	m_Scene = Ref<Sofia::Scene>::Create("App scene");
-	m_Scene->OnViewportResize(window->GetWidth(), window->GetHeight());
-	m_Camera = m_Scene->SetCameraEntity();
+	m_ActiveScene = Ref<Sofia::Scene>::Create();
+	m_ActiveScene->OnViewportResize(window->GetWidth(), window->GetHeight());
+	/*m_Camera = m_ActiveScene->SetCameraEntity();
 	m_Camera.GetComponent<Sofia::CameraComponent>().Camera.As<Sofia::OrthographicCamera>()->SetSize(2.0f);
 	m_Camera.AddComponent<Sofia::NativeScriptComponent>().Bind<CameraController>();
 
-	m_Scene->CreateEntity("Textured quad").AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), m_Texture);
+	textureProps.Filepath = L"assets/textures/checkerboard.png";
+	Ref<Sofia::Texture2D> texture = Sofia::Texture2D::Create(textureProps);
+	m_ActiveScene->CreateEntity("Textured quad").AddComponent<Sofia::SpriteComponent>(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), texture);*/
 
-	m_SceneHierarchyPanel = CreateScope<Sofia::SceneHierarchyPanel>(m_Scene);
+	m_SceneHierarchyPanel = CreateScope<Sofia::SceneHierarchyPanel>();
 	m_ContentBrowserPanel = CreateScope<Sofia::ContentBrowserPanel>();
+
+	m_EditorCamera = Sofia::EditorCamera(glm::half_pi<float>(), (float)window->GetWidth() / (float)window->GetHeight());
 }
 void ExampleLayer::OnDetach()
 {
 	m_ContentBrowserPanel.reset();
 	m_SceneHierarchyPanel.reset();
-	m_Scene.Reset();
+	m_EditorScene.Reset();
+	m_ActiveScene.Reset();
 	m_RenderPass.Reset();
-	m_Texture.Reset();
+	m_PlayButton.Reset();
+	m_StopButton.Reset();
 }
 
 void ExampleLayer::OnUpdate(Sofia::Timestep ts)
@@ -108,14 +119,28 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 	if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (m_ViewportSize.x != m_RenderPass->GetWidth() || m_ViewportSize.y != m_RenderPass->GetHeight()))
 	{
 		m_RenderPass->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_Scene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+		m_ActiveScene->OnViewportResize(m_ViewportSize.x, m_ViewportSize.y);
+		m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 	}
 
 	m_RenderPass->Bind();
 	m_RenderPass->Clear();
 	Sofia::Renderer2D::ResetStats();
 
-	m_Scene->OnUpdate(ts);
+	switch (m_SceneState)
+	{
+		case ExampleLayer::SceneState::Edit:
+		{
+			m_EditorCamera.OnUpdate(ts);
+			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+			break;
+		}
+		case ExampleLayer::SceneState::Play:
+		{
+			m_ActiveScene->OnUpdateRuntime(ts);
+			break;
+		}
+	}
 
 	glm::vec2 mousePos = Sofia::Input::GetMousePos();
 	mousePos.x -= m_ViewportPos.x;
@@ -126,7 +151,7 @@ void ExampleLayer::OnUpdate(Sofia::Timestep ts)
 		m_RenderPass->GetRenderTarget(1u)->ReadPixel(&data, (uint32_t)mousePos.x, (uint32_t)mousePos.y);
 		Sofia::Renderer::Submit([this]()
 		{
-			m_HoveredEntity = data == 0 || data == -1 ? Sofia::Entity() : Sofia::Entity((entt::entity)data, m_Scene.Raw());
+			m_HoveredEntity = data == 0 || data == -1 ? Sofia::Entity() : Sofia::Entity((entt::entity)data, m_ActiveScene.Raw());
 		});
 	}
 
@@ -182,7 +207,7 @@ void ExampleLayer::OnUIRender()
 		ImGui::EndDragDropTarget();
 	}
 
-	if (Sofia::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GizmoType != -1 && selected)
+	if (Sofia::Entity selected = m_SceneHierarchyPanel->GetSelected(); m_GizmoType != -1 && selected && m_SceneState == SceneState::Edit)
 	{
 		const bool snap = Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftControl);
 		const float snapValue = m_GizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : m_GizmoType == ImGuizmo::OPERATION::SCALE ? 0.5f : 0.1f;
@@ -217,6 +242,37 @@ void ExampleLayer::OnUIRender()
 
 	m_SceneHierarchyPanel->OnUIRender();
 	m_ContentBrowserPanel->OnUIRender();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 2));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0, 0));
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+	auto& colors = ImGui::GetStyle().Colors;
+	const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+	const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5f));
+
+	ImGui::Begin("###toolbar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse);
+
+	float size = ImGui::GetWindowHeight() - 4.0f;
+	Ref<Sofia::Texture2D> icon = m_SceneState == SceneState::Edit ? m_PlayButton : m_StopButton;
+	ImGui::SetCursorPosX(ImGui::GetWindowContentRegionMax().x * 0.5f - size * 0.5f);
+	if (ImGui::ImageButton(icon->GetRawPointer(), ImVec2(size, size), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), 0))
+	{
+		switch (m_SceneState)
+		{
+		case ExampleLayer::SceneState::Edit:
+			OnScenePlay();
+			break;
+		case ExampleLayer::SceneState::Play:
+			OnSceneStop();
+			break;
+		}
+	}
+
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor(3);
+	ImGui::End();
 }
 
 void ExampleLayer::OnEvent(Sofia::Event& e)
@@ -225,7 +281,10 @@ void ExampleLayer::OnEvent(Sofia::Event& e)
 	dispatcher.Dispatch<Sofia::MouseButtonPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnMouseButtonPressed));
 	dispatcher.Dispatch<Sofia::KeyPressedEvent>(SOF_BIND_EVENT_FN(ExampleLayer::OnKeyPressed));
 
-	m_Scene->OnEvent(e);
+	if (m_SceneState == SceneState::Play)
+		m_ActiveScene->OnEvent(e);
+	else
+		m_EditorCamera.OnEvent(e);
 }
 bool ExampleLayer::OnKeyPressed(Sofia::KeyPressedEvent& e)
 {
@@ -243,8 +302,17 @@ bool ExampleLayer::OnKeyPressed(Sofia::KeyPressedEvent& e)
 			OpenScene();
 		break;
 	case Sofia::KeyCode::S:
-		if (control && shift)
-			SaveScene();
+		if (control)
+		{
+			if (shift)
+				SaveSceneAs();
+			else
+				SaveScene();
+		}
+		break;
+	case Sofia::KeyCode::D:
+		if (control)
+			OnDuplicateEntity();
 		break;
 	case Sofia::KeyCode::Q:
 		if (!ImGuizmo::IsUsing())
@@ -271,17 +339,43 @@ bool ExampleLayer::OnMouseButtonPressed(Sofia::MouseButtonPressedEvent& e)
 	switch (e.GetButton())
 	{
 	case Sofia::MouseCode::ButtonLeft:
-		if (m_ViewportHovered && !ImGuizmo::IsOver())
+		if (m_ViewportHovered && !ImGuizmo::IsOver() && !Sofia::Input::IsKeyPressed(Sofia::KeyCode::LeftAlt))
 			m_SceneHierarchyPanel->SetSelected(m_HoveredEntity);
 	}
 	return false;
 }
 
+void ExampleLayer::OnScenePlay()
+{
+	if (!m_EditorScene)
+		return;
+
+	m_SceneState = SceneState::Play;
+	m_ActiveScene = Sofia::Scene::Copy(m_EditorScene);
+	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+}
+void ExampleLayer::OnSceneStop()
+{
+	m_SceneState = SceneState::Edit;
+	m_ActiveScene = m_EditorScene;
+	m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+}
+void ExampleLayer::OnDuplicateEntity()
+{
+	if (m_SceneState != SceneState::Edit)
+		return;
+
+	Sofia::Entity entity = m_SceneHierarchyPanel->GetSelected();
+	if (entity)
+		m_EditorScene->DuplicateEntity(entity);
+}
 void ExampleLayer::NewScene()
 {
-	m_Scene = Ref<Sofia::Scene>::Create();
-	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-	m_SceneHierarchyPanel->SetScene(m_Scene);
+	m_ActiveScene = Ref<Sofia::Scene>::Create();
+	m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+	m_SceneHierarchyPanel->SetScene(m_ActiveScene);
+	m_EditorScenePath = std::filesystem::path();
 }
 void ExampleLayer::OpenScene()
 {
@@ -292,22 +386,43 @@ void ExampleLayer::OpenScene()
 }
 void ExampleLayer::OpenScene(const std::filesystem::path& path)
 {
+	if (m_SceneState != SceneState::Edit)
+		OnSceneStop();
+
 	if (!std::filesystem::exists(path) || path.extension() != L".scene")
+	{
+		SOF_CORE_WARN("Could not open scene from: {0}", path.string());
 		return;
+	}
 
-	m_Scene = Ref<Sofia::Scene>::Create();
-	m_Scene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-	m_SceneHierarchyPanel->SetScene(m_Scene);
-
-	Sofia::SceneSerializer serializer(m_Scene);
-	serializer.Deserialize(path);
-}
+	Ref<Sofia::Scene> scene = Ref<Sofia::Scene>::Create();
+	Sofia::SceneSerializer serializer(scene);
+	if (serializer.Deserialize(path))
+	{
+		m_EditorScene = scene;
+		m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel->SetScene(m_EditorScene);
+		m_ActiveScene = m_EditorScene;
+		m_EditorScenePath = path;
+	}
+}\
 void ExampleLayer::SaveScene()
+{
+	if (m_EditorScenePath.empty())
+		SaveSceneAs();
+	else
+	{
+		Sofia::SceneSerializer serializer(m_ActiveScene);
+		serializer.Serialize(m_EditorScenePath);
+	}
+}
+void ExampleLayer::SaveSceneAs()
 {
 	std::filesystem::path filepath = Sofia::FileProcessing::ChooseFileToSaveTo(L"Saba scene (*.scene)\0*.scene\0");
 	if (filepath.empty())
 		return;
 
-	Sofia::SceneSerializer serializer(m_Scene);
+	Sofia::SceneSerializer serializer(m_ActiveScene);
 	serializer.Serialize(filepath);
+	m_EditorScenePath = filepath;
 }

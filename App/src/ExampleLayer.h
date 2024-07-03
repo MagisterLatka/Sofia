@@ -23,15 +23,25 @@ private:
 	void OpenScene();
 	void OpenScene(const std::filesystem::path& path);
 	void SaveScene();
+	void SaveSceneAs();
+	void OnScenePlay();
+	void OnSceneStop();
+	void OnDuplicateEntity();
 private:
 	Ref<Sofia::RenderPass> m_RenderPass;
-	Ref<Sofia::Texture2D> m_Texture;
 
-	Ref<Sofia::Scene> m_Scene;
-	Sofia::Entity m_Camera; //TEMP, breaks on loading different scene;
+	enum class SceneState
+	{
+		Edit, Play
+	};
+	Ref<Sofia::Scene> m_ActiveScene, m_EditorScene;
+	Ref<Sofia::Texture2D> m_PlayButton, m_StopButton;
+	SceneState m_SceneState = SceneState::Edit;
+	std::filesystem::path m_EditorScenePath;
+	Sofia::EditorCamera m_EditorCamera;
+	Sofia::Entity m_HoveredEntity, m_Camera;
 	Scope<Sofia::SceneHierarchyPanel> m_SceneHierarchyPanel;
 	Scope<Sofia::ContentBrowserPanel> m_ContentBrowserPanel;
-	Sofia::Entity m_HoveredEntity;
 
 	bool m_ViewportHovered = false, m_ViewportFocused = false;
 	glm::ivec2 m_ViewportSize = { -1.0f, -1.0f }, m_ViewportPos = { 0.0f, 0.0f };
